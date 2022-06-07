@@ -1,0 +1,25 @@
+{
+    "name": "october-ajax",
+    "version": "1.0.0",
+    "description": "AJAX Framework for October CMS",
+    "main": "src/index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/octobercms/ajax.git"
+    },
+    "keywords": [
+        "octobercms",
+        "october",
+        "ajax",
+        "framework"
+    ],
+    "author": "Responsiv Pty Ltd",
+    "license": "SEE LICENSE IN LICENSE.md",
+    "bugs": {
+        "url": "https://github.com/octobercms/ajax/issues"
+    },
+    "homepage": "https://github.com/octobercms/ajax#readme"
+}
