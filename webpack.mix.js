@@ -12,6 +12,10 @@ const webpackConfig = require('./webpack.config');
  |
  */
 
-mix.webpackConfig(webpackConfig);
+mix
+    .webpackConfig(webpackConfig)
+    .options({
+        manifest: false,
+    });
 
 mix.js(['src/index.js'], 'dist/framework.min.js');
