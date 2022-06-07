@@ -1,5 +1,5 @@
 import { Controller } from "./controller";
-import { Migrate } from "../migrate/jquery";
+import { Migrate } from "./migrate";
 const controller = new Controller;
 
 export default {
