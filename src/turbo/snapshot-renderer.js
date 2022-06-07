@@ -63,9 +63,27 @@ export class SnapshotRenderer extends Renderer
     }
 
     copyNewHeadScriptElements() {
-        for (const element of this.getNewHeadScriptElements()) {
-            document.head.appendChild(this.createScriptElement(element));
+        const newElements = this.getNewHeadScriptElements();
+        this.delegate.setPendingAssets(newElements.length);
+
+        for (const element of newElements) {
+            document.head.appendChild(
+                this.bindPendingAssetLoadedEventOnce(
+                    this.createScriptElement(element)
+                )
+            );
         }
+    }
+
+    bindPendingAssetLoadedEventOnce(element) {
+        var self = this,
+            loadEvent = function() {
+                self.delegate.decrementPendingAsset();
+                element.removeEventListener('load', loadEvent);
+            };
+
+        element.addEventListener('load', loadEvent);
+        return element;
     }
 
     removeCurrentHeadProvisionalElements() {

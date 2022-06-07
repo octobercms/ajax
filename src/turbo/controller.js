@@ -17,6 +17,7 @@ export class Controller
         this.view = new View(this);
         this.cache = new SnapshotCache(10);
         this.enabled = true;
+        this.pendingAssets = 0;
         this.progressBarDelay = 500;
         this.started = false;
 
@@ -27,8 +28,8 @@ export class Controller
         };
 
         this.clickCaptured = () => {
-            removeEventListener("click", this.clickBubbled, false);
-            addEventListener("click", this.clickBubbled, false);
+            removeEventListener('click', this.clickBubbled, false);
+            addEventListener('click', this.clickBubbled, false);
         };
 
         this.clickBubbled = (event) => {
@@ -48,8 +49,8 @@ export class Controller
 
     start() {
         if (Controller.supported && !this.started) {
-            addEventListener("click", this.clickCaptured, true);
-            addEventListener("DOMContentLoaded", this.pageLoaded, false);
+            addEventListener('click', this.clickCaptured, true);
+            addEventListener('DOMContentLoaded', this.pageLoaded, false);
             this.scrollManager.start();
             this.startHistory();
             this.started = true;
@@ -63,8 +64,8 @@ export class Controller
 
     stop() {
         if (this.started) {
-            removeEventListener("click", this.clickCaptured, true);
-            removeEventListener("DOMContentLoaded", this.pageLoaded, false);
+            removeEventListener('click', this.clickCaptured, true);
+            removeEventListener('DOMContentLoaded', this.pageLoaded, false);
             this.scrollManager.stop();
             this.stopHistory();
             this.started = false;
@@ -183,6 +184,18 @@ export class Controller
         restorationData.scrollPosition = position;
     }
 
+    // Pending asset management
+    setPendingAssets(count) {
+        this.pendingAssets = count;
+    }
+
+    decrementPendingAsset() {
+        this.pendingAssets--;
+        if (this.pendingAssets === 0) {
+            this.notifyApplicationAfterLoadScripts();
+        }
+    }
+
     // View
     render(options, callback) {
         this.view.render(options, callback);
@@ -240,6 +253,10 @@ export class Controller
         return dispatch('turbo:load', { data: { url: this.location.absoluteURL, timing }, cancelable: false });
     }
 
+    notifyApplicationAfterLoadScripts() {
+        return dispatch('turbo:after-load', { cancelable: false });
+    }
+
     // Private
     startVisit(location, action, properties) {
         if (this.currentVisit) {
@@ -260,6 +277,10 @@ export class Controller
 
     visitCompleted(visit) {
         this.notifyApplicationAfterPageLoad(visit.getTimingMetrics());
+
+        if (this.pendingAssets === 0) {
+            this.notifyApplicationAfterLoadScripts();
+        }
     }
 
     clickEventIsSignificant(event) {

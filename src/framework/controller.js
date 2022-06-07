@@ -17,8 +17,9 @@ export class Controller
         window.onbeforeunload = this.documentOnBeforeUnload;
 
         // Render event
-        window.addEventListener('ajax:update-complete', this.render, false);
-        window.addEventListener('DOMContentLoaded', this.render, false);
+        addEventListener('ajax:update-complete', this.render, false);
+        addEventListener('DOMContentLoaded', this.render, false);
+        addEventListener('turbo:after-load', this.render, false);
 
         // Submit form
         EventHandler.on(document, 'submit', '[data-request]', this.documentOnSubmit);
@@ -36,8 +37,15 @@ export class Controller
         EventHandler.on(document, 'click', 'a[data-request], button[data-request], input[type=button][data-request], input[type=submit][data-request]', this.documentOnClick);
     }
 
+    stop() {
+        if (this.started) {
+            this.started = false;
+        }
+    }
+
     render(event) {
         dispatch('render');
+        window.dispatchEvent(new Event('resize'));
     }
 
     documentOnSubmit(event) {
@@ -104,11 +112,5 @@ export class Controller
 
     documentOnBeforeUnload(event) {
         window.ocUnloading = true;
-    }
-
-    stop() {
-        if (this.started) {
-            this.started = false;
-        }
     }
 }

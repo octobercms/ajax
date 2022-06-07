@@ -7,12 +7,12 @@ export class ErrorRenderer extends Renderer
         super();
         this.delegate = delegate;
         this.htmlElement = (() => {
-            const htmlElement = document.createElement("html");
+            const htmlElement = document.createElement('html');
             htmlElement.innerHTML = html;
             return htmlElement;
         })();
-        this.newHead = this.htmlElement.querySelector("head") || document.createElement("head");
-        this.newBody = this.htmlElement.querySelector("body") || document.createElement("body");
+        this.newHead = this.htmlElement.querySelector('head') || document.createElement('head');
+        this.newBody = this.htmlElement.querySelector('body') || document.createElement('body');
     }
 
     static render(delegate, callback, html) {
@@ -44,6 +44,6 @@ export class ErrorRenderer extends Renderer
     }
 
     getScriptElements() {
-        return array(document.documentElement.querySelectorAll("script"));
+        return array(document.documentElement.querySelectorAll('script'));
     }
 }

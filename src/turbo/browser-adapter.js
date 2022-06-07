@@ -46,6 +46,7 @@ export class BrowserAdapter
             case SystemStatusCode.networkFailure:
             case SystemStatusCode.timeoutFailure:
             case SystemStatusCode.contentTypeMismatch:
+            case SystemStatusCode.userAborted:
                 return this.reload();
             default:
                 return visit.loadResponse();

@@ -13,11 +13,11 @@ export class Renderer
     }
 
     createScriptElement(element) {
-        if (element.getAttribute("data-turbo-eval") === "false") {
+        if (element.getAttribute('data-turbo-eval') === 'false') {
             return element;
         }
         else {
-            const createdScriptElement = document.createElement("script");
+            const createdScriptElement = document.createElement('script');
             createdScriptElement.textContent = element.textContent;
             createdScriptElement.async = false;
             copyElementAttributes(createdScriptElement, element);
