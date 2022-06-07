@@ -77,7 +77,6 @@ export default class Request
         }
     }
 
-    // Application events
     applicationAllowsRequest() {
         const event = this.notifyApplicationBeforeRequest();
         return !event.defaultPrevented;
@@ -93,6 +92,7 @@ export default class Request
         return !event.defaultPrevented;
     }
 
+    // Application events
     notifyApplicationAjaxSetup() {
         dispatch('ajax:setup', { target: this.el, data: { context: this.context } });
     }
@@ -113,8 +113,8 @@ export default class Request
         dispatch('ajax:always', { target: this.el, data: { context: this.context, data, responseCode, xhr } });
     }
 
-    notifyApplicationBeforeSend() {
-        dispatch('ajax:before-send', { target: window, data: { context: this.context } });
+    notifyApplicationBeforeRedirect() {
+        return dispatch('ajax:before-redirect', { target: this.el });
     }
 
     notifyApplicationBeforeRequest() {
@@ -141,22 +141,6 @@ export default class Request
         return dispatch('ajax:before-validate', { target: this.triggerEl, data: { context: this.context, message, fields } });
     }
 
-    notifyApplicationFieldInvalid(element, fieldName, fieldMessages, isFirst) {
-        return dispatch('ajax:field-invalid', { target: window, data: { element, fieldName, fieldMessages, isFirst } });
-    }
-
-    notifyApplicationConfirmMessage(message, promise) {
-        return dispatch('ajax:confirm-message', { target: window, data: { message, promise } });
-    }
-
-    notifyApplicationErrorMessage(message) {
-        return dispatch('ajax:error-message', { target: window, data: { message } });
-    }
-
-    notifyApplicationBeforeRedirect() {
-        return dispatch('ajax:before-redirect', { target: this.el });
-    }
-
     notifyApplicationBeforeReplace(target) {
         return dispatch('ajax:before-replace', { target });
     }
@@ -165,8 +149,25 @@ export default class Request
         return dispatch('ajax:after-render', { target, data: { context: this.context, data, responseCode, xhr } });
     }
 
+    // Window-based events
+    notifyApplicationBeforeSend() {
+        return dispatch('ajax:before-send', { target: window, data: { context: this.context } });
+    }
+
     notifyApplicationUpdateComplete(data, responseCode, xhr) {
         return dispatch('ajax:update-complete', { target: window, data: { context: this.context, data, responseCode, xhr } });
+    }
+
+    notifyApplicationFieldInvalid(element, fieldName, fieldMessages, isFirst) {
+        return dispatch('ajax:invalid-field', { target: window, data: { element, fieldName, fieldMessages, isFirst } });
+    }
+
+    notifyApplicationConfirmMessage(message, promise) {
+        return dispatch('ajax:confirm-message', { target: window, data: { message, promise } });
+    }
+
+    notifyApplicationErrorMessage(message) {
+        return dispatch('ajax:error-message', { target: window, data: { message } });
     }
 
     // HTTP request delegate
