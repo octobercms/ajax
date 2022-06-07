@@ -104,13 +104,13 @@ export class Actions
 
     // Custom function, requests confirmation from the user
     handleConfirmMessage(message) {
-        let promise = new Deferred;
-        const event = this.delegate.notifyApplicationConfirmMessage(message, promise);
+        const promise = new Deferred;
         promise.done(function() {
             this.delegate.options.confirm = null;
             this.delegate.request.send();
         });
 
+        const event = this.delegate.notifyApplicationConfirmMessage(message, promise);
         if (event.defaultPrevented) {
             return false;
         }

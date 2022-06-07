@@ -5,7 +5,7 @@ export class Migrate
     bind() {
         this.bindRequestFunc();
         this.bindRenderFunc();
-        this.bindJqueryEvents();
+        this.bindjQueryEvents();
     }
 
     bindRequestFunc() {
@@ -36,81 +36,54 @@ export class Migrate
         };
     }
 
-    bindJqueryEvents() {
-        $(document).on('ajax:setup', function(ev) {
-            $(ev.target).trigger('ajaxSetup', [ev.detail.context]);
+    bindjQueryEvents() {
+        this.listenjQueryEvent(document, 'ajax:setup', 'ajaxSetup', ['context']);
+        this.listenjQueryEvent(document, 'ajax:before-request', 'oc.beforeRequest', ['context']);
+        this.listenjQueryEvent(document, 'ajax:before-send', 'ajaxBeforeSend', ['context']);
+        this.listenjQueryEvent(document, 'ajax:promise', 'ajaxPromise', ['context']);
+        this.listenjQueryEvent(document, 'ajax:before-update', 'ajaxBeforeUpdate', ['context', 'data', 'responseCode', 'xhr']);
+        this.listenjQueryEvent(document, 'ajax:request-success', 'ajaxSuccess', ['context', 'data', 'responseCode', 'xhr']);
+        this.listenjQueryEvent(document, 'ajax:request-complete', 'ajaxComplete', ['context', 'data', 'responseCode', 'xhr']);
+        this.listenjQueryEvent(document, 'ajax:after-render', 'ajaxUpdate', ['context', 'data', 'responseCode', 'xhr']);
+        this.listenjQueryEvent(document, 'ajax:update-complete', 'ajaxUpdateComplete', ['context', 'data', 'responseCode', 'xhr']);
+        this.listenjQueryEvent(document, 'ajax:fail', 'ajaxFail', ['context', 'data', 'responseCode', 'xhr']);
+        this.listenjQueryEvent(document, 'ajax:done', 'ajaxDone', ['context', 'data', 'responseCode', 'xhr']);
+        this.listenjQueryEvent(document, 'ajax:always', 'ajaxAlways', ['context', 'data', 'responseCode', 'xhr']);
+        this.listenjQueryEvent(document, 'ajax:request-error', 'ajaxError', ['context', 'message', 'responseCode', 'xhr']);
+        this.listenjQueryEvent(document, 'ajax:before-validate', 'ajaxValidation', ['context', 'message', 'fields']);
+        this.listenjQueryEvent(document, 'ajax:field-invalid', 'ajaxInvalidField', ['element', 'fieldName', 'fieldMessages', 'isFirst']);
+        this.listenjQueryEvent(document, 'ajax:before-redirect', 'ajaxRedirect');
+        this.listenjQueryEvent(document, 'ajax:before-replace', 'ajaxRedirect');
+        this.listenjQueryEvent(window, 'ajax:confirm-message', 'ajaxConfirmMessage', ['message', 'promise']);
+        this.listenjQueryEvent(window, 'ajax:error-message', 'ajaxErrorMessage', ['message']);
+    }
+
+    // Private
+    listenjQueryEvent(target, jsName, jqName, detailNames = []) {
+        var self = this;
+        $(target).on(jsName, function(ev) {
+            self.triggerjQueryEvent(ev.originalEvent, jqName, detailNames);
+        });
+    }
+
+    triggerjQueryEvent(ev, eventName, detailNames = []) {
+        var jQueryEvent = $.Event(eventName),
+            args = this.buildDetailArgs(ev, detailNames);
+
+        $(ev.target).trigger(jQueryEvent, args);
+
+        if (jQueryEvent.isDefaultPrevented()) {
+            ev.preventDefault();
+        }
+    }
+
+    buildDetailArgs(ev, detailNames) {
+        var args = [];
+
+        detailNames.forEach(function(name) {
+            args.push(ev.detail[name]);
         });
 
-        $(document).on('ajax:before-request', function(ev) {
-            $(ev.target).trigger('oc.beforeRequest', [ev.detail.context]);
-        });
-
-        $(document).on('ajax:before-send', function(ev) {
-            $(ev.target).trigger('ajaxBeforeSend', [ev.detail.context]);
-        });
-
-        $(document).on('ajax:promise', function(ev) {
-            $(ev.target).trigger('ajaxPromise', [ev.detail.context]);
-        });
-
-        $(document).on('ajax:before-update', function(ev) {
-            $(ev.target).trigger('ajaxBeforeUpdate', [ev.detail.context, ev.detail.data, ev.detail.responseCode, ev.detail.xhr]);
-        });
-
-        $(document).on('ajax:request-success', function(ev) {
-            $(ev.target).trigger('ajaxSuccess', [ev.detail.context, ev.detail.data, ev.detail.responseCode, ev.detail.xhr]);
-        });
-
-        $(document).on('ajax:request-complete', function(ev) {
-            $(ev.target).trigger('ajaxComplete', [ev.detail.context, ev.detail.data, ev.detail.responseCode, ev.detail.xhr]);
-        });
-
-        $(document).on('ajax:after-render', function(ev) {
-            $(ev.target).trigger('ajaxUpdate', [ev.detail.context, ev.detail.data, ev.detail.responseCode, ev.detail.xhr]);
-        });
-
-        $(document).on('ajax:update-complete', function(ev) {
-            $(ev.target).trigger('ajaxUpdateComplete', [ev.detail.context, ev.detail.data, ev.detail.responseCode, ev.detail.xhr]);
-        });
-
-        $(document).on('ajax:fail', function(ev) {
-            $(ev.target).trigger('ajaxFail', [ev.detail.context, ev.detail.data, ev.detail.responseCode, ev.detail.xhr]);
-        });
-
-        $(document).on('ajax:done', function(ev) {
-            $(ev.target).trigger('ajaxDone', [ev.detail.context, ev.detail.data, ev.detail.responseCode, ev.detail.xhr]);
-        });
-
-        $(document).on('ajax:always', function(ev) {
-            $(ev.target).trigger('ajaxAlways', [ev.detail.context, ev.detail.data, ev.detail.responseCode, ev.detail.xhr]);
-        });
-
-        $(document).on('ajax:request-error', function(ev) {
-            $(ev.target).trigger('ajaxError', [ev.detail.context, ev.detail.message, ev.detail.responseCode, ev.detail.xhr]);
-        });
-
-        $(document).on('ajax:confirm-message', function(ev) {
-            $(ev.target).trigger('ajaxConfirmMessage', [ev.detail.message, ev.detail.promise]);
-        });
-
-        $(document).on('ajax:error-message', function(ev) {
-            $(ev.target).trigger('ajaxErrorMessage', [ev.detail.message]);
-        });
-
-        $(document).on('ajax:before-validate', function(ev) {
-            $(ev.target).trigger('ajaxValidation', [ev.detail.context, ev.detail.message, ev.detail.fields]);
-        });
-
-        $(document).on('ajax:field-invalid', function(ev) {
-            $(ev.target).trigger('ajaxInvalidField', [ev.detail.element, ev.detail.fieldName, ev.detail.fieldMessages, ev.detail.isFirst]);
-        });
-
-        $(document).on('ajax:before-redirect', function(ev) {
-            $(ev.target).trigger('ajaxRedirect');
-        });
-
-        $(document).on('ajax:before-replace', function(ev) {
-            $(ev.target).trigger('ajaxRedirect');
-        });
+        return args;
     }
 }

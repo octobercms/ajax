@@ -18,10 +18,14 @@ export class Options
             url: options.url ? options.url : window.location.href,
             headers: this.buildHeaders(handler, options),
             data: options.data,
-            redirect: options.redirect,
+            form: options.form,
             update: options.update,
+            useFlash: options.flash,
+            confirm: options.confirm,
             loading: options.loading,
-            useFlash: options.flash
+            loading: options.loading,
+            redirect: options.redirect,
+            browserValidate: options.browserValidate
         };
     }
 

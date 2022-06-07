@@ -97,11 +97,11 @@ export class HttpRequest
 
     // Application events
     notifyApplicationBeforeRequestStart() {
-        dispatch('ajax:request-start', { data: { url: this.url, xhr: this.xhr } });
+        dispatch('ajax:request-start', { data: { url: this.url, xhr: this.xhr }, cancelable: false });
     }
 
     notifyApplicationAfterRequestEnd() {
-        dispatch('ajax:request-end', { data: { url: this.url, xhr: this.xhr } });
+        dispatch('ajax:request-end', { data: { url: this.url, xhr: this.xhr }, cancelable: false });
     }
 
     // Private

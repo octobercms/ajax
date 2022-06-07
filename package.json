@@ -3,7 +3,15 @@
     "version": "1.0.0",
     "description": "AJAX Framework for October CMS",
     "main": "src/index.js",
+    "devDependencies": {
+        "laravel-mix": "^6.0.44"
+    },
     "scripts": {
+        "dev": "npm run development",
+        "development": "mix",
+        "watch": "mix watch",
+        "prod": "npm run production",
+        "production": "mix --production",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "repository": {

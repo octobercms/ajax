@@ -1,4 +1,4 @@
-export function dispatch(eventName, { target, cancelable, data } = {}) {
+export function dispatch(eventName, { target, data, cancelable = true } = {}) {
     const event = new CustomEvent(eventName, {
         bubbles: true,
         cancelable: cancelable === true,
