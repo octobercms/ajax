@@ -13,7 +13,7 @@ export class Snapshot
         if (value instanceof this) {
             return value;
         }
-        else if (typeof value == "string") {
+        else if (typeof value == 'string') {
             return this.fromHTMLString(value);
         }
         else {
@@ -22,14 +22,14 @@ export class Snapshot
     }
 
     static fromHTMLString(html) {
-        const element = document.createElement("html");
+        const element = document.createElement('html');
         element.innerHTML = html;
         return this.fromHTMLElement(element);
     }
 
     static fromHTMLElement(htmlElement) {
-        const headElement = htmlElement.querySelector("head");
-        const bodyElement = htmlElement.querySelector("body") || document.createElement("body");
+        const headElement = htmlElement.querySelector('head');
+        const bodyElement = htmlElement.querySelector('body') || document.createElement('body');
         const headDetails = HeadDetails.fromHeadElement(headElement);
         return new this(headDetails, bodyElement);
     }
@@ -39,12 +39,12 @@ export class Snapshot
     }
 
     getRootLocation() {
-        const root = this.getSetting("root", "/");
+        const root = this.getSetting('root', '/');
         return new Location(root);
     }
 
     getCacheControlValue() {
-        return this.getSetting("cache-control");
+        return this.getSetting('cache-control');
     }
 
     getElementForAnchor(anchor) {
@@ -57,7 +57,7 @@ export class Snapshot
     }
 
     getPermanentElements() {
-        return array(this.bodyElement.querySelectorAll("[id][data-turbo-permanent]"));
+        return array(this.bodyElement.querySelectorAll('[id][data-turbo-permanent]'));
     }
 
     getPermanentElementById(id) {
@@ -69,7 +69,7 @@ export class Snapshot
     }
 
     findFirstAutofocusableElement() {
-        return this.bodyElement.querySelector("[autofocus]");
+        return this.bodyElement.querySelector('[autofocus]');
     }
 
     hasAnchor(anchor) {
@@ -85,7 +85,7 @@ export class Snapshot
     }
 
     isVisitable() {
-        return this.getSetting('visit-control') != 'reload';
+        return ['reload', 'disable'].indexOf(this.getSetting('visit-control')) === -1;
     }
 
     getSetting(name, defaultValue) {

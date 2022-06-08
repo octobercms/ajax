@@ -316,7 +316,8 @@ export class Controller
     }
 
     documentIsEnabled() {
-        return this.elementIsVisitable(document.documentElement);
+        const meta = document.documentElement.querySelector('head meta[name="turbo-visit-control"]');
+        return meta ? meta.getAttribute('content') != 'disable' : true;
     }
 
     elementIsVisitable(element) {

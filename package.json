@@ -1,5 +1,5 @@
 {
-    "name": "october-ajax",
+    "name": "octobercms",
     "version": "1.0.0",
     "description": "AJAX Framework for October CMS",
     "main": "src/index.js",

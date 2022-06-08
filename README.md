@@ -4,19 +4,19 @@ This repository contains the AJAX framework of October CMS. If you want to build
 
 ## Installation outside October CMS
 
-Your application can use the `october-ajax` npm package to install the AJAX Framework as a module for build tools like webpack.
+Your application can use the `octobercms` npm package to install the AJAX Framework as a module for build tools like webpack.
 
-1. Add the `october-ajax` package to your application.
+1. Add the `octobercms` package to your application.
 
 ```js
-npm install --save october-ajax
+npm install --save octobercms
 ```
 
 2. Require and start the Framework in your JavaScript bundle.
 
 ```js
-var OctoberAjax = require("october-ajax");
-OctoberAjax.start();
+var oc = require('octobercms');
+oc.start();
 ```
 
 ## License
