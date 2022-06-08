@@ -13,26 +13,24 @@ export class Options
             throw new Error('The browser does not support the FormData interface.');
         }
 
-        this.options = {
+        this.options = options;
+        this.handler = handler;
+    }
+
+    static fetch(handler, options) {
+        return (new this(handler, options)).getRequestOptions();
+    }
+
+    // Public
+    getRequestOptions() {
+        return {
             method: 'POST',
-            url: options.url ? options.url : window.location.href,
-            headers: this.buildHeaders(handler, options),
-            data: options.data,
-            form: options.form,
-            update: options.update,
-            useFlash: options.flash,
-            confirm: options.confirm,
-            loading: options.loading,
-            loading: options.loading,
-            redirect: options.redirect,
-            browserValidate: options.browserValidate
+            url: this.options.url ? this.options.url : window.location.href,
+            headers: this.buildHeaders(this.handler, this.options),
         };
     }
 
-    static parse(handler, options) {
-        return (new this(handler, options)).options;
-    }
-
+    // Private
     buildHeaders(handler, options) {
         const headers = {
             'X-Requested-With': 'XMLHttpRequest',
@@ -44,7 +42,7 @@ export class Options
             headers['Content-Type'] = 'application/x-www-form-urlencoded; charset=UTF-8';
         }
 
-        if (options.useFlash) {
+        if (options.flash) {
             headers['X-OCTOBER-REQUEST-FLASH'] = 1;
         }
 

@@ -36,10 +36,10 @@ export class Actions
             return;
         }
 
-        if (this.delegate.options.useFlash && data['X_OCTOBER_FLASH_MESSAGES']) {
-            data['X_OCTOBER_FLASH_MESSAGES'].forEach(function(message, type) {
-                this.invoke('handleFlashMessage', [message, type]);
-            });
+        if (this.delegate.options.flash && data['X_OCTOBER_FLASH_MESSAGES']) {
+            for (var type in data['X_OCTOBER_FLASH_MESSAGES']) {
+                this.invoke('handleFlashMessage', [data['X_OCTOBER_FLASH_MESSAGES'][type], type]);
+            }
         }
 
         // Proceed with the update process

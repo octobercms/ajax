@@ -10,7 +10,7 @@ export class Request
     constructor(element, handler, options) {
         this.el = element;
         this.handler = handler;
-        this.options = Options.parse(handler, options || {});
+        this.options = options || {};
         this.context = { el: element, handler: handler, options: this.options };
         this.actions = new Actions(this, this.context, options || {});
     }
@@ -25,7 +25,7 @@ export class Request
 
         // Prepare request
         const data = Data.fetch(this.options.data, this.el, this.formEl);
-        const { url, headers, method } = this.options;
+        const { url, headers, method } = Options.fetch(this.handler, this.options);
         this.request = new HttpRequest(this, url, { method, headers, data, trackAbort: true });
         this.promise = new Deferred({ delegate: this.request });
         this.isRedirect = this.options.redirect && this.options.redirect.length > 0;
