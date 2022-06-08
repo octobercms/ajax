@@ -64,12 +64,19 @@ export class Data
 
             var value = useJson[key];
 
-            // Is value an object
+            // Object
             if (value && value.constructor === {}.constructor) {
                 this.appendJsonToFormData(formData, value, fieldKey);
             }
+            // Array
+            else if (value && value.constructor === [].constructor) {
+                value.forEach(function(v) {
+                    formData.append(fieldKey + '[]', v);
+                });
+            }
+            // Mixed
             else {
-                formData.append(fieldKey, useJson[key]);
+                formData.append(fieldKey, value);
             }
         }
     }
