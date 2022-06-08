@@ -77,7 +77,7 @@ export class Request
         }
         else {
             this.options.redirect = redirectUrl;
-            this.isRedirect = shouldRedirect;
+            this.isRedirect = true;
         }
     }
 
