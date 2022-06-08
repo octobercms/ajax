@@ -28,11 +28,11 @@ export class HeadDetails
     }
 
     getScriptElementsNotInDetails(headDetails) {
-        return this.getElementsMatchingTypeNotInDetails("script", headDetails);
+        return this.getElementsMatchingTypeNotInDetails('script', headDetails);
     }
 
     getStylesheetElementsNotInDetails(headDetails) {
-        return this.getElementsMatchingTypeNotInDetails("stylesheet", headDetails);
+        return this.getElementsMatchingTypeNotInDetails('stylesheet', headDetails);
     }
 
     getElementsMatchingTypeNotInDetails(matchedType, headDetails) {
@@ -61,7 +61,7 @@ export class HeadDetails
     getMetaValue(name) {
         const element = this.findMetaElementByName(name);
         return element
-            ? element.getAttribute("content")
+            ? element.getAttribute('content')
             : null;
     }
 
@@ -75,29 +75,29 @@ export class HeadDetails
 
 function elementType(element) {
     if (elementIsScript(element)) {
-        return "script";
+        return 'script';
     }
 
     else if (elementIsStylesheet(element)) {
-        return "stylesheet";
+        return 'stylesheet';
     }
 }
 
 function elementIsTracked(element) {
-    return element.getAttribute("data-turbo-track") == "reload";
+    return element.getAttribute('data-turbo-track') == 'reload';
 }
 
 function elementIsScript(element) {
     const tagName = element.tagName.toLowerCase();
-    return tagName == "script";
+    return tagName == 'script';
 }
 
 function elementIsStylesheet(element) {
     const tagName = element.tagName.toLowerCase();
-    return tagName == "style" || (tagName == "link" && element.getAttribute("rel") == "stylesheet");
+    return tagName == 'style' || (tagName == 'link' && element.getAttribute('rel') == 'stylesheet');
 }
 
 function elementIsMetaElementWithName(element, name) {
     const tagName = element.tagName.toLowerCase();
-    return tagName == "meta" && element.getAttribute("name") == name;
+    return tagName == 'meta' && element.getAttribute('name') == name;
 }

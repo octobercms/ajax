@@ -35,16 +35,16 @@ export class History
 
     start() {
         if (!this.started) {
-            addEventListener("popstate", this.onPopState, false);
-            addEventListener("load", this.onPageLoad, false);
+            addEventListener('popstate', this.onPopState, false);
+            addEventListener('load', this.onPageLoad, false);
             this.started = true;
         }
     }
 
     stop() {
         if (this.started) {
-            removeEventListener("popstate", this.onPopState, false);
-            removeEventListener("load", this.onPageLoad, false);
+            removeEventListener('popstate', this.onPopState, false);
+            removeEventListener('load', this.onPageLoad, false);
             this.started = false;
         }
     }
@@ -64,12 +64,12 @@ export class History
     }
 
     pageIsLoaded() {
-        return this.pageLoaded || document.readyState == "complete";
+        return this.pageLoaded || document.readyState == 'complete';
     }
 
     update(method, location, restorationIdentifier) {
         const state = { ajaxTurbo: { restorationIdentifier } };
 
-        method.call(history, state, "", location.absoluteURL);
+        method.call(history, state, '', location.absoluteURL);
     }
 }

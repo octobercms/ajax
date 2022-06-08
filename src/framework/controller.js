@@ -19,7 +19,7 @@ export class Controller
         // Render event
         addEventListener('ajax:update-complete', this.render, false);
         addEventListener('DOMContentLoaded', this.render, false);
-        addEventListener('turbo:after-load', this.render, false);
+        addEventListener('page:after-load', this.render, false);
 
         // Submit form
         EventHandler.on(document, 'submit', '[data-request]', this.documentOnSubmit);

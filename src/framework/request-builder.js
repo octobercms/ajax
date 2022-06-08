@@ -11,22 +11,21 @@ export class RequestBuilder
             return Request.send(handler, this.options);
         }
 
-        this.assignOptionEval('beforeUpdate', 'request-before-update');
-        this.assignOptionEval('afterUpdate', 'request-after-update');
-        this.assignOptionEval('success', 'request-success');
-        this.assignOptionEval('error', 'request-error');
-        this.assignOptionEval('complete', 'request-complete');
+        this.assignAsEval('beforeUpdate', 'request-before-update');
+        this.assignAsEval('afterUpdate', 'request-after-update');
+        this.assignAsEval('success', 'request-success');
+        this.assignAsEval('error', 'request-error');
+        this.assignAsEval('complete', 'request-complete');
 
-        this.assignOptionData('ajaxGlobal', 'data-ajax-global');
-        this.assignOptionData('confirm', 'request-confirm');
-        this.assignOptionData('redirect', 'request-redirect');
-        this.assignOptionData('loading', 'request-loading');
-        this.assignOptionData('flash', 'request-flash');
-        this.assignOptionData('files', 'request-files');
-        this.assignOptionData('browserValidate', 'browser-validate');
-        this.assignOptionData('form', 'request-form');
-        this.assignOptionData('url', 'request-url');
-        this.assignOptionData('update', 'request-update', true);
+        this.assignAsData('confirm', 'request-confirm');
+        this.assignAsData('redirect', 'request-redirect');
+        this.assignAsData('loading', 'request-loading');
+        this.assignAsData('flash', 'request-flash');
+        this.assignAsData('files', 'request-files');
+        this.assignAsData('browserValidate', 'browser-validate');
+        this.assignAsData('form', 'request-form');
+        this.assignAsData('url', 'request-url');
+        this.assignAsData('update', 'request-update', true);
 
         this.assignRequestData();
 
@@ -34,14 +33,14 @@ export class RequestBuilder
             handler = element.getAttribute('data-request');
         }
 
-        return Request.sendEl(this.element, handler, this.options);
+        return Request.sendElement(this.element, handler, this.options);
     }
 
     static fromElement(element, handler, options) {
         return new RequestBuilder(element, handler, options);
     }
 
-    assignOptionEval(optionName, name) {
+    assignAsEval(optionName, name) {
         const attrFunc = this.element.getAttribute('data-' + name);
         if (!attrFunc) {
             return;
@@ -66,7 +65,7 @@ export class RequestBuilder
         }
     }
 
-    assignOptionData(optionName, name, parseJson = false) {
+    assignAsData(optionName, name, parseJson = false) {
         const attr = this.element.getAttribute('data-' + name);
         if (!attr) {
             return;

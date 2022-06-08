@@ -48,7 +48,7 @@ export class Controller
     }
 
     start() {
-        if (Controller.supported && !this.started) {
+        if (Controller.supported && !this.started && this.documentIsEnabled()) {
             addEventListener('click', this.clickCaptured, true);
             addEventListener('DOMContentLoaded', this.pageLoaded, false);
             this.scrollManager.start();
@@ -80,7 +80,7 @@ export class Controller
         location = Location.wrap(location);
         if (this.applicationAllowsVisitingLocation(location)) {
             if (this.locationIsVisitable(location)) {
-                const action = options.action || "advance";
+                const action = options.action || 'advance';
                 this.adapter.visitProposedToLocationWithAction(location, action);
             }
             else {
@@ -226,35 +226,35 @@ export class Controller
     }
 
     notifyApplicationAfterClickingLinkToLocation(link, location) {
-        return dispatch('turbo:click', { target: link, data: { url: location.absoluteURL } });
+        return dispatch('page:click', { target: link, data: { url: location.absoluteURL } });
     }
 
     notifyApplicationBeforeVisitingLocation(location) {
-        return dispatch('turbo:before-visit', { data: { url: location.absoluteURL } });
+        return dispatch('page:before-visit', { data: { url: location.absoluteURL } });
     }
 
     notifyApplicationAfterVisitingLocation(location) {
-        return dispatch('turbo:visit', { data: { url: location.absoluteURL }, cancelable: false });
+        return dispatch('page:visit', { data: { url: location.absoluteURL }, cancelable: false });
     }
 
     notifyApplicationBeforeCachingSnapshot() {
-        return dispatch('turbo:before-cache', { cancelable: false });
+        return dispatch('page:before-cache', { cancelable: false });
     }
 
     notifyApplicationBeforeRender(newBody) {
-        return dispatch('turbo:before-render', { data: { newBody }, cancelable: false });
+        return dispatch('page:before-render', { data: { newBody }, cancelable: false });
     }
 
     notifyApplicationAfterRender() {
-        return dispatch('turbo:render', { cancelable: false });
+        return dispatch('page:render', { cancelable: false });
     }
 
     notifyApplicationAfterPageLoad(timing = {}) {
-        return dispatch('turbo:load', { data: { url: this.location.absoluteURL, timing }, cancelable: false });
+        return dispatch('page:load', { data: { url: this.location.absoluteURL, timing }, cancelable: false });
     }
 
     notifyApplicationAfterLoadScripts() {
-        return dispatch('turbo:after-load', { cancelable: false });
+        return dispatch('page:after-load', { cancelable: false });
     }
 
     // Private
@@ -307,12 +307,16 @@ export class Controller
     }
 
     getActionForLink(link) {
-        const action = link.getAttribute("data-turbo-action");
+        const action = link.getAttribute('data-turbo-action');
         return this.isAction(action) ? action : "advance";
     }
 
     isAction(action) {
         return action == "advance" || action == "replace" || action == "restore";
+    }
+
+    documentIsEnabled() {
+        return this.elementIsVisitable(document.documentElement);
     }
 
     elementIsVisitable(element) {

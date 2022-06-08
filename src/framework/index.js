@@ -5,8 +5,8 @@ if (!window.oc) {
     window.oc = {};
 }
 
-if (!window.oc.Framework) {
-    window.oc.Framework = namespace;
+if (!window.oc.AjaxFramework) {
+    window.oc.AjaxFramework = namespace;
     if (!isAMD() && !isCommonJS()) {
         namespace.start();
     }

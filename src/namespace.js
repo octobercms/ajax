@@ -1,16 +1,16 @@
-import Turbo from "./turbo/namespace";
-import Request from "./request/namespace";
 import Framework from "./framework/namespace";
+import Request from "./request/namespace";
+import Turbo from "./turbo/namespace";
 import { AssetManager } from "./request/asset-manager";
 
 export default {
-    Request,
-    request: Request.send,
-    requestEl: Request.sendEl,
-    assetManager: AssetManager,
+    AjaxFramework: Framework,
+    AjaxRequest: Request,
+    AjaxTurbo: Turbo,
 
-    Framework,
-    Turbo,
+    ajax: Request.send,
+    request: Request.sendElement,
+    assetManager: AssetManager,
 
     start() {
         Framework.start();

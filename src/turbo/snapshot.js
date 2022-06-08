@@ -77,15 +77,15 @@ export class Snapshot
     }
 
     isPreviewable() {
-        return this.getCacheControlValue() != "no-preview";
+        return this.getCacheControlValue() != 'no-preview';
     }
 
     isCacheable() {
-        return this.getCacheControlValue() != "no-cache";
+        return this.getCacheControlValue() != 'no-cache';
     }
 
     isVisitable() {
-        return this.getSetting("visit-control") != "reload";
+        return this.getSetting('visit-control') != 'reload';
     }
 
     getSetting(name, defaultValue) {

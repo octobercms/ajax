@@ -1,4 +1,4 @@
-# October AJAX
+# October AJAX Framework
 
 This repository contains the AJAX framework of October CMS. If you want to build a website using October CMS, visit the main [October CMS repository](http://github.com/octobercms/october).
 

@@ -34,10 +34,10 @@ export class View
     // Private
     markAsPreview(isPreview) {
         if (isPreview) {
-            this.htmlElement.setAttribute("data-turbo-preview", "");
+            this.htmlElement.setAttribute('data-turbo-preview', '');
         }
         else {
-            this.htmlElement.removeAttribute("data-turbo-preview");
+            this.htmlElement.removeAttribute('data-turbo-preview');
         }
     }
 
@@ -46,6 +46,6 @@ export class View
     }
 
     renderError(error, callback) {
-        ErrorRenderer.render(this.delegate, callback, error || "");
+        ErrorRenderer.render(this.delegate, callback, error || '');
     }
 }

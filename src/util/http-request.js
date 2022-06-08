@@ -41,7 +41,7 @@ export class HttpRequest
                 }
 
                 if (xhr.status >= 200 && xhr.status < 300) {
-                    this.delegate.requestCompletedWithResponse(responseData, xhr.status, xhr.getResponseHeader("Ajax-Location"));
+                    this.delegate.requestCompletedWithResponse(responseData, xhr.status, xhr.getResponseHeader('Turbo-Location'));
                 }
                 else {
                     this.failed = true;

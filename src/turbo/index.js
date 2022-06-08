@@ -5,8 +5,8 @@ if (!window.oc) {
     window.oc = {};
 }
 
-if (!window.oc.Turbo) {
-    window.oc.Turbo = namespace;
+if (!window.oc.AjaxTurbo) {
+    window.oc.AjaxTurbo = namespace;
     if (!isAMD() && !isCommonJS()) {
         namespace.start();
     }

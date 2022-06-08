@@ -1,14 +1,14 @@
 import { AssetManager } from "./asset-manager";
-import Request from "./request";
-export default Request;
+import namespace from "./namespace";
+export default namespace;
 
 if (!window.oc) {
     window.oc = {};
 }
 
-if (!window.oc.Request) {
-    window.oc.Request = Request;
-    window.oc.request = Request.send;
-    window.oc.requestEl = Request.sendEl;
+if (!window.oc.AjaxRequest) {
+    window.oc.AjaxRequest = namespace;
+    window.oc.ajax = namespace.send;
+    window.oc.request = namespace.sendElement;
     window.oc.assetManager = AssetManager;
 }
