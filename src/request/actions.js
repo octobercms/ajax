@@ -207,7 +207,7 @@ export class Actions
                         el.innerHTML = data[partial];
                     }
 
-                    self.delegate.notifyApplicationAfterRender(el, data, responseCode, xhr);
+                    self.delegate.notifyApplicationAjaxUpdate(el, data, responseCode, xhr);
                 });
             }
 

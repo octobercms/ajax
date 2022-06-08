@@ -42,15 +42,15 @@ export class Migrate
         this.migratejQueryEvent(document, 'ajax:fail', 'ajaxFail', ['context', 'data', 'responseCode', 'xhr']);
         this.migratejQueryEvent(document, 'ajax:done', 'ajaxDone', ['context', 'data', 'responseCode', 'xhr']);
         this.migratejQueryEvent(document, 'ajax:always', 'ajaxAlways', ['context', 'data', 'responseCode', 'xhr']);
+        this.migratejQueryEvent(document, 'ajax:update', 'ajaxUpdate', ['context', 'data', 'responseCode', 'xhr']);
         this.migratejQueryEvent(document, 'ajax:before-request', 'oc.beforeRequest', ['context']);
         this.migratejQueryEvent(document, 'ajax:before-update', 'ajaxBeforeUpdate', ['context', 'data', 'responseCode', 'xhr']);
         this.migratejQueryEvent(document, 'ajax:request-success', 'ajaxSuccess', ['context', 'data', 'responseCode', 'xhr']);
         this.migratejQueryEvent(document, 'ajax:request-complete', 'ajaxComplete', ['context', 'data', 'responseCode', 'xhr']);
         this.migratejQueryEvent(document, 'ajax:request-error', 'ajaxError', ['context', 'message', 'responseCode', 'xhr']);
-        this.migratejQueryEvent(document, 'ajax:after-render', 'ajaxUpdate', ['context', 'data', 'responseCode', 'xhr']);
         this.migratejQueryEvent(document, 'ajax:before-validate', 'ajaxValidation', ['context', 'message', 'fields']);
         this.migratejQueryEvent(document, 'ajax:before-redirect', 'ajaxRedirect');
-        this.migratejQueryEvent(document, 'ajax:before-replace', 'ajaxRedirect');
+        this.migratejQueryEvent(document, 'ajax:before-replace', 'ajaxBeforeReplace');
 
         this.migratejQueryEvent(window, 'ajax:before-send', 'ajaxBeforeSend', ['context']);
         this.migratejQueryEvent(window, 'ajax:update-complete', 'ajaxUpdateComplete', ['context', 'data', 'responseCode', 'xhr']);

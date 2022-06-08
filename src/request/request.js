@@ -98,23 +98,27 @@ export class Request
 
     // Application events
     notifyApplicationAjaxSetup() {
-        dispatch('ajax:setup', { target: this.el, data: { context: this.context } });
+        return dispatch('ajax:setup', { target: this.el, data: { context: this.context } });
     }
 
     notifyApplicationAjaxPromise() {
-        dispatch('ajax:promise', { target: this.el, data: { context: this.context } });
+        return dispatch('ajax:promise', { target: this.el, data: { context: this.context } });
     }
 
     notifyApplicationAjaxFail(data, responseCode, xhr) {
-        dispatch('ajax:fail', { target: this.el, data: { context: this.context, data, responseCode, xhr } });
+        return dispatch('ajax:fail', { target: this.el, data: { context: this.context, data, responseCode, xhr } });
     }
 
     notifyApplicationAjaxDone(data, responseCode, xhr) {
-        dispatch('ajax:done', { target: this.el, data: { context: this.context, data, responseCode, xhr } });
+        return dispatch('ajax:done', { target: this.el, data: { context: this.context, data, responseCode, xhr } });
     }
 
     notifyApplicationAjaxAlways(data, responseCode, xhr) {
-        dispatch('ajax:always', { target: this.el, data: { context: this.context, data, responseCode, xhr } });
+        return dispatch('ajax:always', { target: this.el, data: { context: this.context, data, responseCode, xhr } });
+    }
+
+    notifyApplicationAjaxUpdate(target, data, responseCode, xhr) {
+        return dispatch('ajax:update', { target, data: { context: this.context, data, responseCode, xhr } });
     }
 
     notifyApplicationBeforeRedirect() {
@@ -147,10 +151,6 @@ export class Request
 
     notifyApplicationBeforeReplace(target) {
         return dispatch('ajax:before-replace', { target });
-    }
-
-    notifyApplicationAfterRender(target, data, responseCode, xhr) {
-        return dispatch('ajax:after-render', { target, data: { context: this.context, data, responseCode, xhr } });
     }
 
     // Window-based events
