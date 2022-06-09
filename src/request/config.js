@@ -1,6 +1,6 @@
-export class Options
+export class Config
 {
-    constructor(handler, options) {
+    constructor(handler, config) {
         if (!handler) {
             throw new Error('The request handler name is not specified.')
         }
@@ -13,36 +13,36 @@ export class Options
             throw new Error('The browser does not support the FormData interface.');
         }
 
-        this.options = options;
+        this.config = config;
         this.handler = handler;
     }
 
-    static fetch(handler, options) {
-        return (new this(handler, options)).getRequestOptions();
+    static fetch(handler, config) {
+        return (new this(handler, config)).getRequestOptions();
     }
 
     // Public
     getRequestOptions() {
         return {
             method: 'POST',
-            url: this.options.url ? this.options.url : window.location.href,
-            headers: this.buildHeaders(this.handler, this.options),
+            url: this.config.url ? this.config.url : window.location.href,
+            headers: this.buildHeaders(this.handler, this.config),
         };
     }
 
     // Private
-    buildHeaders(handler, options) {
+    buildHeaders(handler, config) {
         const headers = {
             'X-Requested-With': 'XMLHttpRequest',
             'X-OCTOBER-REQUEST-HANDLER': handler,
-            'X-OCTOBER-REQUEST-PARTIALS': this.extractPartials(options.update)
+            'X-OCTOBER-REQUEST-PARTIALS': this.extractPartials(config.update)
         };
 
-        if (options.files === true) {
+        if (config.files === true) {
             headers['Content-Type'] = 'application/x-www-form-urlencoded; charset=UTF-8';
         }
 
-        if (options.flash) {
+        if (config.flash) {
             headers['X-OCTOBER-REQUEST-FLASH'] = 1;
         }
 

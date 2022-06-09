@@ -4,10 +4,10 @@ import { Deferred } from "../util/deferred";
 
 export class Actions
 {
-    constructor(delegate, context, options) {
+    constructor(delegate, context, config) {
         this.delegate = delegate;
         this.context = context;
-        this.options = options;
+        this.config = config;
 
         // Allow override to call parent logic
         this.context.success = this.success.bind(this);
@@ -17,8 +17,8 @@ export class Actions
 
     // Options can override all public methods in this class
     invoke(method, args) {
-        if (this.options[method]) {
-            return this.options[method].apply(this.context, args);
+        if (this.config[method]) {
+            return this.config[method].apply(this.context, args);
         }
 
         return this[method](...args);
@@ -36,7 +36,7 @@ export class Actions
             return;
         }
 
-        if (this.delegate.options.flash && data['X_OCTOBER_FLASH_MESSAGES']) {
+        if (this.delegate.config.flash && data['X_OCTOBER_FLASH_MESSAGES']) {
             for (var type in data['X_OCTOBER_FLASH_MESSAGES']) {
                 this.invoke('handleFlashMessage', [data['X_OCTOBER_FLASH_MESSAGES'][type], type]);
             }
@@ -107,7 +107,7 @@ export class Actions
         var self = this;
         const promise = new Deferred;
         promise.done(function() {
-            self.delegate.options.confirm = null;
+            self.delegate.config.confirm = null;
             self.delegate.request.send();
         });
 
@@ -175,7 +175,7 @@ export class Actions
     // Using a promisary object here in case injected assets need time to load
     handleUpdateResponse(data, responseCode, xhr) {
         var self = this,
-            updateOptions = this.options.update || {},
+            updateOptions = this.config.update || {},
             updatePromise = new Deferred;
 
         // Update partials and finish request
@@ -223,7 +223,7 @@ export class Actions
         }
 
         if (this.delegate.isRedirect) {
-            this.invoke('handleRedirectResponse', [this.delegate.options.redirect]);
+            this.invoke('handleRedirectResponse', [this.delegate.config.redirect]);
         }
 
         // Handle validation
