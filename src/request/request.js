@@ -1,4 +1,4 @@
-import { Config } from "./config";
+import { Options } from "./options";
 import { Actions } from "./actions";
 import { Data } from "./data";
 import { Events } from "../util/events";
@@ -7,12 +7,12 @@ import { Deferred } from "../util/deferred";
 
 export class Request
 {
-    constructor(element, handler, config) {
+    constructor(element, handler, options) {
         this.el = element;
         this.handler = handler;
-        this.config = config || {};
-        this.context = { el: element, handler: handler, config: this.config, options: this.config };
-        this.actions = new Actions(this, this.context, config || {});
+        this.options = options || {};
+        this.context = { el: element, handler: handler, options: this.options };
+        this.actions = new Actions(this, this.context, options || {});
     }
 
     start() {
@@ -24,14 +24,14 @@ export class Request
         }
 
         // Prepare request
-        const data = Data.fetch(this.config.data, this.el, this.formEl);
-        const { url, headers, method } = Config.fetch(this.handler, this.config);
+        const data = Data.fetch(this.options.data, this.el, this.formEl);
+        const { url, headers, method } = Options.fetch(this.handler, this.options);
         this.request = new HttpRequest(this, url, { method, headers, data, trackAbort: true });
         this.promise = new Deferred({ delegate: this.request });
-        this.isRedirect = this.config.redirect && this.config.redirect.length > 0;
+        this.isRedirect = this.options.redirect && this.options.redirect.length > 0;
 
         // Confirm before sending
-        if (this.config.confirm && !this.actions.invoke('handleConfirmMessage', [this.config.confirm])) {
+        if (this.options.confirm && !this.actions.invoke('handleConfirmMessage', [this.options.confirm])) {
             return;
         }
 
@@ -58,25 +58,25 @@ export class Request
         return this.promise;
     }
 
-    static send(handler, config) {
-        return (new Request(document, handler, config)).start();
+    static send(handler, options) {
+        return (new Request(document, handler, options)).start();
     }
 
-    static sendElement(element, handler, config) {
+    static sendElement(element, handler, options) {
         if (typeof element === 'string') {
             element = document.querySelector(element);
         }
 
-        return (new Request(element, handler, config)).start();
+        return (new Request(element, handler, options)).start();
     }
 
     toggleRedirect(redirectUrl) {
         if (!redirectUrl) {
-            this.config.redirect = null;
+            this.options.redirect = null;
             this.isRedirect = false;
         }
         else {
-            this.config.redirect = redirectUrl;
+            this.options.redirect = redirectUrl;
             this.isRedirect = true;
         }
     }
@@ -202,8 +202,8 @@ export class Request
 
     // Private
     initOtherElements() {
-        if (this.config.form) {
-            this.formEl = document.querySelector(this.config.form);
+        if (this.options.form) {
+            this.formEl = document.querySelector(this.options.form);
         }
         else {
             this.formEl = this.el !== document ? this.el.closest('form') : null;
@@ -211,14 +211,14 @@ export class Request
 
         this.triggerEl = this.formEl ? this.formEl : this.el;
 
-        this.loadingEl = typeof this.config.loading === 'string'
-            ? document.querySelector(this.config.loading)
-            : this.config.loading;
+        this.loadingEl = typeof this.options.loading === 'string'
+            ? document.querySelector(this.options.loading)
+            : this.options.loading;
     }
 
     validateClientSideForm() {
         if (
-            this.config.browserValidate &&
+            this.options.browserValidate &&
             typeof document.createElement('input').reportValidity === 'function' &&
             this.formEl &&
             !this.formEl.checkValidity()
