@@ -122,15 +122,10 @@ export class Events
         return event;
     }
 
-    static trigger(element, eventName, args) {
+    static trigger(element, eventName, args = {}) {
         if (typeof eventName !== 'string' || !element) {
             return null;
         }
-
-        const {
-            cancelable = true,
-            detail = {}
-        } = args;
 
         const $ = getjQuery();
         const typeEvent = getTypeEvent(eventName);
@@ -151,8 +146,8 @@ export class Events
 
         let evt = new CustomEvent(eventName, {
             bubbles: true,
-            cancelable: cancelable === true,
-            detail
+            cancelable: args.cancelable === true,
+            detail: args.detail || {}
         });
 
         evt = hydrateObj(evt, args);
