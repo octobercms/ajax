@@ -1,6 +1,5 @@
-import EventHandler from "../util/event-handler";
+import { Events } from "../util/events";
 import { RequestBuilder } from "./request-builder";
-import { dispatch } from "../util";
 
 export class Controller
 {
@@ -22,19 +21,19 @@ export class Controller
         addEventListener('page:after-load', this.render, false);
 
         // Submit form
-        EventHandler.on(document, 'submit', '[data-request]', this.documentOnSubmit);
+        Events.on(document, 'submit', '[data-request]', this.documentOnSubmit);
 
         // Track input
-        EventHandler.on(document, 'input', 'input[data-request][data-track-input]', this.documentOnKeyup);
+        Events.on(document, 'input', 'input[data-request][data-track-input]', this.documentOnKeyup);
 
         // Change select, checkbox, radio, file input
-        EventHandler.on(document, 'change', 'select[data-request], input[type=radio][data-request], input[type=checkbox][data-request], input[type=file][data-request]', this.documentOnChange);
+        Events.on(document, 'change', 'select[data-request], input[type=radio][data-request], input[type=checkbox][data-request], input[type=file][data-request]', this.documentOnChange);
 
         // Press enter on orphan input
-        EventHandler.on(document, 'keydown', 'input[type=text][data-request], input[type=submit][data-request], input[type=password][data-request]', this.documentOnKeydown);
+        Events.on(document, 'keydown', 'input[type=text][data-request], input[type=submit][data-request], input[type=password][data-request]', this.documentOnKeydown);
 
         // Click submit button or link
-        EventHandler.on(document, 'click', 'a[data-request], button[data-request], input[type=button][data-request], input[type=submit][data-request]', this.documentOnClick);
+        Events.on(document, 'click', 'a[data-request], button[data-request], input[type=button][data-request], input[type=submit][data-request]', this.documentOnClick);
     }
 
     stop() {
@@ -44,7 +43,7 @@ export class Controller
     }
 
     render(event) {
-        dispatch('render');
+        Events.dispatch('render');
         window.dispatchEvent(new Event('resize'));
     }
 

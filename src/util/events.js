@@ -64,7 +64,7 @@ const nativeEvents = new Set([
     'scroll'
 ]);
 
-export default class EventHandler
+export class Events
 {
     static on(element, event, handler, delegationFunction) {
         addHandler(element, event, handler, delegationFunction, false);
@@ -111,22 +111,37 @@ export default class EventHandler
         }
     }
 
-    static trigger(element, event, args) {
-        if (typeof event !== 'string' || !element) {
+    static dispatch(eventName, { target, detail, cancelable = true } = {}) {
+        const event = new CustomEvent(eventName, {
+            bubbles: true,
+            cancelable: cancelable === true,
+            detail: detail || {}
+        });
+
+        (target || document).dispatchEvent(event);
+        return event;
+    }
+
+    static trigger(element, eventName, args) {
+        if (typeof eventName !== 'string' || !element) {
             return null;
         }
 
+        const {
+            cancelable = true,
+            detail = {}
+        } = args;
+
         const $ = getjQuery();
-        const typeEvent = getTypeEvent(event);
-        const inNamespace = event !== typeEvent;
+        const typeEvent = getTypeEvent(eventName);
+        const inNamespace = eventName !== typeEvent;
 
         let jQueryEvent = null;
-        let bubbles = true;
         let nativeDispatch = true;
         let defaultPrevented = false;
 
         if (inNamespace && $) {
-            jQueryEvent = $.Event(event, args);
+            jQueryEvent = $.Event(eventName, args);
 
             $(element).trigger(jQueryEvent);
             bubbles = !jQueryEvent.isPropagationStopped();
@@ -134,7 +149,12 @@ export default class EventHandler
             defaultPrevented = jQueryEvent.isDefaultPrevented();
         }
 
-        let evt = new Event(event, { bubbles, cancelable: true });
+        let evt = new CustomEvent(eventName, {
+            bubbles: true,
+            cancelable: cancelable === true,
+            detail
+        });
+
         evt = hydrateObj(evt, args);
 
         if (defaultPrevented) {
@@ -210,8 +230,7 @@ function findHandler(events, callable, delegationSelector = null) {
 
 function normalizeParameters(originalTypeEvent, handler, delegationFunction) {
     const isDelegated = typeof handler === 'string';
-    // todo: tooltip passes `false` instead of selector, so we need to check
-    const callable = isDelegated ? delegationFunction : (handler || delegationFunction);
+    const callable = isDelegated ? delegationFunction : handler;
     let typeEvent = getTypeEvent(originalTypeEvent);
 
     if (!nativeEvents.has(typeEvent)) {

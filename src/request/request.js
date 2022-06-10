@@ -1,7 +1,7 @@
 import { Config } from "./config";
 import { Actions } from "./actions";
 import { Data } from "./data";
-import { dispatch } from "../util";
+import { Events } from "../util/events";
 import { HttpRequest } from "../util/http-request";
 import { Deferred } from "../util/deferred";
 
@@ -11,7 +11,7 @@ export class Request
         this.el = element;
         this.handler = handler;
         this.config = config || {};
-        this.context = { el: element, handler: handler, config: this.config };
+        this.context = { el: element, handler: handler, config: this.config, options: this.config };
         this.actions = new Actions(this, this.context, config || {});
     }
 
@@ -98,80 +98,80 @@ export class Request
 
     // Application events
     notifyApplicationAjaxSetup() {
-        return dispatch('ajax:setup', { target: this.el, data: { context: this.context } });
+        return Events.dispatch('ajax:setup', { target: this.el, detail: { context: this.context } });
     }
 
     notifyApplicationAjaxPromise() {
-        return dispatch('ajax:promise', { target: this.el, data: { context: this.context } });
+        return Events.dispatch('ajax:promise', { target: this.el, detail: { context: this.context } });
     }
 
     notifyApplicationAjaxFail(data, responseCode, xhr) {
-        return dispatch('ajax:fail', { target: this.el, data: { context: this.context, data, responseCode, xhr } });
+        return Events.dispatch('ajax:fail', { target: this.el, detail: { context: this.context, data, responseCode, xhr } });
     }
 
     notifyApplicationAjaxDone(data, responseCode, xhr) {
-        return dispatch('ajax:done', { target: this.el, data: { context: this.context, data, responseCode, xhr } });
+        return Events.dispatch('ajax:done', { target: this.el, detail: { context: this.context, data, responseCode, xhr } });
     }
 
     notifyApplicationAjaxAlways(data, responseCode, xhr) {
-        return dispatch('ajax:always', { target: this.el, data: { context: this.context, data, responseCode, xhr } });
+        return Events.dispatch('ajax:always', { target: this.el, detail: { context: this.context, data, responseCode, xhr } });
     }
 
     notifyApplicationAjaxUpdate(target, data, responseCode, xhr) {
-        return dispatch('ajax:update', { target, data: { context: this.context, data, responseCode, xhr } });
+        return Events.dispatch('ajax:update', { target, detail: { context: this.context, data, responseCode, xhr } });
     }
 
     notifyApplicationBeforeRedirect() {
-        return dispatch('ajax:before-redirect', { target: this.el });
+        return Events.dispatch('ajax:before-redirect', { target: this.el });
     }
 
     notifyApplicationBeforeRequest() {
-        return dispatch('ajax:before-request', { target: this.triggerEl, data: { context: this.context } });
+        return Events.dispatch('ajax:before-request', { target: this.triggerEl, detail: { context: this.context } });
     }
 
     notifyApplicationBeforeUpdate(data, responseCode, xhr) {
-        return dispatch('ajax:before-update', { target: this.triggerEl, data: { context: this.context, data, responseCode, xhr } });
+        return Events.dispatch('ajax:before-update', { target: this.triggerEl, detail: { context: this.context, data, responseCode, xhr } });
     }
 
     notifyApplicationRequestSuccess(data, responseCode, xhr) {
-        return dispatch('ajax:request-success', { target: this.triggerEl, data: { context: this.context, data, responseCode, xhr } });
+        return Events.dispatch('ajax:request-success', { target: this.triggerEl, detail: { context: this.context, data, responseCode, xhr } });
     }
 
     notifyApplicationRequestError(message, responseCode, xhr) {
-        return dispatch('ajax:request-error', { target: this.triggerEl, data: { context: this.context, message, responseCode, xhr } });
+        return Events.dispatch('ajax:request-error', { target: this.triggerEl, detail: { context: this.context, message, responseCode, xhr } });
     }
 
     notifyApplicationRequestComplete(data, responseCode, xhr) {
-        return dispatch('ajax:request-complete', { target: this.triggerEl, data: { context: this.context, data, responseCode, xhr } });
+        return Events.dispatch('ajax:request-complete', { target: this.triggerEl, detail: { context: this.context, data, responseCode, xhr } });
     }
 
     notifyApplicationBeforeValidate(message, fields) {
-        return dispatch('ajax:before-validate', { target: this.triggerEl, data: { context: this.context, message, fields } });
+        return Events.dispatch('ajax:before-validate', { target: this.triggerEl, detail: { context: this.context, message, fields } });
     }
 
     notifyApplicationBeforeReplace(target) {
-        return dispatch('ajax:before-replace', { target });
+        return Events.dispatch('ajax:before-replace', { target });
     }
 
     // Window-based events
     notifyApplicationBeforeSend() {
-        return dispatch('ajax:before-send', { target: window, data: { context: this.context } });
+        return Events.dispatch('ajax:before-send', { target: window, detail: { context: this.context } });
     }
 
     notifyApplicationUpdateComplete(data, responseCode, xhr) {
-        return dispatch('ajax:update-complete', { target: window, data: { context: this.context, data, responseCode, xhr } });
+        return Events.dispatch('ajax:update-complete', { target: window, detail: { context: this.context, data, responseCode, xhr } });
     }
 
     notifyApplicationFieldInvalid(element, fieldName, fieldMessages, isFirst) {
-        return dispatch('ajax:invalid-field', { target: window, data: { element, fieldName, fieldMessages, isFirst } });
+        return Events.dispatch('ajax:invalid-field', { target: window, detail: { element, fieldName, fieldMessages, isFirst } });
     }
 
     notifyApplicationConfirmMessage(message, promise) {
-        return dispatch('ajax:confirm-message', { target: window, data: { message, promise } });
+        return Events.dispatch('ajax:confirm-message', { target: window, detail: { message, promise } });
     }
 
     notifyApplicationErrorMessage(message) {
-        return dispatch('ajax:error-message', { target: window, data: { message } });
+        return Events.dispatch('ajax:error-message', { target: window, detail: { message } });
     }
 
     // HTTP request delegate

@@ -7,8 +7,8 @@ if (!window.oc) {
 }
 
 if (!window.oc.AjaxRequest) {
+    window.oc.AssetManager = AssetManager;
     window.oc.AjaxRequest = namespace;
     window.oc.ajax = namespace.send;
     window.oc.request = namespace.sendElement;
-    window.oc.assetManager = AssetManager;
 }

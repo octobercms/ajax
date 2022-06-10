@@ -1,14 +1,3 @@
-export function dispatch(eventName, { target, data, cancelable = true } = {}) {
-    const event = new CustomEvent(eventName, {
-        bubbles: true,
-        cancelable: cancelable === true,
-        detail: data || {}
-    });
-
-    (target || document).dispatchEvent(event);
-    return event;
-}
-
 export function defer(callback) {
     setTimeout(callback, 1);
 }
