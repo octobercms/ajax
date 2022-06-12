@@ -6,10 +6,6 @@ export class Data
         this.formEl = formEl;
     }
 
-    static fetch(userData, targetEl, formEl) {
-        return (new this(userData, targetEl, formEl)).getRequestData();
-    }
-
     // Public
     getRequestData() {
         let requestData;
@@ -22,13 +18,26 @@ export class Data
             requestData = new FormData;
         }
 
-        // Encode JSON to form data
-        this.appendJsonToFormData(requestData, this.userData);
-
         // Add single input data
         this.appendSingleInputElement(requestData);
 
         return requestData;
+    }
+
+    getAsFormData() {
+        return this.appendJsonToFormData(
+            this.getRequestData(),
+            this.userData
+        );
+    }
+
+    getAsJsonData() {
+        return JSON.stringify(
+            this.appendFormDataToJson(
+                this.getRequestData(),
+                this.userData
+            )
+        );
     }
 
     // Private
@@ -79,6 +88,61 @@ export class Data
                 formData.append(fieldKey, value);
             }
         }
+
+        return formData;
+    }
+
+    appendFormDataToJson(formData, useJson) {
+        // Process to a flat object with array values
+        let flatData = Object.fromEntries(
+            Array.from(formData.keys()).map(key => [
+                key,
+                formData.getAll(key).length > 1
+                ? formData.getAll(key)
+                : formData.get(key)
+            ])
+        );
+
+        // Process HTML names to a nested object
+        let jsonData = {};
+        for (var key in flatData) {
+            this.assignObjectNested(
+                jsonData,
+                this.nameToArray(key),
+                flatData[key]
+            );
+        }
+
+        // Assign supplied user data
+        Object.assign(jsonData, useJson);
+
+        return jsonData;
+    }
+
+    nameToArray(fieldName) {
+        var expression = /([^\]\[]+)/g,
+            elements = [],
+            searchResult;
+
+        while ((searchResult = expression.exec(fieldName))) {
+            elements.push(searchResult[0]);
+        }
+
+        return elements;
+    }
+
+    assignObjectNested(obj, fieldArr, value)  {
+        var currentTarget = obj,
+            lastIndex = fieldArr.length - 1;
+
+        fieldArr.forEach(function(prop, index) {
+            if (currentTarget[prop] === undefined) {
+                currentTarget[prop] = index === lastIndex
+                    ? value
+                    : {};
+            }
+
+            currentTarget = currentTarget[prop];
+        });
     }
 }
-

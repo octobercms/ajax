@@ -38,8 +38,8 @@ export class Options
             'X-OCTOBER-REQUEST-PARTIALS': this.extractPartials(options.update)
         };
 
-        if (options.files === true) {
-            headers['Content-Type'] = 'application/x-www-form-urlencoded; charset=UTF-8';
+        if (options.files !== true) {
+            headers['Content-Type'] = 'application/json';
         }
 
         if (options.flash) {

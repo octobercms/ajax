@@ -24,8 +24,9 @@ export class Request
         }
 
         // Prepare request
-        const data = Data.fetch(this.options.data, this.el, this.formEl);
         const { url, headers, method } = Options.fetch(this.handler, this.options);
+        const dataObj = new Data(this.options.data, this.el, this.formEl);
+        const data = this.options.files ? dataObj.getAsFormData() : dataObj.getAsJsonData();
         this.request = new HttpRequest(this, url, { method, headers, data, trackAbort: true });
         this.promise = new Deferred({ delegate: this.request });
         this.isRedirect = this.options.redirect && this.options.redirect.length > 0;
