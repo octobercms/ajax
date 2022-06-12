@@ -203,8 +203,11 @@ export class Request
 
     // Private
     initOtherElements() {
-        if (this.options.form) {
+        if (typeof this.options.form === 'string') {
             this.formEl = document.querySelector(this.options.form);
+        }
+        else if (this.options.form) {
+            this.formEl = this.options.form;
         }
         else {
             this.formEl = this.el !== document ? this.el.closest('form') : null;

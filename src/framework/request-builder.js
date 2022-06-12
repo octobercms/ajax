@@ -5,32 +5,32 @@ export class RequestBuilder
 {
     constructor(element, handler, options) {
         this.options = options || {};
-        this.element = element;
+        this.element = this.findElement(element);
 
-        if (!this.element || this.element === document) {
+        if (!this.element) {
             return Request.send(handler, this.options);
         }
 
-        this.assignAsEval('beforeUpdate', 'request-before-update');
-        this.assignAsEval('afterUpdate', 'request-after-update');
-        this.assignAsEval('success', 'request-success');
-        this.assignAsEval('error', 'request-error');
-        this.assignAsEval('complete', 'request-complete');
+        this.assignAsEval('beforeUpdate', 'requestBeforeUpdate');
+        this.assignAsEval('afterUpdate', 'requestAfterUpdate');
+        this.assignAsEval('success', 'requestSuccess');
+        this.assignAsEval('error', 'requestError');
+        this.assignAsEval('complete', 'requestComplete');
 
-        this.assignAsData('confirm', 'request-confirm');
-        this.assignAsData('redirect', 'request-redirect');
-        this.assignAsData('loading', 'request-loading');
-        this.assignAsData('flash', 'request-flash');
-        this.assignAsData('files', 'request-files');
-        this.assignAsData('browserValidate', 'browser-validate');
-        this.assignAsData('form', 'request-form');
-        this.assignAsData('url', 'request-url');
-        this.assignAsData('update', 'request-update', true);
+        this.assignAsData('confirm', 'requestConfirm');
+        this.assignAsData('redirect', 'requestRedirect');
+        this.assignAsData('loading', 'requestLoading');
+        this.assignAsData('flash', 'requestFlash');
+        this.assignAsData('files', 'requestFiles');
+        this.assignAsData('form', 'requestForm');
+        this.assignAsData('url', 'requestUrl');
+        this.assignAsData('update', 'requestUpdate', true);
+        this.assignAsData('browserValidate', 'browserValidate');
 
         this.assignRequestData();
 
         if (!handler) {
-            handler = element.getAttribute('data-request');
+            handler = this.getHandlerName();
         }
 
         return Request.sendElement(this.element, handler, this.options);
@@ -38,6 +38,31 @@ export class RequestBuilder
 
     static fromElement(element, handler, options) {
         return new RequestBuilder(element, handler, options);
+    }
+
+    findElement(element) {
+        if (element === document) {
+            return null;
+        }
+
+        if (element.matches('[data-attribute]')) {
+            return element;
+        }
+
+        var parentEl = element.closest('[data-request]');
+        if (parentEl) {
+            return parentEl;
+        }
+
+        return element;
+    }
+
+    getHandlerName() {
+        if (this.element.dataset.dataRequest) {
+            return this.element.dataset.dataRequest;
+        }
+
+        return this.element.getAttribute('data-request');
     }
 
     assignAsEval(optionName, name) {
@@ -66,16 +91,26 @@ export class RequestBuilder
     }
 
     assignAsData(optionName, name, parseJson = false) {
-        const attr = this.element.getAttribute('data-' + name);
-        if (!attr) {
+        var attrVal;
+        if (this.element.dataset[name]) {
+            attrVal = this.element.dataset[name];
+        }
+        else {
+            this.element.getAttribute('data-' + normalizeDataKey(name));
+        }
+
+        if (!attrVal) {
             return;
         }
 
         if (parseJson) {
-            this.options[optionName] = JsonParser.paramToObj('data-' + name, attr);
+            this.options[optionName] = JsonParser.paramToObj(
+                'data-' + normalizeDataKey(name),
+                attrVal
+            );
         }
         else {
-            this.options[optionName] = attr;
+            this.options[optionName] = attrVal;
         }
     }
 
@@ -87,7 +122,10 @@ export class RequestBuilder
         }
 
         elementParents(this.element, '[data-request-data]').reverse().forEach(function(el) {
-            Object.assign(data, JsonParser.paramToObj('data-request-data', el.getAttribute('data-request-data')));
+            Object.assign(data, JsonParser.paramToObj(
+                'data-request-data',
+                el.getAttribute('data-request-data')
+            ));
         });
 
         this.options.data = data;
@@ -107,4 +145,8 @@ function elementParents(element, selector) {
     }
 
     return parents;
+}
+
+function normalizeDataKey(key) {
+    return key.replace(/[A-Z]/g, chr => `-${chr.toLowerCase()}`)
 }
