@@ -5,6 +5,7 @@ export class RequestBuilder
 {
     constructor(element, handler, options) {
         this.options = options || {};
+        this.ogElement = element;
         this.element = this.findElement(element);
 
         if (!this.element) {
@@ -40,12 +41,15 @@ export class RequestBuilder
         return new RequestBuilder(element, handler, options);
     }
 
+    // Event target may some random node inside the data-request container
+    // so it should bubble up but also capture the ogElement in case it is
+    // a button that contains data-request-data.
     findElement(element) {
         if (element === document) {
             return null;
         }
 
-        if (element.matches('[data-attribute]')) {
+        if (element.matches('[data-request]')) {
             return element;
         }
 
@@ -66,16 +70,22 @@ export class RequestBuilder
     }
 
     assignAsEval(optionName, name) {
-        const attrFunc = this.element.getAttribute('data-' + name);
-        if (!attrFunc) {
+        var attrVal;
+        if (this.element.dataset[name]) {
+            attrVal = this.element.dataset[name];
+        }
+        else {
+            this.element.getAttribute('data-' + normalizeDataKey(name));
+        }
+
+        if (!attrVal) {
             return;
         }
 
         const otherFunc = this.options[optionName];
-
         this.options[optionName] = function(data, responseCode, xhr) {
             // Call eval code, with halting
-            var result = (new Function('data', attrFunc)).apply(this.el, [data]);
+            var result = (new Function('data', attrVal)).apply(this.el, [data]);
             if (result === false) {
                 return;
             }
@@ -116,12 +126,13 @@ export class RequestBuilder
 
     assignRequestData() {
         var data = this.options.data || {};
-        const attr = this.element.getAttribute('data-request-data');
+
+        const attr = this.ogElement.getAttribute('data-request-data');
         if (attr) {
             Object.assign(data, JsonParser.paramToObj('data-request-data', attr));
         }
 
-        elementParents(this.element, '[data-request-data]').reverse().forEach(function(el) {
+        elementParents(this.ogElement, '[data-request-data]').reverse().forEach(function(el) {
             Object.assign(data, JsonParser.paramToObj(
                 'data-request-data',
                 el.getAttribute('data-request-data')
