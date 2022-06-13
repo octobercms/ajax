@@ -31,7 +31,7 @@ export class FlashMessage
             transform: scale(1);
         }
         .oc-flash-message.success {
-            background: #8da85e;
+            background: #86cB43;
         }
         .oc-flash-message.error {
             background: #cc3300;
@@ -124,8 +124,9 @@ export class FlashMessage
     }
 
     render() {
+        var self = this;
         document.querySelectorAll('[data-control=flash-message]').forEach(function(el) {
-            this.show({ ...el.dataset, target: el });
+            self.show({ ...el.dataset, target: el, message: el.innerHTML });
         });
     }
 
