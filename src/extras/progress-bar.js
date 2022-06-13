@@ -2,6 +2,8 @@ import { unindent } from "../util";
 
 export class ProgressBar
 {
+    static stylesheetReady = false;
+
     constructor() {
         this.stylesheetElement = this.createStylesheetElement();
         this.progressElement = this.createProgressElement();
@@ -15,7 +17,7 @@ export class ProgressBar
 
     static get defaultCSS() {
         return unindent `
-        .october-progress-bar {
+        .oc-progress-bar {
             position: fixed;
             display: block;
             top: 0;
@@ -59,7 +61,10 @@ export class ProgressBar
 
     // Private
     installStylesheetElement() {
-        document.head.insertBefore(this.stylesheetElement, document.head.firstChild);
+        if (!ProgressBar.stylesheetReady) {
+            document.head.insertBefore(this.stylesheetElement, document.head.firstChild);
+            ProgressBar.stylesheetReady = true;
+        }
     }
 
     installProgressElement() {
@@ -98,15 +103,14 @@ export class ProgressBar
     }
 
     createStylesheetElement() {
-        const element = document.createElement("style");
-        element.type = "text/css";
+        const element = document.createElement('style');
         element.textContent = ProgressBar.defaultCSS;
         return element;
     }
 
     createProgressElement() {
-        const element = document.createElement("div");
-        element.className = "october-progress-bar";
+        const element = document.createElement('div');
+        element.className = 'oc-progress-bar';
         return element;
     }
 }

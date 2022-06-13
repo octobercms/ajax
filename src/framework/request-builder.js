@@ -75,7 +75,7 @@ export class RequestBuilder
             attrVal = this.element.dataset[name];
         }
         else {
-            this.element.getAttribute('data-' + normalizeDataKey(name));
+            attrVal = this.element.getAttribute('data-' + normalizeDataKey(name));
         }
 
         if (!attrVal) {
@@ -106,7 +106,7 @@ export class RequestBuilder
             attrVal = this.element.dataset[name];
         }
         else {
-            this.element.getAttribute('data-' + normalizeDataKey(name));
+            attrVal = this.element.getAttribute('data-' + normalizeDataKey(name));
         }
 
         if (!attrVal) {
