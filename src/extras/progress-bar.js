@@ -34,6 +34,20 @@ export class ProgressBar
     `;
     }
 
+    static progressBar() {
+        const instance = new ProgressBar;
+        return {
+            show: function() {
+                instance.setValue(0);
+                instance.show();
+            },
+            hide: function() {
+                instance.setValue(100);
+                instance.hide();
+            }
+        };
+    }
+
     show() {
         if (!this.visible) {
             this.visible = true;

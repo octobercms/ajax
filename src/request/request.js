@@ -279,10 +279,12 @@ export class Request
     }
 
     showProgressBarAfterDelay() {
+        this.progressBar.setValue(0);
         this.progressBarTimeout = window.setTimeout(this.showProgressBar, this.options.progressBarDelay);
     }
 
     hideProgressBar() {
+        this.progressBar.setValue(100);
         this.progressBar.hide();
         if (this.progressBarTimeout != null) {
             window.clearTimeout(this.progressBarTimeout);

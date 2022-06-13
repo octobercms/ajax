@@ -25,7 +25,7 @@ export class BrowserAdapter
 
     visitRequestStarted(visit) {
         this.progressBar.setValue(0);
-        if (visit.hasCachedSnapshot() || visit.action != "restore") {
+        if (visit.hasCachedSnapshot() || visit.action != 'restore') {
             this.showProgressBarAfterDelay();
         }
         else {
@@ -78,7 +78,7 @@ export class BrowserAdapter
 
     hideProgressBar() {
         this.progressBar.hide();
-        if (this.progressBarTimeout != null) {
+        if (this.progressBarTimeout !== null) {
             window.clearTimeout(this.progressBarTimeout);
             delete this.progressBarTimeout;
         }

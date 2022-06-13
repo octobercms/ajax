@@ -96,6 +96,11 @@ export class FlashMessage
             target.removeAttribute('data-control');
         }
 
+        // Error singles
+        if (type === 'error') {
+            this.deleteFlashMessages();
+        }
+
         // Inject element
         var flashElement = this.createFlashElement(message, type);
         document.body.appendChild(flashElement);
@@ -103,6 +108,7 @@ export class FlashMessage
 
         // Events
         flashElement.querySelector('.flash-close').addEventListener('click', remove);
+        flashElement.addEventListener('extras:flash-remove', remove);
 
         // Timeout
         var timer;
@@ -112,10 +118,10 @@ export class FlashMessage
 
         // Remove logic
         function remove() {
-            flashElement.classList.remove('flash-show');
-
-            flashElement.removeEventListener('click', remove);
             window.clearInterval(timer);
+            flashElement.removeEventListener('click', remove);
+            flashElement.removeEventListener('extras:flash-remove', remove);
+            flashElement.classList.remove('flash-show');
 
             setTimeout(function() {
                 flashElement.remove();
@@ -127,6 +133,12 @@ export class FlashMessage
         var self = this;
         document.querySelectorAll('[data-control=flash-message]').forEach(function(el) {
             self.show({ ...el.dataset, target: el, message: el.innerHTML });
+        });
+    }
+
+    deleteFlashMessages() {
+        document.querySelectorAll('.oc-flash-message').forEach(function(el) {
+            el.dispatchEvent(new Event('extras:flash-remove'));
         });
     }
 
