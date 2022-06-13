@@ -1,17 +1,20 @@
-import namespace from "./namespace";
-export default namespace;
+/**
+ * --------------------------------------------------------------------------
+ * October CMS: Frontend JavaScript Framework
+ * https://octobercms.com
+ * --------------------------------------------------------------------------
+ * Copyright 2013-2022 Alexey Bobkov, Samuel Georges
+ * --------------------------------------------------------------------------
+ */
 
-if (!window.oc) {
-    window.oc = namespace;
-    if (!isAMD() && !isCommonJS()) {
-        namespace.start();
-    }
-}
+import Framework from "./framework/namespace";
+import Request from "./request/namespace";
+import Extras from "./extras/namespace";
+import Turbo from "./turbo/namespace";
 
-function isAMD() {
-    return typeof define == "function" && define.amd;
-}
-
-function isCommonJS() {
-    return typeof exports == "object" && typeof module != "undefined";
-}
+export default {
+    Request,
+    Framework,
+    Extras,
+    Turbo
+};
