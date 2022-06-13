@@ -10,20 +10,18 @@ export class AttachLoader
 
     static get defaultCSS() {
         return unindent `
-        a.oc-loading, button.oc-loading, span.oc-loading {
-            &:after {
-                content: '';
-                display: inline-block;
-                vertical-align: middle;
-                margin-left: .4em;
-                height: 1em;
-                width: 1em;
-                animation: oc-rotate-loader 0.8s infinite linear;
-                border: .2em solid currentColor;
-                border-right-color: transparent;
-                border-radius: 50%;
-                opacity: .5;
-            }
+        .oc-attach-loader:after {
+            content: '';
+            display: inline-block;
+            vertical-align: middle;
+            margin-left: .4em;
+            height: 1em;
+            width: 1em;
+            animation: oc-rotate-loader 0.8s infinite linear;
+            border: .2em solid currentColor;
+            border-right-color: transparent;
+            border-radius: 50%;
+            opacity: .5;
         }
 
         @keyframes oc-rotate-loader {
@@ -38,13 +36,13 @@ export class AttachLoader
         this.installStylesheetElement();
 
         if (el.dataset.attachLoading !== undefined) {
-            el.classList.add('oc-loading');
+            el.classList.add('oc-attach-loader');
             el.disabled = true;
         }
 
         if (el.matches('form')) {
             el.querySelectorAll('[data-attach-loading]').forEach(function(otherEl) {
-                otherEl.classList.add('oc-loading');
+                otherEl.classList.add('oc-attach-loader');
                 otherEl.disabled = true;
             });
         }
@@ -52,13 +50,13 @@ export class AttachLoader
 
     hide(el) {
         if (el.dataset.attachLoading !== undefined) {
-            el.classList.remove('oc-loading');
+            el.classList.remove('oc-attach-loader');
             el.disabled = false;
         }
 
         if (el.matches('form')) {
             el.querySelectorAll('[data-attach-loading]').forEach(function(otherEl) {
-                otherEl.classList.remove('oc-loading');
+                otherEl.classList.remove('oc-attach-loader');
                 otherEl.disabled = false;
             });
         }

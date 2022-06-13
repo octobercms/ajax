@@ -1,3 +1,4 @@
+import { Validator } from "./validator";
 import { AttachLoader } from "./attach-loader";
 import { Events } from "../util/events";
 
@@ -20,6 +21,12 @@ export class Controller
         Events.on(document, 'ajax:promise', '[data-request]', this.showAttachLoader.bind(this));
         Events.on(document, 'ajax:fail', '[data-request]', this.hideAttachLoader.bind(this));
         Events.on(document, 'ajax:done', '[data-request]', this.hideAttachLoader.bind(this));
+
+
+        // Validator
+        this.validator = new Validator;
+        Events.on(document, 'ajax:before-validate', '[data-request][data-request-validate]', this.validatorValidate.bind(this));
+        Events.on(document, 'ajax:promise', '[data-request][data-request-validate]', this.validatorSubmit.bind(this));
     }
 
     stop() {
@@ -35,6 +42,11 @@ export class Controller
         Events.off(document, 'ajax:promise', '[data-request]', this.showAttachLoader.bind(this));
         Events.off(document, 'ajax:fail', '[data-request]', this.hideAttachLoader.bind(this));
         Events.off(document, 'ajax:done', '[data-request]', this.hideAttachLoader.bind(this));
+
+        // Validator
+        this.validator = null;
+        Events.off(document, 'ajax:promise', '[data-request][data-request-validate]', this.validatorSubmit.bind(this));
+        Events.off(document, 'ajax:before-validate', '[data-request][data-request-validate]', this.validatorValidate.bind(this));
     }
 
     // Progress bar
@@ -50,5 +62,14 @@ export class Controller
 
     hideAttachLoader(event) {
         this.attachLoader.hide(event.target);
+    }
+
+    // Validator
+    validatorSubmit(event) {
+        this.validator.submit(event.target);
+    }
+
+    validatorValidate(event) {
+        this.validator.validate(event.target, event.detail.fields);
     }
 }
