@@ -1,5 +1,6 @@
 import { Validator } from "./validator";
 import { AttachLoader } from "./attach-loader";
+import { FlashMessage } from "./flash-message";
 import { Events } from "../util/events";
 
 export class Controller
@@ -22,11 +23,15 @@ export class Controller
         Events.on(document, 'ajax:fail', '[data-request]', this.hideAttachLoader.bind(this));
         Events.on(document, 'ajax:done', '[data-request]', this.hideAttachLoader.bind(this));
 
-
         // Validator
         this.validator = new Validator;
         Events.on(document, 'ajax:before-validate', '[data-request][data-request-validate]', this.validatorValidate.bind(this));
         Events.on(document, 'ajax:promise', '[data-request][data-request-validate]', this.validatorSubmit.bind(this));
+
+        // Flash message
+        this.flashMessage = new FlashMessage;
+        addEventListener('render', this.flashMessageRender.bind(this));
+        Events.on(document, 'ajax:setup', '[data-request][data-request-flash]', this.flashMessageBind.bind(this));
     }
 
     stop() {
@@ -71,5 +76,22 @@ export class Controller
 
     validatorValidate(event) {
         this.validator.validate(event.target, event.detail.fields);
+    }
+
+    // Flash message
+    flashMessageBind(event) {
+        const { options } = event.detail.context;
+
+        options.handleErrorMessage = function(message) {
+            this.flashMessage.show({ message, type: 'error' });
+        }
+
+        options.handleFlashMessage = function(message, type) {
+            this.flashMessage.show({ message, type });
+        }
+    }
+
+    flashMessageRender(event) {
+        this.flashMessage.render();
     }
 }

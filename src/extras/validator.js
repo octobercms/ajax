@@ -1,8 +1,28 @@
+import { unindent } from "../util";
 import { Events } from "../util/events";
 
 export class Validator
 {
+    static stylesheetReady = false;
+
+    constructor() {
+        this.stylesheetElement = this.createStylesheetElement();
+    }
+
+    static get defaultCSS() {
+        return unindent `
+        [data-request][data-request-validate] [data-validate-for],
+        [data-request][data-request-validate] [data-validate-error] {
+            &:not(.oc-visible) {
+                display: none;
+            }
+        }
+    `;
+    }
+
     submit(el) {
+        this.installStylesheetElement();
+
         var form = el.closest('form');
         if (!form) {
             return;
@@ -19,8 +39,7 @@ export class Validator
 
     validate(el, fields) {
         var form = el.closest('form'),
-            messages = [],
-            field;
+            messages = [];
 
         if (!form) {
             return;
@@ -32,7 +51,7 @@ export class Validator
             messages = [...messages, ...fieldMessages];
 
             // Display message next to field
-            field = form.querySelector('[data-validate-for="'+fieldName+'"]');
+            var field = form.querySelector('[data-validate-for="'+fieldName+'"]');
             if (field) {
                 if (field.innerHTML || field.dataset.emptyMode === true) {
                     field.dataset.emptyMode = true;
@@ -71,5 +90,19 @@ export class Validator
         Events.one(form, 'ajax:error', function(event) {
             event.preventDefault();
         });
+    }
+
+    // Private
+    installStylesheetElement() {
+        if (!Validator.stylesheetReady) {
+            document.head.insertBefore(this.stylesheetElement, document.head.firstChild);
+            Validator.stylesheetReady = true;
+        }
+    }
+
+    createStylesheetElement() {
+        const element = document.createElement('style');
+        element.textContent = Validator.defaultCSS;
+        return element;
     }
 }

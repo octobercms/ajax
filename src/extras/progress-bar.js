@@ -3,6 +3,7 @@ import { unindent } from "../util";
 export class ProgressBar
 {
     static stylesheetReady = false;
+    static animationDuration = 300; /*ms*/
 
     constructor() {
         this.stylesheetElement = this.createStylesheetElement();
@@ -114,5 +115,3 @@ export class ProgressBar
         return element;
     }
 }
-
-ProgressBar.animationDuration = 300; /*ms*/
