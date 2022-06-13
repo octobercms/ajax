@@ -1,5 +1,3 @@
-import { JsonParser } from "./json-parser";
-import { Events } from "../util/events";
 import namespace from "./namespace";
 export default namespace;
 
@@ -7,15 +5,9 @@ if (!window.oc) {
     window.oc = {};
 }
 
-if (!window.oc.AjaxFramework) {
+if (!window.oc.AjaxExtras) {
     // Namespace
-    window.oc.AjaxFramework = namespace;
-
-    // Selector events
-    window.oc.Events = Events;
-
-    // JSON parser
-    window.oc.parseJSON = JsonParser.parseJSON;
+    window.oc.AjaxExtras = namespace;
 }
 
 // Boot controller

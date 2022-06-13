@@ -1,4 +1,4 @@
-import { getjQuery } from './index'
+import { dispatch, getjQuery } from './index'
 
 /**
  * Constants
@@ -112,14 +112,7 @@ export class Events
     }
 
     static dispatch(eventName, { target, detail, cancelable = true } = {}) {
-        const event = new CustomEvent(eventName, {
-            bubbles: true,
-            cancelable: cancelable === true,
-            detail: detail || {}
-        });
-
-        (target || document).dispatchEvent(event);
-        return event;
+        return dispatch(eventName, { target, detail, cancelable });
     }
 
     static trigger(element, eventName, args = {}) {

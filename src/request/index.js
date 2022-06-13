@@ -7,8 +7,15 @@ if (!window.oc) {
 }
 
 if (!window.oc.AjaxRequest) {
-    window.oc.AssetManager = AssetManager;
+    // Namespace
     window.oc.AjaxRequest = namespace;
+
+    // Asset manager
+    window.oc.AssetManager = AssetManager;
+
+    // Request without element
     window.oc.ajax = namespace.send;
+
+    // Request on element
     window.oc.request = namespace.sendElement;
 }

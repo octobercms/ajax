@@ -3,8 +3,7 @@ import { History } from "./history";
 import { Location } from "./location";
 import { ScrollManager } from "./scroll-manager";
 import { SnapshotCache } from "./snapshot-cache";
-import { Events } from "../util/events";
-import { defer, uuid } from "../util";
+import { dispatch, defer, uuid } from "../util";
 import { View } from "./view";
 import { Visit } from "./visit";
 
@@ -227,35 +226,35 @@ export class Controller
     }
 
     notifyApplicationAfterClickingLinkToLocation(link, location) {
-        return Events.dispatch('page:click', { target: link, detail: { url: location.absoluteURL } });
+        return dispatch('page:click', { target: link, detail: { url: location.absoluteURL } });
     }
 
     notifyApplicationBeforeVisitingLocation(location) {
-        return Events.dispatch('page:before-visit', { detail: { url: location.absoluteURL } });
+        return dispatch('page:before-visit', { detail: { url: location.absoluteURL } });
     }
 
     notifyApplicationAfterVisitingLocation(location) {
-        return Events.dispatch('page:visit', { detail: { url: location.absoluteURL }, cancelable: false });
+        return dispatch('page:visit', { detail: { url: location.absoluteURL }, cancelable: false });
     }
 
     notifyApplicationBeforeCachingSnapshot() {
-        return Events.dispatch('page:before-cache', { cancelable: false });
+        return dispatch('page:before-cache', { cancelable: false });
     }
 
     notifyApplicationBeforeRender(newBody) {
-        return Events.dispatch('page:before-render', { detail: { newBody }, cancelable: false });
+        return dispatch('page:before-render', { detail: { newBody }, cancelable: false });
     }
 
     notifyApplicationAfterRender() {
-        return Events.dispatch('page:render', { cancelable: false });
+        return dispatch('page:render', { cancelable: false });
     }
 
     notifyApplicationAfterPageLoad(timing = {}) {
-        return Events.dispatch('page:load', { detail: { url: this.location.absoluteURL, timing }, cancelable: false });
+        return dispatch('page:load', { detail: { url: this.location.absoluteURL, timing }, cancelable: false });
     }
 
     notifyApplicationAfterLoadScripts() {
-        return Events.dispatch('page:after-load', { cancelable: false });
+        return dispatch('page:after-load', { cancelable: false });
     }
 
     // Private

@@ -18,4 +18,14 @@ mix
         manifest: false,
     });
 
-mix.js(['src/index.js'], 'dist/framework.min.js');
+mix.js([
+    'src/request/index.js',
+    'src/framework/index.js',
+    'src/extras/index.js',
+    'src/turbo/index.js',
+], 'dist/framework.min.js');
+
+mix.js([
+    'src/request/index.js',
+    'src/framework/index.js'
+], 'dist/framework-slim.min.js');

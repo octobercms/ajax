@@ -1,18 +1,33 @@
 import { Options } from "./options";
 import { Actions } from "./actions";
 import { Data } from "./data";
-import { Events } from "../util/events";
 import { HttpRequest } from "../util/http-request";
 import { Deferred } from "../util/deferred";
+import { ProgressBar } from "../extras/progress-bar";
+import { dispatch } from "../util";
 
 export class Request
 {
     constructor(element, handler, options) {
         this.el = element;
         this.handler = handler;
-        this.options = options || {};
+        this.options = { ...this.constructor.DEFAULTS, ...(options || {}) };
         this.context = { el: element, handler: handler, options: this.options };
         this.actions = new Actions(this, this.context, options || {});
+
+        this.progressBar = new ProgressBar;
+        this.showProgressBar = () => {
+            this.progressBar.show();
+        };
+    }
+
+    static get DEFAULTS() {
+        return {
+            handler: null,
+            update: {},
+            progressBarDelay: 500,
+            progressBar: false
+        }
     }
 
     start() {
@@ -99,85 +114,89 @@ export class Request
 
     // Application events
     notifyApplicationAjaxSetup() {
-        return Events.dispatch('ajax:setup', { target: this.el, detail: { context: this.context } });
+        return dispatch('ajax:setup', { target: this.el, detail: { context: this.context } });
     }
 
     notifyApplicationAjaxPromise() {
-        return Events.dispatch('ajax:promise', { target: this.el, detail: { context: this.context } });
+        return dispatch('ajax:promise', { target: this.el, detail: { context: this.context } });
     }
 
     notifyApplicationAjaxFail(data, responseCode, xhr) {
-        return Events.dispatch('ajax:fail', { target: this.el, detail: { context: this.context, data, responseCode, xhr } });
+        return dispatch('ajax:fail', { target: this.el, detail: { context: this.context, data, responseCode, xhr } });
     }
 
     notifyApplicationAjaxDone(data, responseCode, xhr) {
-        return Events.dispatch('ajax:done', { target: this.el, detail: { context: this.context, data, responseCode, xhr } });
+        return dispatch('ajax:done', { target: this.el, detail: { context: this.context, data, responseCode, xhr } });
     }
 
     notifyApplicationAjaxAlways(data, responseCode, xhr) {
-        return Events.dispatch('ajax:always', { target: this.el, detail: { context: this.context, data, responseCode, xhr } });
+        return dispatch('ajax:always', { target: this.el, detail: { context: this.context, data, responseCode, xhr } });
     }
 
     notifyApplicationAjaxUpdate(target, data, responseCode, xhr) {
-        return Events.dispatch('ajax:update', { target, detail: { context: this.context, data, responseCode, xhr } });
+        return dispatch('ajax:update', { target, detail: { context: this.context, data, responseCode, xhr } });
     }
 
     notifyApplicationBeforeRedirect() {
-        return Events.dispatch('ajax:before-redirect', { target: this.el });
+        return dispatch('ajax:before-redirect', { target: this.el });
     }
 
     notifyApplicationBeforeRequest() {
-        return Events.dispatch('ajax:before-request', { target: this.triggerEl, detail: { context: this.context } });
+        return dispatch('ajax:before-request', { target: this.triggerEl, detail: { context: this.context } });
     }
 
     notifyApplicationBeforeUpdate(data, responseCode, xhr) {
-        return Events.dispatch('ajax:before-update', { target: this.triggerEl, detail: { context: this.context, data, responseCode, xhr } });
+        return dispatch('ajax:before-update', { target: this.triggerEl, detail: { context: this.context, data, responseCode, xhr } });
     }
 
     notifyApplicationRequestSuccess(data, responseCode, xhr) {
-        return Events.dispatch('ajax:request-success', { target: this.triggerEl, detail: { context: this.context, data, responseCode, xhr } });
+        return dispatch('ajax:request-success', { target: this.triggerEl, detail: { context: this.context, data, responseCode, xhr } });
     }
 
     notifyApplicationRequestError(message, responseCode, xhr) {
-        return Events.dispatch('ajax:request-error', { target: this.triggerEl, detail: { context: this.context, message, responseCode, xhr } });
+        return dispatch('ajax:request-error', { target: this.triggerEl, detail: { context: this.context, message, responseCode, xhr } });
     }
 
     notifyApplicationRequestComplete(data, responseCode, xhr) {
-        return Events.dispatch('ajax:request-complete', { target: this.triggerEl, detail: { context: this.context, data, responseCode, xhr } });
+        return dispatch('ajax:request-complete', { target: this.triggerEl, detail: { context: this.context, data, responseCode, xhr } });
     }
 
     notifyApplicationBeforeValidate(message, fields) {
-        return Events.dispatch('ajax:before-validate', { target: this.triggerEl, detail: { context: this.context, message, fields } });
+        return dispatch('ajax:before-validate', { target: this.triggerEl, detail: { context: this.context, message, fields } });
     }
 
     notifyApplicationBeforeReplace(target) {
-        return Events.dispatch('ajax:before-replace', { target });
+        return dispatch('ajax:before-replace', { target });
     }
 
     // Window-based events
     notifyApplicationBeforeSend() {
-        return Events.dispatch('ajax:before-send', { target: window, detail: { context: this.context } });
+        return dispatch('ajax:before-send', { target: window, detail: { context: this.context } });
     }
 
     notifyApplicationUpdateComplete(data, responseCode, xhr) {
-        return Events.dispatch('ajax:update-complete', { target: window, detail: { context: this.context, data, responseCode, xhr } });
+        return dispatch('ajax:update-complete', { target: window, detail: { context: this.context, data, responseCode, xhr } });
     }
 
     notifyApplicationFieldInvalid(element, fieldName, fieldMessages, isFirst) {
-        return Events.dispatch('ajax:invalid-field', { target: window, detail: { element, fieldName, fieldMessages, isFirst } });
+        return dispatch('ajax:invalid-field', { target: window, detail: { element, fieldName, fieldMessages, isFirst } });
     }
 
     notifyApplicationConfirmMessage(message, promise) {
-        return Events.dispatch('ajax:confirm-message', { target: window, detail: { message, promise } });
+        return dispatch('ajax:confirm-message', { target: window, detail: { message, promise } });
     }
 
     notifyApplicationErrorMessage(message) {
-        return Events.dispatch('ajax:error-message', { target: window, detail: { message } });
+        return dispatch('ajax:error-message', { target: window, detail: { message } });
     }
 
     // HTTP request delegate
     requestStarted() {
         this.toggleLoaderState(true);
+
+        if (this.options.progressBar) {
+            this.showProgressBarAfterDelay();
+        }
     }
 
     requestProgressed(progress) {
@@ -199,6 +218,10 @@ export class Request
 
     requestFinished() {
         this.toggleLoaderState(false);
+
+        if (this.options.progressBar) {
+            this.hideProgressBar();
+        }
     }
 
     // Private
@@ -252,6 +275,18 @@ export class Request
         }
         else {
             this.loadingEl.hide();
+        }
+    }
+
+    showProgressBarAfterDelay() {
+        this.progressBarTimeout = window.setTimeout(this.showProgressBar, this.options.progressBarDelay);
+    }
+
+    hideProgressBar() {
+        this.progressBar.hide();
+        if (this.progressBarTimeout != null) {
+            window.clearTimeout(this.progressBarTimeout);
+            delete this.progressBarTimeout;
         }
     }
 }

@@ -6,10 +6,13 @@ if (!window.oc) {
 }
 
 if (!window.oc.AjaxTurbo) {
+    // Namespace
     window.oc.AjaxTurbo = namespace;
-    if (!isAMD() && !isCommonJS()) {
-        namespace.start();
-    }
+}
+
+// Boot controller
+if (!isAMD() && !isCommonJS()) {
+    namespace.start();
 }
 
 function isAMD() {
