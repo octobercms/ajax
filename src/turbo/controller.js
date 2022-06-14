@@ -185,8 +185,8 @@ export class Controller
     }
 
     // Pending asset management
-    setPendingAssets(count) {
-        this.pendingAssets = count;
+    incrementPendingAsset() {
+        this.pendingAssets++;
     }
 
     decrementPendingAsset() {

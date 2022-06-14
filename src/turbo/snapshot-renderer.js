@@ -63,10 +63,7 @@ export class SnapshotRenderer extends Renderer
     }
 
     copyNewHeadScriptElements() {
-        const newElements = this.getNewHeadScriptElements();
-        this.delegate.setPendingAssets(newElements.length);
-
-        for (const element of newElements) {
+        for (const element of this.getNewHeadScriptElements()) {
             document.head.appendChild(
                 this.bindPendingAssetLoadedEventOnce(
                     this.createScriptElement(element)
@@ -76,6 +73,10 @@ export class SnapshotRenderer extends Renderer
     }
 
     bindPendingAssetLoadedEventOnce(element) {
+        if (!element.hasAttribute('src')) {
+            return element;
+        }
+
         var self = this,
             loadEvent = function() {
                 self.delegate.decrementPendingAsset();
@@ -83,6 +84,7 @@ export class SnapshotRenderer extends Renderer
             };
 
         element.addEventListener('load', loadEvent);
+        this.delegate.incrementPendingAsset();
         return element;
     }
 
