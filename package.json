@@ -1,6 +1,6 @@
 {
     "name": "octobercms",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "AJAX Framework for October CMS",
     "main": "src/index.js",
     "devDependencies": {
@@ -12,6 +12,7 @@
         "watch": "mix watch",
         "prod": "npm run production",
         "production": "mix --production",
+        "pub": "npm run development && npm run production",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "repository": {

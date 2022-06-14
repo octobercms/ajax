@@ -9,6 +9,8 @@ export var SystemStatusCode = {
 
 export class HttpRequest
 {
+    static timeout = 240;
+
     constructor(delegate, url, options) {
         this.failed = false;
         this.progress = 0;
@@ -143,8 +145,6 @@ export class HttpRequest
         this.delegate.requestFinished();
     }
 }
-
-HttpRequest.timeout = 240;
 
 function contentTypeIsHTML(contentType) {
     return (contentType || '').match(/^text\/html|^application\/xhtml\+xml/);

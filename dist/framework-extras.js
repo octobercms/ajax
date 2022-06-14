@@ -5973,6 +5973,8 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
 
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 
 var SystemStatusCode = {
   networkFailure: 0,
@@ -6144,7 +6146,8 @@ var HttpRequest = /*#__PURE__*/function () {
 
   return HttpRequest;
 }();
-HttpRequest.timeout = 240;
+
+_defineProperty(HttpRequest, "timeout", 240);
 
 function contentTypeIsHTML(contentType) {
   return (contentType || '').match(/^text\/html|^application\/xhtml\+xml/);
