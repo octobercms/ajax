@@ -43,7 +43,13 @@ export class Controller
     }
 
     render(event) {
+        // Pre render event, used to move nodes around
+        Events.dispatch('before-render');
+
+        // Render event, used to initialize controls
         Events.dispatch('render');
+
+        // Resize event to adjust all measurements
         window.dispatchEvent(new Event('resize'));
     }
 
