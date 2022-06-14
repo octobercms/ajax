@@ -18,14 +18,11 @@ mix
         manifest: false,
     });
 
-mix.js([
-    'src/request/index.js',
-    'src/framework/index.js',
-    'src/extras/index.js',
-    'src/turbo/index.js',
-], 'dist/framework-extras.min.js');
-
-mix.js([
-    'src/request/index.js',
-    'src/framework/index.js'
-], 'dist/framework.min.js');
+if (mix.inProduction()) {
+    mix.js('src/framework-extras.js', 'dist/framework-extras.min.js');
+    mix.js('src/framework.js', 'dist/framework.min.js');
+}
+else {
+    mix.js('src/framework-extras.js', 'dist/framework-extras.js');
+    mix.js('src/framework.js', 'dist/framework.js');
+}
