@@ -16,7 +16,18 @@ npm install --save octobercms
 
 ```js
 var oc = require('octobercms');
-oc.start();
+
+// Make an AJAX request
+oc.Request.send('onDoSomething');
+
+// Enable data attributes API
+oc.Framework.start();
+
+// Enable extra features
+oc.Extras.start();
+
+// Enable turbo routing
+oc.Turbo.start();
 ```
 
 ## License
