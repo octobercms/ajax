@@ -1671,7 +1671,7 @@ var Data = /*#__PURE__*/function () {
     value: function appendFormDataToJson(formData, useJson) {
       // Process to a flat object with array values
       var flatData = Object.fromEntries(Array.from(formData.keys()).map(function (key) {
-        return [key, formData.getAll(key).length > 1 ? formData.getAll(key) : formData.get(key)];
+        return [key, key.endsWith('[]') ? formData.getAll(key) : formData.getAll(key).pop()];
       })); // Process HTML names to a nested object
 
       var jsonData = {};

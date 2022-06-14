@@ -7,14 +7,9 @@
  * --------------------------------------------------------------------------
  */
 
-import Framework from "./framework/namespace";
-import Request from "./request/namespace";
-import Extras from "./extras/namespace";
-import Turbo from "./turbo/namespace";
+import "./framework";
+import "./request";
+import "./extras";
+import "./turbo";
 
-export default {
-    Request,
-    Framework,
-    Extras,
-    Turbo
-};
+export default window.oc;
