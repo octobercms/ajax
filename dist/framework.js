@@ -2291,8 +2291,7 @@ var Request = /*#__PURE__*/function () {
     }
   }, {
     key: "requestCompletedWithResponse",
-    value: function requestCompletedWithResponse(response, statusCode, redirectedToLocation) {
-      if (redirectedToLocation) this.toggleRedirect(redirectedToLocation);
+    value: function requestCompletedWithResponse(response, statusCode) {
       this.actions.invoke('success', [response, statusCode, this.request.xhr]);
       this.actions.invoke('complete', [response, statusCode, this.request.xhr]);
       this.promise.resolve(response, statusCode, this.request.xhr);

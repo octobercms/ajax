@@ -203,8 +203,7 @@ export class Request
         this.promise.notify(progress);
     }
 
-    requestCompletedWithResponse(response, statusCode, redirectedToLocation) {
-        if (redirectedToLocation) this.toggleRedirect(redirectedToLocation);
+    requestCompletedWithResponse(response, statusCode) {
         this.actions.invoke('success', [response, statusCode, this.request.xhr]);
         this.actions.invoke('complete', [response, statusCode, this.request.xhr]);
         this.promise.resolve(response, statusCode, this.request.xhr);
