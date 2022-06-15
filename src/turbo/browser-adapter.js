@@ -20,6 +20,7 @@ export class BrowserAdapter
     visitStarted(visit) {
         visit.issueRequest();
         visit.changeHistory();
+        visit.goToSamePageAnchor();
         visit.loadCachedSnapshot();
     }
 

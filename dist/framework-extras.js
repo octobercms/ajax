@@ -363,7 +363,7 @@ var FlashMessage = /*#__PURE__*/function () {
   }], [{
     key: "defaultCSS",
     get: function get() {
-      return (0,_util__WEBPACK_IMPORTED_MODULE_0__.unindent)(_templateObject || (_templateObject = _taggedTemplateLiteral(["\n        .oc-flash-message {\n            position: fixed;\n            z-index: 10300;\n            width: 500px;\n            left: 50%;\n            top: 50px;\n            margin-left: -250px;\n            color: #fff;\n            font-size: 1rem;\n            padding: 10px 30px 10px 15px;\n            border-radius: 5px;\n\n            opacity: 0;\n            transition: all 0.5s, width 0s;\n            transform: scale(0.9);\n        }\n        .oc-flash-message.flash-show {\n            opacity: 1;\n            transform: scale(1);\n        }\n        .oc-flash-message.success {\n            background: #86cB43;\n        }\n        .oc-flash-message.error {\n            background: #cc3300;\n        }\n        .oc-flash-message.warning {\n            background: #f0ad4e;\n        }\n        .oc-flash-message.info {\n            background: #5fb6f5;\n        }\n        .oc-flash-message a.flash-close {\n            box-sizing: content-box;\n            width: 1em;\n            height: 1em;\n            padding: .25em .25em;\n            background: transparent url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23FFF'%3e%3cpath d='M.293.293a1 1 0 011.414 0L8 6.586 14.293.293a1 1 0 111.414 1.414L9.414 8l6.293 6.293a1 1 0 01-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 01-1.414-1.414L6.586 8 .293 1.707a1 1 0 010-1.414z'/%3e%3c/svg%3e\") center/1em auto no-repeat;\n            border: 0;\n            border-radius: .25rem;\n            opacity: .5;\n            text-decoration: none;\n            position: absolute;\n            right: 10px;\n            top: 10px;\n            cursor: pointer;\n        }\n        .oc-flash-message a.flash-close:hover,\n        .oc-flash-message a.flash-close:focus {\n            opacity: 1;\n        }\n        @media (max-width: 768px) {\n            .oc-flash-message {\n                left: 10px;\n                right: 10px;\n                top: 10px;\n                margin-left: 0;\n                width: auto;\n            }\n        }\n    "])));
+      return (0,_util__WEBPACK_IMPORTED_MODULE_0__.unindent)(_templateObject || (_templateObject = _taggedTemplateLiteral(["\n        .oc-flash-message {\n            position: fixed;\n            z-index: 10300;\n            width: 500px;\n            left: 50%;\n            top: 50px;\n            margin-left: -250px;\n            color: #fff;\n            font-size: 1rem;\n            padding: 10px 30px 10px 15px;\n            border-radius: 5px;\n\n            opacity: 0;\n            transition: all 0.5s, width 0s;\n            transform: scale(0.9);\n        }\n        .oc-flash-message.flash-show {\n            opacity: 1;\n            transform: scale(1);\n        }\n        .oc-flash-message.success {\n            background: #86cB43;\n        }\n        .oc-flash-message.error {\n            background: #cc3300;\n        }\n        .oc-flash-message.warning {\n            background: #f0ad4e;\n        }\n        .oc-flash-message.info {\n            background: #5fb6f5;\n        }\n        .oc-flash-message a.flash-close {\n            box-sizing: content-box;\n            width: 1em;\n            height: 1em;\n            padding: .25em .25em;\n            background: transparent url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23FFF'%3e%3cpath d='M.293.293a1 1 0 011.414 0L8 6.586 14.293.293a1 1 0 111.414 1.414L9.414 8l6.293 6.293a1 1 0 01-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 01-1.414-1.414L6.586 8 .293 1.707a1 1 0 010-1.414z'/%3e%3c/svg%3e\") center/1em auto no-repeat;\n            border: 0;\n            border-radius: .25rem;\n            opacity: .5;\n            text-decoration: none;\n            position: absolute;\n            right: 10px;\n            top: 10px;\n            cursor: pointer;\n        }\n        .oc-flash-message a.flash-close:hover,\n        .oc-flash-message a.flash-close:focus {\n            opacity: 1;\n        }\n        html[data-turbo-preview] .oc-flash-message {\n            opacity: 0;\n        }\n        @media (max-width: 768px) {\n            .oc-flash-message {\n                left: 10px;\n                right: 10px;\n                top: 10px;\n                margin-left: 0;\n                width: auto;\n            }\n        }\n    "])));
     }
   }, {
     key: "flashMsg",
@@ -519,7 +519,6 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 
 var ProgressBar = /*#__PURE__*/function () {
-  /*ms*/
   function ProgressBar() {
     var _this = this;
 
@@ -851,9 +850,9 @@ var Controller = /*#__PURE__*/function () {
 
       window.onbeforeunload = this.documentOnBeforeUnload; // Render event
 
-      addEventListener('DOMContentLoaded', this.render, false);
-      addEventListener('page:after-load', this.render, false);
-      addEventListener('ajax:update-complete', this.render, false); // Submit form
+      addEventListener('DOMContentLoaded', this.render);
+      addEventListener('page:after-load', this.render);
+      addEventListener('ajax:update-complete', this.render); // Submit form
 
       _util_events__WEBPACK_IMPORTED_MODULE_0__.Events.on(document, 'submit', '[data-request]', this.documentOnSubmit); // Track input
 
@@ -1955,9 +1954,14 @@ var Actions = /*#__PURE__*/function () {
 
   }, {
     key: "handleRedirectResponse",
-    value: function handleRedirectResponse(url) {
+    value: function handleRedirectResponse(href) {
       this.delegate.notifyApplicationBeforeRedirect();
-      window.location.assign(url);
+
+      if (oc.AjaxTurbo) {
+        oc.AjaxTurbo.visit(href);
+      } else {
+        location.assign(href);
+      }
     } // Custom function, handle any application specific response values
     // Using a promisary object here in case injected assets need time to load
 
@@ -1972,9 +1976,9 @@ var Actions = /*#__PURE__*/function () {
         var _loop = function _loop() {
           // If a partial has been supplied on the client side that matches the server supplied key, look up
           // it's selector and use that. If not, we assume it is an explicit selector reference.
-          var selector = updateOptions[partial] ? updateOptions[partial] : partial;
-          var isString = typeof selector === 'string';
-          var selectedEl = isString ? document.querySelectorAll(resolveSelectorResponse(selector)) : [selector];
+          var selector = updateOptions[partial] || partial,
+              isString = typeof selector === 'string';
+          var selectedEl = isString ? resolveSelectorResponse(selector) : [selector];
           selectedEl.forEach(function (el) {
             // Replace With
             if (isString && selector.charAt(0) === '!') {
@@ -2036,11 +2040,17 @@ var Actions = /*#__PURE__*/function () {
 }();
 
 function resolveSelectorResponse(selector) {
-  if (['!', '@', '^'].indexOf(selector.charAt(0)) !== -1) {
-    return selector.substring(1);
+  // Invalid selector
+  if (['#', '.', '@', '^', '!'].indexOf(selector.charAt(0)) === -1) {
+    return [];
+  } // Prepend, append or replace with
+
+
+  if (['@', '^', '!'].indexOf(selector.charAt(0)) !== -1) {
+    selector = selector.substring(1);
   }
 
-  return selector;
+  return document.querySelectorAll(selector);
 }
 
 /***/ }),
@@ -3076,6 +3086,7 @@ var BrowserAdapter = /*#__PURE__*/function () {
     value: function visitStarted(visit) {
       visit.issueRequest();
       visit.changeHistory();
+      visit.goToSamePageAnchor();
       visit.loadCachedSnapshot();
     }
   }, {
@@ -3623,6 +3634,11 @@ var Controller = /*#__PURE__*/function () {
       return location.isPrefixedBy(this.view.getRootLocation()) && location.isHTML();
     }
   }, {
+    key: "locationIsSamePageAnchor",
+    value: function locationIsSamePageAnchor(location) {
+      return typeof location.anchor != 'undefined' && location.requestURL == this.location.requestURL;
+    }
+  }, {
     key: "getCurrentRestorationData",
     value: function getCurrentRestorationData() {
       return this.getRestorationDataForIdentifier(this.restorationIdentifier);
@@ -4116,17 +4132,16 @@ var Location = /*#__PURE__*/function () {
   function Location(url) {
     _classCallCheck(this, Location);
 
-    var linkWithAnchor = document.createElement("a");
-    linkWithAnchor.href = url;
-    this.absoluteURL = linkWithAnchor.href;
-    var anchorLength = linkWithAnchor.hash.length;
+    var link = document.createElement('a');
+    link.href = url;
+    this.absoluteURL = link.href;
+    var anchorMatch = this.absoluteURL.match(/#(.*)$/);
 
-    if (anchorLength < 2) {
-      this.requestURL = this.absoluteURL;
-    } else {
-      this.requestURL = this.absoluteURL.slice(0, -anchorLength);
-      this.anchor = linkWithAnchor.hash.slice(1);
+    if (anchorMatch) {
+      this.anchor = anchorMatch[1];
     }
+
+    this.requestURL = typeof this.anchor == 'undefined' ? this.absoluteURL : this.absoluteURL.slice(0, -(this.anchor.length + 1));
   }
 
   _createClass(Location, [{
@@ -5142,6 +5157,7 @@ var Visit = /*#__PURE__*/function () {
 
     this.controller = controller;
     this.location = location;
+    this.isSamePage = this.controller.locationIsSamePageAnchor(this.location);
     this.action = action;
     this.adapter = controller.adapter;
     this.restorationIdentifier = restorationIdentifier;
@@ -5245,15 +5261,21 @@ var Visit = /*#__PURE__*/function () {
         this.render(function () {
           _this2.cacheSnapshot();
 
-          _this2.controller.render({
-            snapshot: snapshot,
-            isPreview: isPreview
-          }, _this2.performScroll);
+          if (_this2.isSamePage) {
+            _this2.performScroll();
 
-          _this2.adapter.visitRendered(_this2);
+            _this2.adapter.visitRendered(_this2);
+          } else {
+            _this2.controller.render({
+              snapshot: snapshot,
+              isPreview: isPreview
+            }, _this2.performScroll);
 
-          if (!isPreview) {
-            _this2.complete();
+            _this2.adapter.visitRendered(_this2);
+
+            if (!isPreview) {
+              _this2.complete();
+            }
           }
         });
       }
@@ -5297,6 +5319,21 @@ var Visit = /*#__PURE__*/function () {
         this.location = this.redirectedToLocation;
         this.controller.replaceHistoryWithLocationAndRestorationIdentifier(this.redirectedToLocation, this.restorationIdentifier);
         this.followedRedirect = true;
+      }
+    }
+  }, {
+    key: "goToSamePageAnchor",
+    value: function goToSamePageAnchor() {
+      var _this4 = this;
+
+      if (this.isSamePage) {
+        this.render(function () {
+          _this4.cacheSnapshot();
+
+          _this4.performScroll();
+
+          _this4.adapter.visitRendered(_this4);
+        });
       }
     } // HTTP request delegate
 
@@ -5387,7 +5424,13 @@ var Visit = /*#__PURE__*/function () {
   }, {
     key: "shouldIssueRequest",
     value: function shouldIssueRequest() {
-      return this.action == "restore" ? !this.hasCachedSnapshot() : true;
+      if (this.action == "restore") {
+        return !this.hasCachedSnapshot();
+      } else if (this.isSamePage) {
+        return false;
+      } else {
+        return true;
+      }
     }
   }, {
     key: "cacheSnapshot",
@@ -5400,12 +5443,12 @@ var Visit = /*#__PURE__*/function () {
   }, {
     key: "render",
     value: function render(callback) {
-      var _this4 = this;
+      var _this5 = this;
 
       this.cancelRender();
       this.frame = requestAnimationFrame(function () {
-        delete _this4.frame;
-        callback.call(_this4);
+        delete _this5.frame;
+        callback.call(_this5);
       });
     }
   }, {

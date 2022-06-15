@@ -339,6 +339,10 @@ export class Controller
         return location.isPrefixedBy(this.view.getRootLocation()) && location.isHTML();
     }
 
+    locationIsSamePageAnchor(location) {
+        return typeof location.anchor != 'undefined' && location.requestURL == this.location.requestURL;
+    }
+
     getCurrentRestorationData() {
         return this.getRestorationDataForIdentifier(this.restorationIdentifier);
     }

@@ -27,7 +27,6 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 
 var ProgressBar = /*#__PURE__*/function () {
-  /*ms*/
   function ProgressBar() {
     var _this = this;
 
@@ -211,9 +210,9 @@ var Controller = /*#__PURE__*/function () {
 
       window.onbeforeunload = this.documentOnBeforeUnload; // Render event
 
-      addEventListener('DOMContentLoaded', this.render, false);
-      addEventListener('page:after-load', this.render, false);
-      addEventListener('ajax:update-complete', this.render, false); // Submit form
+      addEventListener('DOMContentLoaded', this.render);
+      addEventListener('page:after-load', this.render);
+      addEventListener('ajax:update-complete', this.render); // Submit form
 
       _util_events__WEBPACK_IMPORTED_MODULE_0__.Events.on(document, 'submit', '[data-request]', this.documentOnSubmit); // Track input
 
@@ -1315,9 +1314,14 @@ var Actions = /*#__PURE__*/function () {
 
   }, {
     key: "handleRedirectResponse",
-    value: function handleRedirectResponse(url) {
+    value: function handleRedirectResponse(href) {
       this.delegate.notifyApplicationBeforeRedirect();
-      window.location.assign(url);
+
+      if (oc.AjaxTurbo) {
+        oc.AjaxTurbo.visit(href);
+      } else {
+        location.assign(href);
+      }
     } // Custom function, handle any application specific response values
     // Using a promisary object here in case injected assets need time to load
 
@@ -1332,9 +1336,9 @@ var Actions = /*#__PURE__*/function () {
         var _loop = function _loop() {
           // If a partial has been supplied on the client side that matches the server supplied key, look up
           // it's selector and use that. If not, we assume it is an explicit selector reference.
-          var selector = updateOptions[partial] ? updateOptions[partial] : partial;
-          var isString = typeof selector === 'string';
-          var selectedEl = isString ? document.querySelectorAll(resolveSelectorResponse(selector)) : [selector];
+          var selector = updateOptions[partial] || partial,
+              isString = typeof selector === 'string';
+          var selectedEl = isString ? resolveSelectorResponse(selector) : [selector];
           selectedEl.forEach(function (el) {
             // Replace With
             if (isString && selector.charAt(0) === '!') {
@@ -1396,11 +1400,17 @@ var Actions = /*#__PURE__*/function () {
 }();
 
 function resolveSelectorResponse(selector) {
-  if (['!', '@', '^'].indexOf(selector.charAt(0)) !== -1) {
-    return selector.substring(1);
+  // Invalid selector
+  if (['#', '.', '@', '^', '!'].indexOf(selector.charAt(0)) === -1) {
+    return [];
+  } // Prepend, append or replace with
+
+
+  if (['@', '^', '!'].indexOf(selector.charAt(0)) !== -1) {
+    selector = selector.substring(1);
   }
 
-  return selector;
+  return document.querySelectorAll(selector);
 }
 
 /***/ }),
