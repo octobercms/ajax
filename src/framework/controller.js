@@ -16,9 +16,9 @@ export class Controller
         window.onbeforeunload = this.documentOnBeforeUnload;
 
         // Render event
-        addEventListener('DOMContentLoaded', this.render, false);
-        addEventListener('page:after-load', this.render, false);
-        addEventListener('ajax:update-complete', this.render, false);
+        addEventListener('DOMContentLoaded', this.render);
+        addEventListener('page:after-load', this.render);
+        addEventListener('ajax:update-complete', this.render);
 
         // Submit form
         Events.on(document, 'submit', '[data-request]', this.documentOnSubmit);

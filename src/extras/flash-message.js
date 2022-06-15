@@ -61,6 +61,9 @@ export class FlashMessage
         .oc-flash-message a.flash-close:focus {
             opacity: 1;
         }
+        html[data-turbo-preview] .oc-flash-message {
+            opacity: 0;
+        }
         @media (max-width: 768px) {
             .oc-flash-message {
                 left: 10px;

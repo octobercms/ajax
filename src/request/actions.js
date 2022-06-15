@@ -166,9 +166,15 @@ export class Actions
     handleFlashMessage(message, type) {}
 
     // Custom function, redirect the browser to another location
-    handleRedirectResponse(url) {
+    handleRedirectResponse(href) {
         this.delegate.notifyApplicationBeforeRedirect();
-        window.location.assign(url);
+
+        if (oc.AjaxTurbo) {
+            oc.AjaxTurbo.visit(href);
+        }
+        else {
+            location.assign(href);
+        }
     }
 
     // Custom function, handle any application specific response values
@@ -183,10 +189,10 @@ export class Actions
             for (var partial in data) {
                 // If a partial has been supplied on the client side that matches the server supplied key, look up
                 // it's selector and use that. If not, we assume it is an explicit selector reference.
-                const selector = updateOptions[partial] ? updateOptions[partial] : partial;
-                const isString = typeof selector === 'string';
-                let selectedEl = isString ? document.querySelectorAll(resolveSelectorResponse(selector)) : [selector];
+                const selector = updateOptions[partial] || partial,
+                    isString = typeof selector === 'string';
 
+                let selectedEl = isString ? resolveSelectorResponse(selector) : [selector];
                 selectedEl.forEach(function(el) {
                     // Replace With
                     if (isString && selector.charAt(0) === '!') {
@@ -246,9 +252,15 @@ export class Actions
 }
 
 function resolveSelectorResponse(selector) {
-    if (['!', '@', '^'].indexOf(selector.charAt(0)) !== -1) {
-        return selector.substring(1);
+    // Invalid selector
+    if (['#', '.', '@', '^', '!'].indexOf(selector.charAt(0)) === -1) {
+        return [];
     }
 
-    return selector;
+    // Prepend, append or replace with
+    if (['@', '^', '!'].indexOf(selector.charAt(0)) !== -1) {
+        selector = selector.substring(1);
+    }
+
+    return document.querySelectorAll(selector);
 }
