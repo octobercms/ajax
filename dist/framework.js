@@ -208,10 +208,12 @@ var Controller = /*#__PURE__*/function () {
       } // Track unload event for request lib
 
 
-      window.onbeforeunload = this.documentOnBeforeUnload; // Render event
+      window.onbeforeunload = this.documentOnBeforeUnload; // DOMContentLoaded and PJAX load
 
-      addEventListener('DOMContentLoaded', this.render);
-      addEventListener('page:after-load', this.render);
+      addEventListener('page:load', this.render); // Again, after new scripts load
+
+      addEventListener('page:after-load', this.render); // Again after AJAX request
+
       addEventListener('ajax:update-complete', this.render); // Submit form
 
       _util_events__WEBPACK_IMPORTED_MODULE_0__.Events.on(document, 'submit', '[data-request]', this.documentOnSubmit); // Track input
@@ -2997,7 +2999,7 @@ var HttpRequest = /*#__PURE__*/function () {
         }
 
         if (xhr.status >= 200 && xhr.status < 300) {
-          _this.delegate.requestCompletedWithResponse(responseData, xhr.status, xhr.getResponseHeader('Turbo-Location'));
+          _this.delegate.requestCompletedWithResponse(responseData, xhr.status, xhr.getResponseHeader('X-OCTOBER-LOCATION'));
         } else {
           _this.failed = true;
 

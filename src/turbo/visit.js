@@ -33,7 +33,7 @@ export class Visit
         // Scrolling
         this.performScroll = () => {
             if (!this.scrolled) {
-                if (this.action == "restore") {
+                if (this.action == 'restore') {
                     this.scrollToRestoredPosition() || this.scrollToTop();
                 }
                 else {
@@ -88,7 +88,7 @@ export class Visit
 
     changeHistory() {
         if (!this.historyChanged) {
-            const actionForHistory = this.location.isEqualTo(this.referrer) ? "replace" : this.action;
+            const actionForHistory = this.location.isEqualTo(this.referrer) ? 'replace' : this.action;
             const method = this.getHistoryMethodForAction(actionForHistory);
             method.call(this.controller, this.location, this.restorationIdentifier);
             this.historyChanged = true;
@@ -98,11 +98,11 @@ export class Visit
     issueRequest() {
         if (this.shouldIssueRequest() && !this.request) {
             const url = Location.wrap(this.location).absoluteURL;
-            const options = { method: "GET", headers: {}, htmlOnly: true };
+            const options = { method: 'GET', headers: {}, htmlOnly: true };
 
-            options.headers["Accept"] = "text/html, application/xhtml+xml";
+            options.headers['Accept'] = 'text/html, application/xhtml+xml';
             if (this.referrer) {
-                options.headers["October-Referrer"] = Location.wrap(this.referrer).absoluteURL;
+                options.headers['X-OCTOBER-REFERRER'] = Location.wrap(this.referrer).absoluteURL;
             }
 
             this.progress = 0;
@@ -114,7 +114,7 @@ export class Visit
     getCachedSnapshot() {
         const snapshot = this.controller.getCachedSnapshotForLocation(this.location);
         if (snapshot && (!this.location.anchor || snapshot.hasAnchor(this.location.anchor))) {
-            if (this.action == "restore" || snapshot.isPreviewable()) {
+            if (this.action == 'restore' || snapshot.isPreviewable()) {
                 return snapshot;
             }
         }

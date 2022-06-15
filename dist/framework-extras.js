@@ -848,10 +848,12 @@ var Controller = /*#__PURE__*/function () {
       } // Track unload event for request lib
 
 
-      window.onbeforeunload = this.documentOnBeforeUnload; // Render event
+      window.onbeforeunload = this.documentOnBeforeUnload; // DOMContentLoaded and PJAX load
 
-      addEventListener('DOMContentLoaded', this.render);
-      addEventListener('page:after-load', this.render);
+      addEventListener('page:load', this.render); // Again, after new scripts load
+
+      addEventListener('page:after-load', this.render); // Again after AJAX request
+
       addEventListener('ajax:update-complete', this.render); // Submit form
 
       _util_events__WEBPACK_IMPORTED_MODULE_0__.Events.on(document, 'submit', '[data-request]', this.documentOnSubmit); // Track input
@@ -5157,7 +5159,7 @@ var Visit = /*#__PURE__*/function () {
 
     this.performScroll = function () {
       if (!_this.scrolled) {
-        if (_this.action == "restore") {
+        if (_this.action == 'restore') {
           _this.scrollToRestoredPosition() || _this.scrollToTop();
         } else {
           _this.scrollToAnchor() || _this.scrollToTop();
@@ -5218,7 +5220,7 @@ var Visit = /*#__PURE__*/function () {
     key: "changeHistory",
     value: function changeHistory() {
       if (!this.historyChanged) {
-        var actionForHistory = this.location.isEqualTo(this.referrer) ? "replace" : this.action;
+        var actionForHistory = this.location.isEqualTo(this.referrer) ? 'replace' : this.action;
         var method = this.getHistoryMethodForAction(actionForHistory);
         method.call(this.controller, this.location, this.restorationIdentifier);
         this.historyChanged = true;
@@ -5230,14 +5232,14 @@ var Visit = /*#__PURE__*/function () {
       if (this.shouldIssueRequest() && !this.request) {
         var url = _location__WEBPACK_IMPORTED_MODULE_1__.Location.wrap(this.location).absoluteURL;
         var options = {
-          method: "GET",
+          method: 'GET',
           headers: {},
           htmlOnly: true
         };
-        options.headers["Accept"] = "text/html, application/xhtml+xml";
+        options.headers['Accept'] = 'text/html, application/xhtml+xml';
 
         if (this.referrer) {
-          options.headers["October-Referrer"] = _location__WEBPACK_IMPORTED_MODULE_1__.Location.wrap(this.referrer).absoluteURL;
+          options.headers['X-OCTOBER-REFERRER'] = _location__WEBPACK_IMPORTED_MODULE_1__.Location.wrap(this.referrer).absoluteURL;
         }
 
         this.progress = 0;
@@ -5251,7 +5253,7 @@ var Visit = /*#__PURE__*/function () {
       var snapshot = this.controller.getCachedSnapshotForLocation(this.location);
 
       if (snapshot && (!this.location.anchor || snapshot.hasAnchor(this.location.anchor))) {
-        if (this.action == "restore" || snapshot.isPreviewable()) {
+        if (this.action == 'restore' || snapshot.isPreviewable()) {
           return snapshot;
         }
       }
@@ -6073,7 +6075,7 @@ var HttpRequest = /*#__PURE__*/function () {
         }
 
         if (xhr.status >= 200 && xhr.status < 300) {
-          _this.delegate.requestCompletedWithResponse(responseData, xhr.status, xhr.getResponseHeader('Turbo-Location'));
+          _this.delegate.requestCompletedWithResponse(responseData, xhr.status, xhr.getResponseHeader('X-OCTOBER-LOCATION'));
         } else {
           _this.failed = true;
 
