@@ -64,6 +64,7 @@ export class Data
     }
 
     appendJsonToFormData(formData, useJson, parentKey) {
+        var self = this;
         for (var key in useJson) {
             var fieldKey = key;
             if (parentKey) {
@@ -78,8 +79,16 @@ export class Data
             }
             // Array
             else if (value && value.constructor === [].constructor) {
-                value.forEach(function(v) {
-                    formData.append(fieldKey + '[]', v);
+                value.forEach(function(v, i) {
+                    if (
+                        v.constructor === {}.constructor ||
+                        v.constructor === [].constructor
+                    ) {
+                        self.appendJsonToFormData(formData, v, fieldKey + '[' + i + ']');
+                    }
+                    else {
+                        formData.append(fieldKey + '[]', v);
+                    }
                 });
             }
             // Mixed

@@ -2292,6 +2292,8 @@ var Data = /*#__PURE__*/function () {
   }, {
     key: "appendJsonToFormData",
     value: function appendJsonToFormData(formData, useJson, parentKey) {
+      var self = this;
+
       for (var key in useJson) {
         var fieldKey = key;
 
@@ -2305,8 +2307,12 @@ var Data = /*#__PURE__*/function () {
           this.appendJsonToFormData(formData, value, fieldKey);
         } // Array
         else if (value && value.constructor === [].constructor) {
-          value.forEach(function (v) {
-            formData.append(fieldKey + '[]', v);
+          value.forEach(function (v, i) {
+            if (v.constructor === {}.constructor || v.constructor === [].constructor) {
+              self.appendJsonToFormData(formData, v, fieldKey + '[' + i + ']');
+            } else {
+              formData.append(fieldKey + '[]', v);
+            }
           });
         } // Mixed
         else {
