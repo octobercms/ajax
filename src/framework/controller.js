@@ -15,8 +15,8 @@ export class Controller
         // Track unload event for request lib
         window.onbeforeunload = this.documentOnBeforeUnload;
 
-        // DOMContentLoaded and PJAX load
-        addEventListener('page:load', this.render);
+        // First page load
+        addEventListener('DOMContentLoaded', this.render);
 
         // Again, after new scripts load
         addEventListener('page:after-load', this.render);

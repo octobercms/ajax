@@ -848,9 +848,9 @@ var Controller = /*#__PURE__*/function () {
       } // Track unload event for request lib
 
 
-      window.onbeforeunload = this.documentOnBeforeUnload; // DOMContentLoaded and PJAX load
+      window.onbeforeunload = this.documentOnBeforeUnload; // First page load
 
-      addEventListener('page:load', this.render); // Again, after new scripts load
+      addEventListener('DOMContentLoaded', this.render); // Again, after new scripts load
 
       addEventListener('page:after-load', this.render); // Again after AJAX request
 
@@ -6074,7 +6074,7 @@ var HttpRequest = /*#__PURE__*/function () {
         }
 
         if (xhr.status >= 200 && xhr.status < 300) {
-          _this.delegate.requestCompletedWithResponse(responseData, xhr.status, xhr.getResponseHeader('X-OCTOBER-LOCATION'));
+          _this.delegate.requestCompletedWithResponse(responseData, xhr.status, contentResponseIsRedirect(xhr, _this.url));
         } else {
           _this.failed = true;
 
@@ -6204,6 +6204,16 @@ var HttpRequest = /*#__PURE__*/function () {
 }();
 
 _defineProperty(HttpRequest, "timeout", 240);
+
+function contentResponseIsRedirect(xhr, url) {
+  if (xhr.getResponseHeader('X-OCTOBER-LOCATION')) {
+    return xhr.getResponseHeader('X-OCTOBER-LOCATION');
+  }
+
+  var anchorMatch = url.match(/^(.*)#/),
+      wantUrl = anchorMatch ? anchorMatch[1] : url;
+  return wantUrl !== xhr.responseURL ? xhr.responseURL : null;
+}
 
 function contentTypeIsHTML(contentType) {
   return (contentType || '').match(/^text\/html|^application\/xhtml\+xml/);

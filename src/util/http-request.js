@@ -43,7 +43,7 @@ export class HttpRequest
                 }
 
                 if (xhr.status >= 200 && xhr.status < 300) {
-                    this.delegate.requestCompletedWithResponse(responseData, xhr.status, xhr.getResponseHeader('X-OCTOBER-LOCATION'));
+                    this.delegate.requestCompletedWithResponse(responseData, xhr.status, contentResponseIsRedirect(xhr, this.url));
                 }
                 else {
                     this.failed = true;
@@ -144,6 +144,17 @@ export class HttpRequest
         this.setProgress(1);
         this.delegate.requestFinished();
     }
+}
+
+function contentResponseIsRedirect(xhr, url) {
+    if (xhr.getResponseHeader('X-OCTOBER-LOCATION')) {
+        return xhr.getResponseHeader('X-OCTOBER-LOCATION');
+    }
+
+    var anchorMatch = url.match(/^(.*)#/),
+        wantUrl = anchorMatch ? anchorMatch[1] : url;
+
+    return wantUrl !== xhr.responseURL ? xhr.responseURL : null;
 }
 
 function contentTypeIsHTML(contentType) {
