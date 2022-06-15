@@ -1957,7 +1957,7 @@ var Actions = /*#__PURE__*/function () {
     value: function handleRedirectResponse(href) {
       this.delegate.notifyApplicationBeforeRedirect();
 
-      if (oc.AjaxTurbo) {
+      if (oc.AjaxTurbo && oc.AjaxTurbo.isEnabled()) {
         oc.AjaxTurbo.visit(href);
       } else {
         location.assign(href);
@@ -3287,6 +3287,11 @@ var Controller = /*#__PURE__*/function () {
       }
     }
   }, {
+    key: "isEnabled",
+    value: function isEnabled() {
+      return this.started && this.enabled;
+    }
+  }, {
     key: "clearCache",
     value: function clearCache() {
       this.cache = new _snapshot_cache__WEBPACK_IMPORTED_MODULE_4__.SnapshotCache(10);
@@ -4276,6 +4281,9 @@ var controller = new _controller__WEBPACK_IMPORTED_MODULE_0__.Controller();
   },
   start: function start() {
     controller.start();
+  },
+  isEnabled: function isEnabled() {
+    return controller.isEnabled();
   }
 });
 

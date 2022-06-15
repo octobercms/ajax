@@ -1317,7 +1317,7 @@ var Actions = /*#__PURE__*/function () {
     value: function handleRedirectResponse(href) {
       this.delegate.notifyApplicationBeforeRedirect();
 
-      if (oc.AjaxTurbo) {
+      if (oc.AjaxTurbo && oc.AjaxTurbo.isEnabled()) {
         oc.AjaxTurbo.visit(href);
       } else {
         location.assign(href);

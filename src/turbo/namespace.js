@@ -22,5 +22,9 @@ export default {
 
     start() {
         controller.start();
+    },
+
+    isEnabled() {
+        return controller.isEnabled();
     }
 };

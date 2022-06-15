@@ -72,6 +72,10 @@ export class Controller
         }
     }
 
+    isEnabled() {
+        return this.started && this.enabled;
+    }
+
     clearCache() {
         this.cache = new SnapshotCache(10);
     }

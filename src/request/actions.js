@@ -169,7 +169,7 @@ export class Actions
     handleRedirectResponse(href) {
         this.delegate.notifyApplicationBeforeRedirect();
 
-        if (oc.AjaxTurbo) {
+        if (oc.AjaxTurbo && oc.AjaxTurbo.isEnabled()) {
             oc.AjaxTurbo.visit(href);
         }
         else {
