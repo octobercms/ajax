@@ -2262,7 +2262,7 @@ var Data = /*#__PURE__*/function () {
   }, {
     key: "getAsJsonData",
     value: function getAsJsonData() {
-      return JSON.stringify(this.appendFormDataToJson(this.getRequestData(), this.userData));
+      return JSON.stringify(this.convertFormDataToJson(this.getAsFormData()));
     } // Private
 
   }, {
@@ -2317,8 +2317,8 @@ var Data = /*#__PURE__*/function () {
       return formData;
     }
   }, {
-    key: "appendFormDataToJson",
-    value: function appendFormDataToJson(formData, useJson) {
+    key: "convertFormDataToJson",
+    value: function convertFormDataToJson(formData) {
       // Process to a flat object with array values
       var flatData = Object.fromEntries(Array.from(formData.keys()).map(function (key) {
         return [key, key.endsWith('[]') ? formData.getAll(key) : formData.getAll(key).pop()];
@@ -2328,10 +2328,8 @@ var Data = /*#__PURE__*/function () {
 
       for (var key in flatData) {
         this.assignObjectNested(jsonData, this.nameToArray(key), flatData[key]);
-      } // Assign supplied user data
+      }
 
-
-      Object.assign(jsonData, useJson);
       return jsonData;
     }
   }, {

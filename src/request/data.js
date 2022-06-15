@@ -33,9 +33,8 @@ export class Data
 
     getAsJsonData() {
         return JSON.stringify(
-            this.appendFormDataToJson(
-                this.getRequestData(),
-                this.userData
+            this.convertFormDataToJson(
+                this.getAsFormData()
             )
         );
     }
@@ -92,7 +91,7 @@ export class Data
         return formData;
     }
 
-    appendFormDataToJson(formData, useJson) {
+    convertFormDataToJson(formData) {
         // Process to a flat object with array values
         let flatData = Object.fromEntries(
             Array.from(formData.keys()).map(key => [
@@ -112,9 +111,6 @@ export class Data
                 flatData[key]
             );
         }
-
-        // Assign supplied user data
-        Object.assign(jsonData, useJson);
 
         return jsonData;
     }
