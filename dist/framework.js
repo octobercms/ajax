@@ -1695,8 +1695,7 @@ var Data = /*#__PURE__*/function () {
       // Process to a flat object with array values
       var flatData = Object.fromEntries(Array.from(formData.keys()).map(function (key) {
         return [key, key.endsWith('[]') ? formData.getAll(key) : formData.getAll(key).pop()];
-      }));
-      console.log(flatData); // Process HTML names to a nested object
+      })); // Process HTML names to a nested object
 
       var jsonData = {};
 
