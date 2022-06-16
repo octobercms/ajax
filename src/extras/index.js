@@ -11,7 +11,7 @@ if (!window.oc.AjaxExtras) {
     // Namespace
     window.oc.AjaxExtras = namespace;
     window.oc.flashMsg = FlashMessage.flashMsg;
-    window.oc.progressBar = new ProgressBar.progressBar();
+    window.oc.progressBar = ProgressBar.progressBar();
 }
 
 // Boot controller
