@@ -232,7 +232,7 @@ export class Request
             this.formEl = this.options.form;
         }
         else {
-            this.formEl = this.el !== document ? this.el.closest('form') : null;
+            this.formEl = this.el && this.el !== document ? this.el.closest('form') : null;
         }
 
         this.triggerEl = this.formEl ? this.formEl : this.el;

@@ -41,8 +41,13 @@ export class Data
 
     // Private
     appendSingleInputElement(requestData) {
+        // Has a form, or no target element
+        if (this.formEl || !this.targetEl) {
+            return;
+        }
+
         // Not single or input
-        if (this.formEl || ['INPUT', 'SELECT'].indexOf(this.targetEl.tagName) === -1) {
+        if (['INPUT', 'SELECT'].indexOf(this.targetEl.tagName) === -1) {
             return;
         }
 
@@ -87,13 +92,13 @@ export class Data
                         self.appendJsonToFormData(formData, v, fieldKey + '[' + i + ']');
                     }
                     else {
-                        formData.append(fieldKey + '[]', v);
+                        formData.append(fieldKey + '[]', self.castJsonToFormData(v));
                     }
                 });
             }
             // Mixed
             else {
-                formData.append(fieldKey, value);
+                formData.append(fieldKey, this.castJsonToFormData(value));
             }
         }
 
@@ -149,5 +154,21 @@ export class Data
 
             currentTarget = currentTarget[prop];
         });
+    }
+
+    castJsonToFormData(val) {
+        if (val === null) {
+            return '';
+        }
+
+        if (val === true) {
+            return '1';
+        }
+
+        if (val === false) {
+            return '0';
+        }
+
+        return val;
     }
 }

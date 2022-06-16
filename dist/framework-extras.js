@@ -1824,7 +1824,7 @@ var Actions = /*#__PURE__*/function () {
       } // Trigger 'ajaxBeforeUpdate' on the form, halt if event.preventDefault() is called
 
 
-      if (!this.delegate.applicationAllowsUpdate()) {
+      if (!this.delegate.applicationAllowsUpdate(data, responseCode, xhr)) {
         return;
       }
 
@@ -1870,7 +1870,7 @@ var Actions = /*#__PURE__*/function () {
       updatePromise.done(function () {
         self.delegate.el !== document && self.delegate.el.setAttribute('data-error-message', errorMsg); // Trigger 'ajaxError' on the form, halt if event.preventDefault() is called
 
-        if (!self.delegate.applicationAllowsError()) {
+        if (!self.delegate.applicationAllowsError(data, responseCode, xhr)) {
           return;
         }
 
@@ -2270,8 +2270,13 @@ var Data = /*#__PURE__*/function () {
   }, {
     key: "appendSingleInputElement",
     value: function appendSingleInputElement(requestData) {
-      // Not single or input
-      if (this.formEl || ['INPUT', 'SELECT'].indexOf(this.targetEl.tagName) === -1) {
+      // Has a form, or no target element
+      if (this.formEl || !this.targetEl) {
+        return;
+      } // Not single or input
+
+
+      if (['INPUT', 'SELECT'].indexOf(this.targetEl.tagName) === -1) {
         return;
       } // No name or supplied by user data already
 
@@ -2313,12 +2318,12 @@ var Data = /*#__PURE__*/function () {
             if (v.constructor === {}.constructor || v.constructor === [].constructor) {
               self.appendJsonToFormData(formData, v, fieldKey + '[' + i + ']');
             } else {
-              formData.append(fieldKey + '[]', v);
+              formData.append(fieldKey + '[]', self.castJsonToFormData(v));
             }
           });
         } // Mixed
         else {
-          formData.append(fieldKey, value);
+          formData.append(fieldKey, this.castJsonToFormData(value));
         }
       }
 
@@ -2365,6 +2370,23 @@ var Data = /*#__PURE__*/function () {
 
         currentTarget = currentTarget[prop];
       });
+    }
+  }, {
+    key: "castJsonToFormData",
+    value: function castJsonToFormData(val) {
+      if (val === null) {
+        return '';
+      }
+
+      if (val === true) {
+        return '1';
+      }
+
+      if (val === false) {
+        return '0';
+      }
+
+      return val;
     }
   }]);
 
@@ -2961,7 +2983,7 @@ var Request = /*#__PURE__*/function () {
       } else if (this.options.form) {
         this.formEl = this.options.form;
       } else {
-        this.formEl = this.el !== document ? this.el.closest('form') : null;
+        this.formEl = this.el && this.el !== document ? this.el.closest('form') : null;
       }
 
       this.triggerEl = this.formEl ? this.formEl : this.el;

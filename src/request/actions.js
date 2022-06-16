@@ -32,7 +32,7 @@ export class Actions
         }
 
         // Trigger 'ajaxBeforeUpdate' on the form, halt if event.preventDefault() is called
-        if (!this.delegate.applicationAllowsUpdate()) {
+        if (!this.delegate.applicationAllowsUpdate(data, responseCode, xhr)) {
             return;
         }
 
@@ -82,7 +82,7 @@ export class Actions
             self.delegate.el !== document && self.delegate.el.setAttribute('data-error-message', errorMsg);
 
             // Trigger 'ajaxError' on the form, halt if event.preventDefault() is called
-            if (!self.delegate.applicationAllowsError()) {
+            if (!self.delegate.applicationAllowsError(data, responseCode, xhr)) {
                 return;
             }
 
