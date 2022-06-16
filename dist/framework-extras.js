@@ -2335,7 +2335,8 @@ var Data = /*#__PURE__*/function () {
       // Process to a flat object with array values
       var flatData = Object.fromEntries(Array.from(formData.keys()).map(function (key) {
         return [key, key.endsWith('[]') ? formData.getAll(key) : formData.getAll(key).pop()];
-      })); // Process HTML names to a nested object
+      }));
+      console.log(flatData); // Process HTML names to a nested object
 
       var jsonData = {};
 
@@ -2365,7 +2366,11 @@ var Data = /*#__PURE__*/function () {
           lastIndex = fieldArr.length - 1;
       fieldArr.forEach(function (prop, index) {
         if (currentTarget[prop] === undefined) {
-          currentTarget[prop] = index === lastIndex ? value : {};
+          currentTarget[prop] = {};
+        }
+
+        if (index === lastIndex) {
+          currentTarget[prop] = value;
         }
 
         currentTarget = currentTarget[prop];

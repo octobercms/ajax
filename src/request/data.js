@@ -147,9 +147,11 @@ export class Data
 
         fieldArr.forEach(function(prop, index) {
             if (currentTarget[prop] === undefined) {
-                currentTarget[prop] = index === lastIndex
-                    ? value
-                    : {};
+                currentTarget[prop] = {};
+            }
+
+            if (index === lastIndex) {
+                currentTarget[prop] = value;
             }
 
             currentTarget = currentTarget[prop];
