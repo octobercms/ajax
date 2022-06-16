@@ -407,7 +407,7 @@ if (!window.oc.AjaxExtras) {
   // Namespace
   window.oc.AjaxExtras = _namespace__WEBPACK_IMPORTED_MODULE_2__["default"];
   window.oc.flashMsg = _flash_message__WEBPACK_IMPORTED_MODULE_0__.FlashMessage.flashMsg;
-  window.oc.progressBar = new _progress_bar__WEBPACK_IMPORTED_MODULE_1__.ProgressBar.progressBar();
+  window.oc.progressBar = _progress_bar__WEBPACK_IMPORTED_MODULE_1__.ProgressBar.progressBar();
 } // Boot controller
 
 
