@@ -25,6 +25,7 @@ export class Controller
         this.pageLoaded = () => {
             this.lastRenderedLocation = this.location;
             this.notifyApplicationAfterPageLoad();
+            this.notifyApplicationAfterPageAndScriptsLoad();
         };
 
         this.clickCaptured = () => {
@@ -196,6 +197,7 @@ export class Controller
     decrementPendingAsset() {
         this.pendingAssets--;
         if (this.pendingAssets === 0) {
+            this.notifyApplicationAfterPageAndScriptsLoad();
             this.notifyApplicationAfterLoadScripts();
         }
     }
@@ -210,6 +212,7 @@ export class Controller
     }
 
     viewWillRender(newBody) {
+        this.notifyApplicationUnload();
         this.notifyApplicationBeforeRender(newBody);
     }
 
@@ -257,8 +260,16 @@ export class Controller
         return dispatch('page:load', { detail: { url: this.location.absoluteURL, timing }, cancelable: false });
     }
 
+    notifyApplicationAfterPageAndScriptsLoad() {
+        return dispatch('page:loaded', { cancelable: false });
+    }
+
     notifyApplicationAfterLoadScripts() {
-        return dispatch('page:after-load', { cancelable: false });
+        return dispatch('page:updated', { cancelable: false });
+    }
+
+    notifyApplicationUnload() {
+        return dispatch('page:unload', { cancelable: false });
     }
 
     // Private
@@ -283,6 +294,7 @@ export class Controller
         this.notifyApplicationAfterPageLoad(visit.getTimingMetrics());
 
         if (this.pendingAssets === 0) {
+            this.notifyApplicationAfterPageAndScriptsLoad();
             this.notifyApplicationAfterLoadScripts();
         }
     }

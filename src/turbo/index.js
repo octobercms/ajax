@@ -8,6 +8,10 @@ if (!window.oc) {
 if (!window.oc.AjaxTurbo) {
     // Namespace
     window.oc.AjaxTurbo = namespace;
+
+    // Helpers
+    window.oc.visit = namespace.visit;
+    window.oc.useTurbo = namespace.isEnabled;
 }
 
 // Boot controller

@@ -852,7 +852,7 @@ var Controller = /*#__PURE__*/function () {
 
       addEventListener('DOMContentLoaded', this.render); // Again, after new scripts load
 
-      addEventListener('page:after-load', this.render); // Again after AJAX request
+      addEventListener('page:updated', this.render); // Again after AJAX request
 
       addEventListener('ajax:update-complete', this.render); // Submit form
 
@@ -1959,8 +1959,8 @@ var Actions = /*#__PURE__*/function () {
     value: function handleRedirectResponse(href) {
       this.delegate.notifyApplicationBeforeRedirect();
 
-      if (oc.AjaxTurbo && oc.AjaxTurbo.isEnabled()) {
-        oc.AjaxTurbo.visit(href);
+      if (oc.useTurbo && oc.useTurbo()) {
+        oc.visit(href);
       } else {
         location.assign(href);
       }
@@ -3253,6 +3253,8 @@ var Controller = /*#__PURE__*/function () {
       _this.lastRenderedLocation = _this.location;
 
       _this.notifyApplicationAfterPageLoad();
+
+      _this.notifyApplicationAfterPageAndScriptsLoad();
     };
 
     this.clickCaptured = function () {
@@ -3466,6 +3468,7 @@ var Controller = /*#__PURE__*/function () {
       this.pendingAssets--;
 
       if (this.pendingAssets === 0) {
+        this.notifyApplicationAfterPageAndScriptsLoad();
         this.notifyApplicationAfterLoadScripts();
       }
     } // View
@@ -3483,6 +3486,7 @@ var Controller = /*#__PURE__*/function () {
   }, {
     key: "viewWillRender",
     value: function viewWillRender(newBody) {
+      this.notifyApplicationUnload();
       this.notifyApplicationBeforeRender(newBody);
     }
   }, {
@@ -3570,9 +3574,23 @@ var Controller = /*#__PURE__*/function () {
       });
     }
   }, {
+    key: "notifyApplicationAfterPageAndScriptsLoad",
+    value: function notifyApplicationAfterPageAndScriptsLoad() {
+      return (0,_util__WEBPACK_IMPORTED_MODULE_5__.dispatch)('page:loaded', {
+        cancelable: false
+      });
+    }
+  }, {
     key: "notifyApplicationAfterLoadScripts",
     value: function notifyApplicationAfterLoadScripts() {
-      return (0,_util__WEBPACK_IMPORTED_MODULE_5__.dispatch)('page:after-load', {
+      return (0,_util__WEBPACK_IMPORTED_MODULE_5__.dispatch)('page:updated', {
+        cancelable: false
+      });
+    }
+  }, {
+    key: "notifyApplicationUnload",
+    value: function notifyApplicationUnload() {
+      return (0,_util__WEBPACK_IMPORTED_MODULE_5__.dispatch)('page:unload', {
         cancelable: false
       });
     } // Private
@@ -3603,6 +3621,7 @@ var Controller = /*#__PURE__*/function () {
       this.notifyApplicationAfterPageLoad(visit.getTimingMetrics());
 
       if (this.pendingAssets === 0) {
+        this.notifyApplicationAfterPageAndScriptsLoad();
         this.notifyApplicationAfterLoadScripts();
       }
     }
@@ -4126,7 +4145,10 @@ if (!window.oc) {
 
 if (!window.oc.AjaxTurbo) {
   // Namespace
-  window.oc.AjaxTurbo = _namespace__WEBPACK_IMPORTED_MODULE_0__["default"];
+  window.oc.AjaxTurbo = _namespace__WEBPACK_IMPORTED_MODULE_0__["default"]; // Helpers
+
+  window.oc.visit = _namespace__WEBPACK_IMPORTED_MODULE_0__["default"].visit;
+  window.oc.useTurbo = _namespace__WEBPACK_IMPORTED_MODULE_0__["default"].isEnabled;
 } // Boot controller
 
 

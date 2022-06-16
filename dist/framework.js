@@ -212,7 +212,7 @@ var Controller = /*#__PURE__*/function () {
 
       addEventListener('DOMContentLoaded', this.render); // Again, after new scripts load
 
-      addEventListener('page:after-load', this.render); // Again after AJAX request
+      addEventListener('page:updated', this.render); // Again after AJAX request
 
       addEventListener('ajax:update-complete', this.render); // Submit form
 
@@ -1319,8 +1319,8 @@ var Actions = /*#__PURE__*/function () {
     value: function handleRedirectResponse(href) {
       this.delegate.notifyApplicationBeforeRedirect();
 
-      if (oc.AjaxTurbo && oc.AjaxTurbo.isEnabled()) {
-        oc.AjaxTurbo.visit(href);
+      if (oc.useTurbo && oc.useTurbo()) {
+        oc.visit(href);
       } else {
         location.assign(href);
       }

@@ -19,7 +19,7 @@ export class Controller
         addEventListener('DOMContentLoaded', this.render);
 
         // Again, after new scripts load
-        addEventListener('page:after-load', this.render);
+        addEventListener('page:updated', this.render);
 
         // Again after AJAX request
         addEventListener('ajax:update-complete', this.render);
