@@ -10,9 +10,10 @@ export class Controller
     }
 
     start() {
-        if (!this.started) {
-            this.started = true;
+        if (this.started) {
+            return;
         }
+        this.started = true;
 
         // Progress bar
         addEventListener('ajax:setup', this.enableProgressBar);
@@ -35,9 +36,10 @@ export class Controller
     }
 
     stop() {
-        if (this.started) {
-            this.started = false;
+        if (!this.started) {
+            return;
         }
+        this.started = false;
 
         // Progress bar
         removeEventListener('ajax:setup', this.enableProgressBar);
@@ -52,6 +54,11 @@ export class Controller
         this.validator = null;
         Events.off(document, 'ajax:promise', '[data-request][data-request-validate]', this.validatorSubmit.bind(this));
         Events.off(document, 'ajax:before-validate', '[data-request][data-request-validate]', this.validatorValidate.bind(this));
+
+        // Flash message
+        this.flashMessage = null;
+        removeEventListener('render', this.flashMessageRender.bind(this));
+        Events.off(document, 'ajax:setup', '[data-request][data-request-flash]', this.flashMessageBind.bind(this));
     }
 
     // Progress bar default value
