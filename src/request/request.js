@@ -28,7 +28,7 @@ export class Request
             files: false,
             bulk: false,
             progressBarDelay: 500,
-            progressBar: false
+            progressBar: null
         }
     }
 

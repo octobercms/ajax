@@ -962,6 +962,7 @@ var RequestBuilder = /*#__PURE__*/function () {
     this.assignAsEval('success', 'requestSuccess');
     this.assignAsEval('error', 'requestError');
     this.assignAsEval('complete', 'requestComplete');
+    this.assignAsEval('progressBar', 'requestProgressBar');
     this.assignAsData('confirm', 'requestConfirm');
     this.assignAsData('redirect', 'requestRedirect');
     this.assignAsData('loading', 'requestLoading');
@@ -2438,7 +2439,7 @@ var Request = /*#__PURE__*/function () {
         files: false,
         bulk: false,
         progressBarDelay: 500,
-        progressBar: false
+        progressBar: null
       };
     }
   }, {

@@ -18,6 +18,7 @@ export class RequestBuilder
         this.assignAsEval('error', 'requestError');
         this.assignAsEval('complete', 'requestComplete');
 
+        this.assignAsEval('progressBar', 'requestProgressBar');
         this.assignAsData('confirm', 'requestConfirm');
         this.assignAsData('redirect', 'requestRedirect');
         this.assignAsData('loading', 'requestLoading');

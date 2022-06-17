@@ -168,13 +168,16 @@ var Controller = /*#__PURE__*/function () {
       this.validator = null;
       _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.off(document, 'ajax:promise', '[data-request][data-request-validate]', this.validatorSubmit.bind(this));
       _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.off(document, 'ajax:before-validate', '[data-request][data-request-validate]', this.validatorValidate.bind(this));
-    } // Progress bar
+    } // Progress bar default value
 
   }, {
     key: "enableProgressBar",
     value: function enableProgressBar(event) {
       var options = event.detail.context.options;
-      options.progressBar = true;
+
+      if (options.progressBar === null) {
+        options.progressBar = true;
+      }
     } // Attach loader
 
   }, {
@@ -1602,6 +1605,7 @@ var RequestBuilder = /*#__PURE__*/function () {
     this.assignAsEval('success', 'requestSuccess');
     this.assignAsEval('error', 'requestError');
     this.assignAsEval('complete', 'requestComplete');
+    this.assignAsEval('progressBar', 'requestProgressBar');
     this.assignAsData('confirm', 'requestConfirm');
     this.assignAsData('redirect', 'requestRedirect');
     this.assignAsData('loading', 'requestLoading');
@@ -3078,7 +3082,7 @@ var Request = /*#__PURE__*/function () {
         files: false,
         bulk: false,
         progressBarDelay: 500,
-        progressBar: false
+        progressBar: null
       };
     }
   }, {

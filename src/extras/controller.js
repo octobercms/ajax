@@ -54,10 +54,13 @@ export class Controller
         Events.off(document, 'ajax:before-validate', '[data-request][data-request-validate]', this.validatorValidate.bind(this));
     }
 
-    // Progress bar
+    // Progress bar default value
     enableProgressBar(event) {
         const { options } = event.detail.context;
-        options.progressBar = true;
+
+        if (options.progressBar === null) {
+            options.progressBar = true;
+        }
     }
 
     // Attach loader
