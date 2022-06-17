@@ -1716,7 +1716,13 @@ var Data = /*#__PURE__*/function () {
       var flatData = this.formDataToArray(formData); // Process HTML names to a query string
 
       return Object.keys(flatData).map(function (key) {
-        return key + '=' + encodeURIComponent(flatData[key]);
+        if (key.endsWith('[]')) {
+          return flatData[key].map(function (val) {
+            return key + '=' + val;
+          }).join('&');
+        } else {
+          return key + '=' + flatData[key];
+        }
       }).join('&');
     }
   }, {
