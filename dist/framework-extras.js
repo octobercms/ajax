@@ -862,11 +862,8 @@ var Controller = /*#__PURE__*/function () {
   }, {
     key: "documentOnClick",
     value: function documentOnClick(event) {
-      event.preventDefault(); // Wait for onclick to change attributes
-
-      (0,_util__WEBPACK_IMPORTED_MODULE_2__.defer)(function () {
-        _request_builder__WEBPACK_IMPORTED_MODULE_1__.RequestBuilder.fromElement(event.target);
-      });
+      event.preventDefault();
+      _request_builder__WEBPACK_IMPORTED_MODULE_1__.RequestBuilder.fromElement(event.target);
     }
   }, {
     key: "documentOnChange",
@@ -1500,13 +1497,16 @@ var Migrate = /*#__PURE__*/function () {
       });
       return args;
     } // For instances where data() is populated in the jQ instance
-    // the specific event must be deferred in the controller
 
   }, {
     key: "migratejQueryAttachData",
     value: function migratejQueryAttachData(target, eventName, selector) {
       $(target).on(eventName, selector, function () {
         var dataObj = $(this).data('request-data');
+
+        if (!dataObj) {
+          return;
+        }
 
         if (dataObj.constructor === {}.constructor) {
           $(this).one('ajaxSetup', function (event, context) {
@@ -6062,7 +6062,7 @@ function addHandler(element, originalTypeEvent, handler, delegationFunction, one
   fn.oneOff = oneOff;
   fn.uidEvent = uid;
   handlers[uid] = fn;
-  element.addEventListener(typeEvent, fn, isDelegated);
+  element.addEventListener(typeEvent, fn);
 }
 
 function removeHandler(element, events, typeEvent, handler, delegationSelector) {
@@ -6072,7 +6072,7 @@ function removeHandler(element, events, typeEvent, handler, delegationSelector) 
     return;
   }
 
-  element.removeEventListener(typeEvent, fn, Boolean(delegationSelector));
+  element.removeEventListener(typeEvent, fn);
   delete events[typeEvent][fn.uidEvent];
 }
 

@@ -91,10 +91,13 @@ export class Migrate
     }
 
     // For instances where data() is populated in the jQ instance
-    // the specific event must be deferred in the controller
     migratejQueryAttachData(target, eventName, selector) {
         $(target).on(eventName, selector, function() {
             var dataObj = $(this).data('request-data');
+            if (!dataObj) {
+                return;
+            }
+
             if (dataObj.constructor === {}.constructor) {
                 $(this).one('ajaxSetup', function(event, context) {
                     Object.assign(context.options.data, dataObj);

@@ -60,17 +60,12 @@ export class Controller
 
     documentOnSubmit(event) {
         event.preventDefault();
-
         RequestBuilder.fromElement(event.target);
     }
 
     documentOnClick(event) {
         event.preventDefault();
-
-        // Wait for onclick to change attributes
-        defer(() => {
-            RequestBuilder.fromElement(event.target);
-        });
+        RequestBuilder.fromElement(event.target);
     }
 
     documentOnChange(event) {
