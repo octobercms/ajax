@@ -57,6 +57,8 @@ export class Migrate
         this.migratejQueryEvent(window, 'ajax:invalid-field', 'ajaxInvalidField', ['element', 'fieldName', 'fieldMessages', 'isFirst']);
         this.migratejQueryEvent(window, 'ajax:confirm-message', 'ajaxConfirmMessage', ['message', 'promise']);
         this.migratejQueryEvent(window, 'ajax:error-message', 'ajaxErrorMessage', ['message']);
+
+        this.migratejQueryAttachData(document, 'click', 'a[data-request], button[data-request], input[type=button][data-request], input[type=submit][data-request]');
     }
 
     // Private
@@ -86,5 +88,21 @@ export class Migrate
         });
 
         return args;
+    }
+
+    // For instances where data() is populated in the jQ instance
+    // the specific event must be deferred in the controller
+    migratejQueryAttachData(target, eventName, selector) {
+        $(target).on(eventName, selector, function() {
+            var dataObj = $(this).data('request-data');
+            if (dataObj.constructor === {}.constructor) {
+                $(this).one('ajaxSetup', function(event, context) {
+                    Object.assign(context.options.data, dataObj);
+                });
+            }
+            else if (typeof dataObj === 'string') {
+                this.dataset.requestData = dataObj;
+            }
+        });
     }
 }

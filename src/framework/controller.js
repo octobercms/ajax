@@ -1,5 +1,6 @@
 import { Events } from "../util/events";
 import { RequestBuilder } from "./request-builder";
+import { defer } from "../util";
 
 export class Controller
 {
@@ -66,8 +67,10 @@ export class Controller
     documentOnClick(event) {
         event.preventDefault();
 
-        var el = event.target;
-        RequestBuilder.fromElement(el);
+        // Wait for onclick to change attributes
+        defer(() => {
+            RequestBuilder.fromElement(event.target);
+        });
     }
 
     documentOnChange(event) {

@@ -829,11 +829,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _util_events__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../util/events */ "./src/util/events.js");
 /* harmony import */ var _request_builder__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./request-builder */ "./src/framework/request-builder.js");
+/* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../util */ "./src/util/index.js");
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+
 
 
 
@@ -896,9 +898,11 @@ var Controller = /*#__PURE__*/function () {
   }, {
     key: "documentOnClick",
     value: function documentOnClick(event) {
-      event.preventDefault();
-      var el = event.target;
-      _request_builder__WEBPACK_IMPORTED_MODULE_1__.RequestBuilder.fromElement(el);
+      event.preventDefault(); // Wait for onclick to change attributes
+
+      (0,_util__WEBPACK_IMPORTED_MODULE_2__.defer)(function () {
+        _request_builder__WEBPACK_IMPORTED_MODULE_1__.RequestBuilder.fromElement(event.target);
+      });
     }
   }, {
     key: "documentOnChange",
@@ -1499,6 +1503,7 @@ var Migrate = /*#__PURE__*/function () {
       this.migratejQueryEvent(window, 'ajax:invalid-field', 'ajaxInvalidField', ['element', 'fieldName', 'fieldMessages', 'isFirst']);
       this.migratejQueryEvent(window, 'ajax:confirm-message', 'ajaxConfirmMessage', ['message', 'promise']);
       this.migratejQueryEvent(window, 'ajax:error-message', 'ajaxErrorMessage', ['message']);
+      this.migratejQueryAttachData(document, 'click', 'a[data-request], button[data-request], input[type=button][data-request], input[type=submit][data-request]');
     } // Private
 
   }, {
@@ -1530,6 +1535,23 @@ var Migrate = /*#__PURE__*/function () {
         args.push(ev.detail[name]);
       });
       return args;
+    } // For instances where data() is populated in the jQ instance
+    // the specific event must be deferred in the controller
+
+  }, {
+    key: "migratejQueryAttachData",
+    value: function migratejQueryAttachData(target, eventName, selector) {
+      $(target).on(eventName, selector, function () {
+        var dataObj = $(this).data('request-data');
+
+        if (dataObj.constructor === {}.constructor) {
+          $(this).one('ajaxSetup', function (event, context) {
+            Object.assign(context.options.data, dataObj);
+          });
+        } else if (typeof dataObj === 'string') {
+          this.dataset.requestData = dataObj;
+        }
+      });
     }
   }]);
 
