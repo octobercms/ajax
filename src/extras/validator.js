@@ -1,28 +1,8 @@
-import { unindent } from "../util";
 import { Events } from "../util/events";
 
 export class Validator
 {
-    static stylesheetReady = false;
-
-    constructor() {
-        this.stylesheetElement = this.createStylesheetElement();
-    }
-
-    static get defaultCSS() {
-        return unindent `
-        [data-request][data-request-validate] [data-validate-for],
-        [data-request][data-request-validate] [data-validate-error] {
-            &:not(.oc-visible) {
-                display: none;
-            }
-        }
-    `;
-    }
-
     submit(el) {
-        this.installStylesheetElement();
-
         var form = el.closest('form');
         if (!form) {
             return;
@@ -37,7 +17,7 @@ export class Validator
         });
     }
 
-    validate(el, fields) {
+    validate(el, fields, errorMsg) {
         var form = el.closest('form'),
             messages = [];
 
@@ -53,7 +33,7 @@ export class Validator
             // Display message next to field
             var field = form.querySelector('[data-validate-for="'+fieldName+'"]');
             if (field) {
-                if (field.innerHTML || field.dataset.emptyMode === true) {
+                if (!field.innerHTML || field.dataset.emptyMode === true) {
                     field.dataset.emptyMode = true;
                     field.innerHTML = fieldMessages.join(', ');
                 }
@@ -87,22 +67,8 @@ export class Validator
         }
 
         // Prevent default error behavior
-        Events.one(form, 'ajax:error', function(event) {
+        Events.one(window, 'ajax:error-message', function(event) {
             event.preventDefault();
         });
-    }
-
-    // Private
-    installStylesheetElement() {
-        if (!Validator.stylesheetReady) {
-            document.head.insertBefore(this.stylesheetElement, document.head.firstChild);
-            Validator.stylesheetReady = true;
-        }
-    }
-
-    createStylesheetElement() {
-        const element = document.createElement('style');
-        element.textContent = Validator.defaultCSS;
-        return element;
     }
 }

@@ -124,93 +124,36 @@ var Controller = /*#__PURE__*/function () {
   function Controller() {
     _classCallCheck(this, Controller);
 
-    this.started = false;
-  }
+    this.started = false; // Progress bar default value
 
-  _createClass(Controller, [{
-    key: "start",
-    value: function start() {
-      if (this.started) {
-        return;
-      }
-
-      this.started = true; // Progress bar
-
-      addEventListener('ajax:setup', this.enableProgressBar); // Attach loader
-
-      this.attachLoader = new _attach_loader__WEBPACK_IMPORTED_MODULE_1__.AttachLoader();
-      _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.on(document, 'ajax:promise', '[data-request]', this.showAttachLoader.bind(this));
-      _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.on(document, 'ajax:fail', '[data-request]', this.hideAttachLoader.bind(this));
-      _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.on(document, 'ajax:done', '[data-request]', this.hideAttachLoader.bind(this)); // Validator
-
-      this.validator = new _validator__WEBPACK_IMPORTED_MODULE_0__.Validator();
-      _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.on(document, 'ajax:before-validate', '[data-request][data-request-validate]', this.validatorValidate.bind(this));
-      _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.on(document, 'ajax:promise', '[data-request][data-request-validate]', this.validatorSubmit.bind(this)); // Flash message
-
-      this.flashMessage = new _flash_message__WEBPACK_IMPORTED_MODULE_2__.FlashMessage();
-      addEventListener('render', this.flashMessageRender.bind(this));
-      _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.on(document, 'ajax:setup', '[data-request][data-request-flash]', this.flashMessageBind.bind(this));
-    }
-  }, {
-    key: "stop",
-    value: function stop() {
-      if (!this.started) {
-        return;
-      }
-
-      this.started = false; // Progress bar
-
-      removeEventListener('ajax:setup', this.enableProgressBar); // Attach loader
-
-      this.attachLoader = null;
-      _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.off(document, 'ajax:promise', '[data-request]', this.showAttachLoader.bind(this));
-      _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.off(document, 'ajax:fail', '[data-request]', this.hideAttachLoader.bind(this));
-      _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.off(document, 'ajax:done', '[data-request]', this.hideAttachLoader.bind(this)); // Validator
-
-      this.validator = null;
-      _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.off(document, 'ajax:promise', '[data-request][data-request-validate]', this.validatorSubmit.bind(this));
-      _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.off(document, 'ajax:before-validate', '[data-request][data-request-validate]', this.validatorValidate.bind(this)); // Flash message
-
-      this.flashMessage = null;
-      removeEventListener('render', this.flashMessageRender.bind(this));
-      _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.off(document, 'ajax:setup', '[data-request][data-request-flash]', this.flashMessageBind.bind(this));
-    } // Progress bar default value
-
-  }, {
-    key: "enableProgressBar",
-    value: function enableProgressBar(event) {
+    this.enableProgressBar = function (event) {
       var options = event.detail.context.options;
 
       if (options.progressBar === null) {
         options.progressBar = true;
       }
-    } // Attach loader
+    }; // Attach loader
 
-  }, {
-    key: "showAttachLoader",
-    value: function showAttachLoader(event) {
+
+    this.showAttachLoader = function (event) {
       this.attachLoader.show(event.target);
-    }
-  }, {
-    key: "hideAttachLoader",
-    value: function hideAttachLoader(event) {
+    }.bind(this);
+
+    this.hideAttachLoader = function (event) {
       this.attachLoader.hide(event.target);
-    } // Validator
+    }.bind(this); // Validator
 
-  }, {
-    key: "validatorSubmit",
-    value: function validatorSubmit(event) {
+
+    this.validatorSubmit = function (event) {
       this.validator.submit(event.target);
-    }
-  }, {
-    key: "validatorValidate",
-    value: function validatorValidate(event) {
-      this.validator.validate(event.target, event.detail.fields);
-    } // Flash message
+    }.bind(this);
 
-  }, {
-    key: "flashMessageBind",
-    value: function flashMessageBind(event) {
+    this.validatorValidate = function (event) {
+      this.validator.validate(event.target, event.detail.fields, event.detail.message);
+    }.bind(this); // Flash message
+
+
+    this.flashMessageBind = function (event) {
       var self = this;
       var options = event.detail.context.options;
 
@@ -227,11 +170,60 @@ var Controller = /*#__PURE__*/function () {
           type: type
         });
       };
+    }.bind(this);
+
+    this.flashMessageRender = function (event) {
+      this.flashMessage.render();
+    }.bind(this);
+  }
+
+  _createClass(Controller, [{
+    key: "start",
+    value: function start() {
+      if (this.started) {
+        return;
+      }
+
+      this.started = true; // Progress bar
+
+      addEventListener('ajax:setup', this.enableProgressBar); // Attach loader
+
+      this.attachLoader = new _attach_loader__WEBPACK_IMPORTED_MODULE_1__.AttachLoader();
+      _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.on(document, 'ajax:promise', '[data-request]', this.showAttachLoader);
+      _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.on(document, 'ajax:fail', '[data-request]', this.hideAttachLoader);
+      _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.on(document, 'ajax:done', '[data-request]', this.hideAttachLoader); // Validator
+
+      this.validator = new _validator__WEBPACK_IMPORTED_MODULE_0__.Validator();
+      _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.on(document, 'ajax:before-validate', '[data-request][data-request-validate]', this.validatorValidate);
+      _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.on(document, 'ajax:promise', '[data-request][data-request-validate]', this.validatorSubmit); // Flash message
+
+      this.flashMessage = new _flash_message__WEBPACK_IMPORTED_MODULE_2__.FlashMessage();
+      addEventListener('render', this.flashMessageRender);
+      _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.on(document, 'ajax:setup', '[data-request][data-request-flash]', this.flashMessageBind);
     }
   }, {
-    key: "flashMessageRender",
-    value: function flashMessageRender(event) {
-      this.flashMessage.render();
+    key: "stop",
+    value: function stop() {
+      if (!this.started) {
+        return;
+      }
+
+      this.started = false; // Progress bar
+
+      removeEventListener('ajax:setup', this.enableProgressBar); // Attach loader
+
+      this.attachLoader = null;
+      _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.off(document, 'ajax:promise', '[data-request]', this.showAttachLoader);
+      _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.off(document, 'ajax:fail', '[data-request]', this.hideAttachLoader);
+      _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.off(document, 'ajax:done', '[data-request]', this.hideAttachLoader); // Validator
+
+      this.validator = null;
+      _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.off(document, 'ajax:before-validate', '[data-request][data-request-validate]', this.validatorValidate);
+      _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.off(document, 'ajax:promise', '[data-request][data-request-validate]', this.validatorSubmit); // Flash message
+
+      this.flashMessage = null;
+      removeEventListener('render', this.flashMessageRender);
+      _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.off(document, 'ajax:setup', '[data-request][data-request-flash]', this.flashMessageBind);
     }
   }]);
 
@@ -685,12 +677,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "Validator": () => (/* binding */ Validator)
 /* harmony export */ });
-/* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../util */ "./src/util/index.js");
-/* harmony import */ var _util_events__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../util/events */ "./src/util/events.js");
-var _templateObject;
-
-function _taggedTemplateLiteral(strings, raw) { if (!raw) { raw = strings.slice(0); } return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
-
+/* harmony import */ var _util_events__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../util/events */ "./src/util/events.js");
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
 
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
@@ -709,21 +696,15 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
 
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-
 
 var Validator = /*#__PURE__*/function () {
   function Validator() {
     _classCallCheck(this, Validator);
-
-    this.stylesheetElement = this.createStylesheetElement();
   }
 
   _createClass(Validator, [{
     key: "submit",
     value: function submit(el) {
-      this.installStylesheetElement();
       var form = el.closest('form');
 
       if (!form) {
@@ -739,7 +720,7 @@ var Validator = /*#__PURE__*/function () {
     }
   }, {
     key: "validate",
-    value: function validate(el, fields) {
+    value: function validate(el, fields, errorMsg) {
       var form = el.closest('form'),
           messages = [];
 
@@ -755,7 +736,7 @@ var Validator = /*#__PURE__*/function () {
         var field = form.querySelector('[data-validate-for="' + fieldName + '"]');
 
         if (field) {
-          if (field.innerHTML || field.dataset.emptyMode === true) {
+          if (!field.innerHTML || field.dataset.emptyMode === true) {
             field.dataset.emptyMode = true;
             field.innerHTML = fieldMessages.join(', ');
           }
@@ -789,37 +770,14 @@ var Validator = /*#__PURE__*/function () {
       } // Prevent default error behavior
 
 
-      _util_events__WEBPACK_IMPORTED_MODULE_1__.Events.one(form, 'ajax:error', function (event) {
+      _util_events__WEBPACK_IMPORTED_MODULE_0__.Events.one(window, 'ajax:error-message', function (event) {
         event.preventDefault();
       });
-    } // Private
-
-  }, {
-    key: "installStylesheetElement",
-    value: function installStylesheetElement() {
-      if (!Validator.stylesheetReady) {
-        document.head.insertBefore(this.stylesheetElement, document.head.firstChild);
-        Validator.stylesheetReady = true;
-      }
-    }
-  }, {
-    key: "createStylesheetElement",
-    value: function createStylesheetElement() {
-      var element = document.createElement('style');
-      element.textContent = Validator.defaultCSS;
-      return element;
-    }
-  }], [{
-    key: "defaultCSS",
-    get: function get() {
-      return (0,_util__WEBPACK_IMPORTED_MODULE_0__.unindent)(_templateObject || (_templateObject = _taggedTemplateLiteral(["\n        [data-request][data-request-validate] [data-validate-for],\n        [data-request][data-request-validate] [data-validate-error] {\n            &:not(.oc-visible) {\n                display: none;\n            }\n        }\n    "])));
     }
   }]);
 
   return Validator;
 }();
-
-_defineProperty(Validator, "stylesheetReady", false);
 
 /***/ }),
 
@@ -6004,7 +5962,7 @@ function internalHandler(element, fn) {
     event.delegateTarget = element;
 
     if (handler.oneOff) {
-      EventHandler.off(element, event.type, fn);
+      Events.off(element, event.type, fn);
     }
 
     return fn.apply(element, [event]);
@@ -6030,7 +5988,7 @@ function internalDelegationHandler(element, selector, fn) {
           event.delegateTarget = target;
 
           if (handler.oneOff) {
-            EventHandler.off(element, event.type, selector, fn);
+            Events.off(element, event.type, selector, fn);
           }
 
           return fn.apply(target, [event]);

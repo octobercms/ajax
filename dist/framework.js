@@ -2896,7 +2896,7 @@ function internalHandler(element, fn) {
     event.delegateTarget = element;
 
     if (handler.oneOff) {
-      EventHandler.off(element, event.type, fn);
+      Events.off(element, event.type, fn);
     }
 
     return fn.apply(element, [event]);
@@ -2922,7 +2922,7 @@ function internalDelegationHandler(element, selector, fn) {
           event.delegateTarget = target;
 
           if (handler.oneOff) {
-            EventHandler.off(element, event.type, selector, fn);
+            Events.off(element, event.type, selector, fn);
           }
 
           return fn.apply(target, [event]);
