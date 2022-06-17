@@ -2037,6 +2037,7 @@ var Actions = /*#__PURE__*/function () {
             else {
               self.delegate.notifyApplicationBeforeReplace(el);
               el.innerHTML = data[partial];
+              runScriptsOnElement(el);
             }
 
             self.delegate.notifyApplicationAjaxUpdate(el, data, responseCode, xhr);
@@ -2094,6 +2095,18 @@ function resolveSelectorResponse(selector) {
   }
 
   return document.querySelectorAll(selector);
+}
+
+function runScriptsOnElement(el) {
+  // Replace blocked scripts with fresh nodes
+  Array.from(el.querySelectorAll('script')).forEach(function (oldScript) {
+    var newScript = document.createElement('script');
+    Array.from(oldScript.attributes).forEach(function (attr) {
+      return newScript.setAttribute(attr.name, attr.value);
+    });
+    newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+    oldScript.parentNode.replaceChild(newScript, oldScript);
+  });
 }
 
 /***/ }),
