@@ -18,7 +18,7 @@ export class RequestBuilder
         this.assignAsEval('error', 'requestError');
         this.assignAsEval('complete', 'requestComplete');
 
-        this.assignAsEval('progressBar', 'requestProgressBar');
+        this.assignAsData('progressBar', 'requestProgressBar');
         this.assignAsData('confirm', 'requestConfirm');
         this.assignAsData('redirect', 'requestRedirect');
         this.assignAsData('loading', 'requestLoading');
@@ -111,7 +111,7 @@ export class RequestBuilder
             attrVal = this.element.getAttribute('data-' + normalizeDataKey(name));
         }
 
-        if (!attrVal) {
+        if (attrVal === null) {
             return;
         }
 
@@ -122,8 +122,20 @@ export class RequestBuilder
             );
         }
         else {
-            this.options[optionName] = attrVal;
+            this.options[optionName] = this.castAttrToOption(attrVal);
         }
+    }
+
+    castAttrToOption(val) {
+        if (val === '' || val === 'true' || val === '1') {
+            return true;
+        }
+
+        if (val === 'false' || val === '0') {
+            return false;
+        }
+
+        return val;
     }
 
     assignRequestData() {

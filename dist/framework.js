@@ -962,7 +962,7 @@ var RequestBuilder = /*#__PURE__*/function () {
     this.assignAsEval('success', 'requestSuccess');
     this.assignAsEval('error', 'requestError');
     this.assignAsEval('complete', 'requestComplete');
-    this.assignAsEval('progressBar', 'requestProgressBar');
+    this.assignAsData('progressBar', 'requestProgressBar');
     this.assignAsData('confirm', 'requestConfirm');
     this.assignAsData('redirect', 'requestRedirect');
     this.assignAsData('loading', 'requestLoading');
@@ -1059,15 +1059,28 @@ var RequestBuilder = /*#__PURE__*/function () {
         attrVal = this.element.getAttribute('data-' + normalizeDataKey(name));
       }
 
-      if (!attrVal) {
+      if (attrVal === null) {
         return;
       }
 
       if (parseJson) {
         this.options[optionName] = _json_parser__WEBPACK_IMPORTED_MODULE_1__.JsonParser.paramToObj('data-' + normalizeDataKey(name), attrVal);
       } else {
-        this.options[optionName] = attrVal;
+        this.options[optionName] = this.castAttrToOption(attrVal);
       }
+    }
+  }, {
+    key: "castAttrToOption",
+    value: function castAttrToOption(val) {
+      if (val === '' || val === 'true' || val === '1') {
+        return true;
+      }
+
+      if (val === 'false' || val === '0') {
+        return false;
+      }
+
+      return val;
     }
   }, {
     key: "assignRequestData",
