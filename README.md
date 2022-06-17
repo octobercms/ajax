@@ -18,17 +18,27 @@ npm install --save octobercms
 var oc = require('octobercms');
 
 // Make an AJAX request
-oc.ajax('onDoSomething');
+oc.ajax('onSomething', { data: someVar });
 
-// Enable data attributes API
-oc.AjaxFramework.start();
-
-// Enable extra features
-oc.AjaxExtras.start();
-
-// Enable turbo routing
-oc.AjaxTurbo.start();
+// Serialize an element with the request
+oc.request('.some-element', 'onSomething', { data: someVar });
 ```
+
+### jQuery Adapter
+
+If jQuery is found, the traditional API can also be used.
+
+```js
+// AJAX request with jQuery
+$.request('onSomething', { data: someVar });
+
+// Serialized request with jQuery
+$('.some-element').request('onSomething', { data: someVar });
+```
+
+## Documentation
+
+[Read the complete documentation](https://docs.octobercms.com/3.x/cms/ajax/introduction.html) on the October CMS website.
 
 ## License
 
