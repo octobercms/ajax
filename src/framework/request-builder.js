@@ -23,6 +23,7 @@ export class RequestBuilder
         this.assignAsData('loading', 'requestLoading');
         this.assignAsData('flash', 'requestFlash');
         this.assignAsData('files', 'requestFiles');
+        this.assignAsData('bulk', 'requestBulk');
         this.assignAsData('form', 'requestForm');
         this.assignAsData('url', 'requestUrl');
         this.assignAsData('update', 'requestUpdate', true);

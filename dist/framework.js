@@ -967,6 +967,7 @@ var RequestBuilder = /*#__PURE__*/function () {
     this.assignAsData('loading', 'requestLoading');
     this.assignAsData('flash', 'requestFlash');
     this.assignAsData('files', 'requestFiles');
+    this.assignAsData('bulk', 'requestBulk');
     this.assignAsData('form', 'requestForm');
     this.assignAsData('url', 'requestUrl');
     this.assignAsData('update', 'requestUpdate', true);
@@ -1622,6 +1623,11 @@ var Data = /*#__PURE__*/function () {
       return this.appendJsonToFormData(this.getRequestData(), this.userData);
     }
   }, {
+    key: "getAsQueryString",
+    value: function getAsQueryString() {
+      return this.convertFormDataToQuery(this.getAsFormData());
+    }
+  }, {
     key: "getAsJsonData",
     value: function getAsJsonData() {
       return JSON.stringify(this.convertFormDataToJson(this.getAsFormData()));
@@ -1690,12 +1696,20 @@ var Data = /*#__PURE__*/function () {
       return formData;
     }
   }, {
+    key: "convertFormDataToQuery",
+    value: function convertFormDataToQuery(formData) {
+      // Process to a flat object with array values
+      var flatData = this.formDataToArray(formData); // Process HTML names to a query string
+
+      return Object.keys(flatData).map(function (key) {
+        return key + '=' + encodeURIComponent(flatData[key]);
+      }).join('&');
+    }
+  }, {
     key: "convertFormDataToJson",
     value: function convertFormDataToJson(formData) {
       // Process to a flat object with array values
-      var flatData = Object.fromEntries(Array.from(formData.keys()).map(function (key) {
-        return [key, key.endsWith('[]') ? formData.getAll(key) : formData.getAll(key).pop()];
-      })); // Process HTML names to a nested object
+      var flatData = this.formDataToArray(formData); // Process HTML names to a nested object
 
       var jsonData = {};
 
@@ -1704,6 +1718,13 @@ var Data = /*#__PURE__*/function () {
       }
 
       return jsonData;
+    }
+  }, {
+    key: "formDataToArray",
+    value: function formDataToArray(formData) {
+      return Object.fromEntries(Array.from(formData.keys()).map(function (key) {
+        return [key, key.endsWith('[]') ? formData.getAll(key) : formData.getAll(key).pop()];
+      }));
     }
   }, {
     key: "nameToArray",
@@ -1866,8 +1887,8 @@ var Options = /*#__PURE__*/function () {
         'X-OCTOBER-REQUEST-PARTIALS': this.extractPartials(options.update)
       };
 
-      if (options.files !== true) {
-        headers['Content-Type'] = 'application/json';
+      if (!options.files) {
+        headers['Content-Type'] = options.bulk ? 'application/json' : 'application/x-www-form-urlencoded';
       }
 
       if (options.flash) {
@@ -2009,6 +2030,18 @@ var Request = /*#__PURE__*/function () {
 
       if (!this.validateClientSideForm() || !this.applicationAllowsRequest()) {
         return;
+      } // Prepare data
+
+
+      var dataObj = new _data__WEBPACK_IMPORTED_MODULE_2__.Data(this.options.data, this.el, this.formEl);
+      var data;
+
+      if (this.options.files) {
+        data = dataObj.getAsFormData();
+      } else if (this.options.bulk) {
+        data = dataObj.getAsJsonData();
+      } else {
+        data = dataObj.getAsQueryString();
       } // Prepare request
 
 
@@ -2017,8 +2050,6 @@ var Request = /*#__PURE__*/function () {
           headers = _Options$fetch.headers,
           method = _Options$fetch.method;
 
-      var dataObj = new _data__WEBPACK_IMPORTED_MODULE_2__.Data(this.options.data, this.el, this.formEl);
-      var data = this.options.files ? dataObj.getAsFormData() : dataObj.getAsJsonData();
       this.request = new _util_http_request__WEBPACK_IMPORTED_MODULE_3__.HttpRequest(this, url, {
         method: method,
         headers: headers,
@@ -2404,6 +2435,8 @@ var Request = /*#__PURE__*/function () {
       return {
         handler: null,
         update: {},
+        files: false,
+        bulk: false,
         progressBarDelay: 500,
         progressBar: false
       };

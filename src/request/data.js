@@ -31,6 +31,12 @@ export class Data
         );
     }
 
+    getAsQueryString() {
+        return this.convertFormDataToQuery(
+            this.getAsFormData()
+        );
+    }
+
     getAsJsonData() {
         return JSON.stringify(
             this.convertFormDataToJson(
@@ -105,16 +111,19 @@ export class Data
         return formData;
     }
 
+    convertFormDataToQuery(formData) {
+        // Process to a flat object with array values
+        let flatData = this.formDataToArray(formData);
+
+        // Process HTML names to a query string
+        return Object.keys(flatData)
+            .map(function(key) { return key + '=' + encodeURIComponent(flatData[key]); })
+            .join('&');
+    }
+
     convertFormDataToJson(formData) {
         // Process to a flat object with array values
-        let flatData = Object.fromEntries(
-            Array.from(formData.keys()).map(key => [
-                key,
-                key.endsWith('[]')
-                    ? formData.getAll(key)
-                    : formData.getAll(key).pop()
-            ])
-        );
+        let flatData = this.formDataToArray(formData);
 
         // Process HTML names to a nested object
         let jsonData = {};
@@ -127,6 +136,17 @@ export class Data
         }
 
         return jsonData;
+    }
+
+    formDataToArray(formData) {
+        return Object.fromEntries(
+            Array.from(formData.keys()).map(key => [
+                key,
+                key.endsWith('[]')
+                    ? formData.getAll(key)
+                    : formData.getAll(key).pop()
+            ])
+        );
     }
 
     nameToArray(fieldName) {

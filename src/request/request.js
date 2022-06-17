@@ -25,6 +25,8 @@ export class Request
         return {
             handler: null,
             update: {},
+            files: false,
+            bulk: false,
             progressBarDelay: 500,
             progressBar: false
         }
@@ -38,10 +40,21 @@ export class Request
             return;
         }
 
+        // Prepare data
+        const dataObj = new Data(this.options.data, this.el, this.formEl);
+        let data;
+        if (this.options.files) {
+            data = dataObj.getAsFormData();
+        }
+        else if (this.options.bulk) {
+            data = dataObj.getAsJsonData();
+        }
+        else {
+            data = dataObj.getAsQueryString();
+        }
+
         // Prepare request
         const { url, headers, method } = Options.fetch(this.handler, this.options);
-        const dataObj = new Data(this.options.data, this.el, this.formEl);
-        const data = this.options.files ? dataObj.getAsFormData() : dataObj.getAsJsonData();
         this.request = new HttpRequest(this, url, { method, headers, data, trackAbort: true });
         this.promise = new Deferred({ delegate: this.request });
         this.isRedirect = this.options.redirect && this.options.redirect.length > 0;
