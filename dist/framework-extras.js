@@ -1627,7 +1627,7 @@ var RequestBuilder = /*#__PURE__*/function () {
     // so it should bubble up but also capture the ogElement in case it is
     // a button that contains data-request-data.
     function findElement(element) {
-      if (element === document) {
+      if (!element || element === document) {
         return null;
       }
 
