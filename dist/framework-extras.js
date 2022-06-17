@@ -205,17 +205,18 @@ var Controller = /*#__PURE__*/function () {
   }, {
     key: "flashMessageBind",
     value: function flashMessageBind(event) {
+      var self = this;
       var options = event.detail.context.options;
 
       options.handleErrorMessage = function (message) {
-        this.flashMessage.show({
+        self.flashMessage.show({
           message: message,
           type: 'error'
         });
       };
 
       options.handleFlashMessage = function (message, type) {
-        this.flashMessage.show({
+        self.flashMessage.show({
           message: message,
           type: type
         });
@@ -2677,7 +2678,6 @@ var Request = /*#__PURE__*/function () {
       handler: handler,
       options: this.options
     };
-    this.actions = new _actions__WEBPACK_IMPORTED_MODULE_1__.Actions(this, this.context, options || {});
     this.progressBar = new _extras_progress_bar__WEBPACK_IMPORTED_MODULE_5__.ProgressBar();
 
     this.showProgressBar = function () {
@@ -2688,8 +2688,11 @@ var Request = /*#__PURE__*/function () {
   _createClass(Request, [{
     key: "start",
     value: function start() {
+      // Setup
       this.notifyApplicationAjaxSetup();
-      this.initOtherElements();
+      this.initOtherElements(); // Prepare actions
+
+      this.actions = new _actions__WEBPACK_IMPORTED_MODULE_1__.Actions(this, this.context, this.options);
 
       if (!this.validateClientSideForm() || !this.applicationAllowsRequest()) {
         return;

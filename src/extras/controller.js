@@ -83,14 +83,15 @@ export class Controller
 
     // Flash message
     flashMessageBind(event) {
+        var self = this;
         const { options } = event.detail.context;
 
         options.handleErrorMessage = function(message) {
-            this.flashMessage.show({ message, type: 'error' });
+            self.flashMessage.show({ message, type: 'error' });
         }
 
         options.handleFlashMessage = function(message, type) {
-            this.flashMessage.show({ message, type });
+            self.flashMessage.show({ message, type });
         }
     }
 

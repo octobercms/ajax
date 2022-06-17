@@ -13,7 +13,6 @@ export class Request
         this.handler = handler;
         this.options = { ...this.constructor.DEFAULTS, ...(options || {}) };
         this.context = { el: element, handler: handler, options: this.options };
-        this.actions = new Actions(this, this.context, options || {});
 
         this.progressBar = new ProgressBar;
         this.showProgressBar = () => {
@@ -33,9 +32,12 @@ export class Request
     }
 
     start() {
+        // Setup
         this.notifyApplicationAjaxSetup();
         this.initOtherElements();
 
+        // Prepare actions
+        this.actions = new Actions(this, this.context, this.options);
         if (!this.validateClientSideForm() || !this.applicationAllowsRequest()) {
             return;
         }
