@@ -136,6 +136,9 @@ export class Actions
     // Custom function, focus fields with errors
     handleValidationMessage(message, fields) {
         this.delegate.notifyApplicationBeforeValidate(message, fields);
+        if (!this.delegate.formEl) {
+            return;
+        }
 
         var isFirstInvalidField = true;
         for (var fieldName in fields) {

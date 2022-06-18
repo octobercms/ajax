@@ -1325,6 +1325,11 @@ var Actions = /*#__PURE__*/function () {
     key: "handleValidationMessage",
     value: function handleValidationMessage(message, fields) {
       this.delegate.notifyApplicationBeforeValidate(message, fields);
+
+      if (!this.delegate.formEl) {
+        return;
+      }
+
       var isFirstInvalidField = true;
 
       for (var fieldName in fields) {
