@@ -91,23 +91,21 @@ export class Migrate
     }
 
     // For instances where data() is populated in the jQ instance
-    // Bind to native and prevent recursion with event once
     migratejQueryAttachData(target, eventName, selector) {
-        $(target).one(eventName, selector, function(ev) {
+        $(target).on(eventName, selector, function() {
             var dataObj = $(this).data('request-data');
-            if (dataObj) {
-                if (dataObj.constructor === {}.constructor) {
-                    $(this).one('ajaxSetup', function(event, context) {
-                        Object.assign(context.options.data, dataObj);
-                    });
-                }
-                else if (typeof dataObj === 'string') {
-                    this.dataset.requestData = dataObj;
-                }
+            if (!dataObj) {
+                return;
             }
 
-            ev.currentTarget.dispatchEvent(new Event('click'));
-            this.migratejQueryAttachData(target, eventName, selector);
+            if (dataObj.constructor === {}.constructor) {
+                $(this).one('ajaxSetup', function(event, context) {
+                    Object.assign(context.options.data, dataObj);
+                });
+            }
+            else if (typeof dataObj === 'string') {
+                this.dataset.requestData = dataObj;
+            }
         });
     }
 }
