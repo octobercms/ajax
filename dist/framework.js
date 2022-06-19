@@ -1758,10 +1758,10 @@ var Data = /*#__PURE__*/function () {
       return Object.keys(flatData).map(function (key) {
         if (key.endsWith('[]')) {
           return flatData[key].map(function (val) {
-            return key + '=' + val;
+            return key + '=' + encodeURIComponent(val);
           }).join('&');
         } else {
-          return key + '=' + flatData[key];
+          return key + '=' + encodeURIComponent(flatData[key]);
         }
       }).join('&');
     }
