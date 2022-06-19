@@ -1446,12 +1446,12 @@ var Actions = /*#__PURE__*/function () {
 
 function resolveSelectorResponse(selector) {
   // Invalid selector
-  if (['#', '.', '@', '^', '!'].indexOf(selector.charAt(0)) === -1) {
+  if (['#', '.', '@', '^', '!', '='].indexOf(selector.charAt(0)) === -1) {
     return [];
-  } // Prepend, append or replace with
+  } // Prepend, append, replace with or custom selector
 
 
-  if (['@', '^', '!'].indexOf(selector.charAt(0)) !== -1) {
+  if (['@', '^', '!', '='].indexOf(selector.charAt(0)) !== -1) {
     selector = selector.substring(1);
   }
 
