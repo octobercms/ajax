@@ -5347,6 +5347,7 @@ var Visit = /*#__PURE__*/function () {
           htmlOnly: true
         };
         options.headers['Accept'] = 'text/html, application/xhtml+xml';
+        options.headers['X-PJAX'] = 1;
 
         if (this.referrer) {
           options.headers['X-OCTOBER-REFERRER'] = _location__WEBPACK_IMPORTED_MODULE_1__.Location.wrap(this.referrer).absoluteURL;
