@@ -22,13 +22,13 @@ export class RequestBuilder
         this.assignAsData('confirm', 'requestConfirm');
         this.assignAsData('redirect', 'requestRedirect');
         this.assignAsData('loading', 'requestLoading');
-        this.assignAsData('flash', 'requestFlash');
-        this.assignAsData('files', 'requestFiles');
-        this.assignAsData('bulk', 'requestBulk');
         this.assignAsData('form', 'requestForm');
         this.assignAsData('url', 'requestUrl');
-        this.assignAsData('update', 'requestUpdate', true);
-        this.assignAsData('browserValidate', 'browserValidate');
+        this.assignAsData('update', 'requestUpdate', { parseJson: true });
+        this.assignAsData('bulk', 'requestBulk', { emptyAsTrue: true });
+        this.assignAsData('files', 'requestFiles', { emptyAsTrue: true });
+        this.assignAsData('flash', 'requestFlash', { emptyAsTrue: true });
+        this.assignAsData('browserValidate', 'browserValidate', { emptyAsTrue: true });
 
         this.assignRequestData();
 
@@ -102,7 +102,7 @@ export class RequestBuilder
         }
     }
 
-    assignAsData(optionName, name, parseJson = false) {
+    assignAsData(optionName, name, { parseJson = false, emptyAsTrue = false } = {}) {
         var attrVal;
         if (this.element.dataset[name]) {
             attrVal = this.element.dataset[name];
@@ -122,12 +122,16 @@ export class RequestBuilder
             );
         }
         else {
-            this.options[optionName] = this.castAttrToOption(attrVal);
+            this.options[optionName] = this.castAttrToOption(attrVal, emptyAsTrue);
         }
     }
 
-    castAttrToOption(val) {
-        if (val === '' || val === 'true' || val === '1') {
+    castAttrToOption(val, emptyAsTrue) {
+        if (emptyAsTrue && val === '') {
+            return true;
+        }
+
+        if (val === 'true' || val === '1') {
             return true;
         }
 

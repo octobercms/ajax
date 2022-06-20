@@ -1599,13 +1599,23 @@ var RequestBuilder = /*#__PURE__*/function () {
     this.assignAsData('confirm', 'requestConfirm');
     this.assignAsData('redirect', 'requestRedirect');
     this.assignAsData('loading', 'requestLoading');
-    this.assignAsData('flash', 'requestFlash');
-    this.assignAsData('files', 'requestFiles');
-    this.assignAsData('bulk', 'requestBulk');
     this.assignAsData('form', 'requestForm');
     this.assignAsData('url', 'requestUrl');
-    this.assignAsData('update', 'requestUpdate', true);
-    this.assignAsData('browserValidate', 'browserValidate');
+    this.assignAsData('update', 'requestUpdate', {
+      parseJson: true
+    });
+    this.assignAsData('bulk', 'requestBulk', {
+      emptyAsTrue: true
+    });
+    this.assignAsData('files', 'requestFiles', {
+      emptyAsTrue: true
+    });
+    this.assignAsData('flash', 'requestFlash', {
+      emptyAsTrue: true
+    });
+    this.assignAsData('browserValidate', 'browserValidate', {
+      emptyAsTrue: true
+    });
     this.assignRequestData();
 
     if (!handler) {
@@ -1683,7 +1693,12 @@ var RequestBuilder = /*#__PURE__*/function () {
   }, {
     key: "assignAsData",
     value: function assignAsData(optionName, name) {
-      var parseJson = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+      var _ref = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {},
+          _ref$parseJson = _ref.parseJson,
+          parseJson = _ref$parseJson === void 0 ? false : _ref$parseJson,
+          _ref$emptyAsTrue = _ref.emptyAsTrue,
+          emptyAsTrue = _ref$emptyAsTrue === void 0 ? false : _ref$emptyAsTrue;
+
       var attrVal;
 
       if (this.element.dataset[name]) {
@@ -1699,13 +1714,17 @@ var RequestBuilder = /*#__PURE__*/function () {
       if (parseJson) {
         this.options[optionName] = _json_parser__WEBPACK_IMPORTED_MODULE_1__.JsonParser.paramToObj('data-' + normalizeDataKey(name), attrVal);
       } else {
-        this.options[optionName] = this.castAttrToOption(attrVal);
+        this.options[optionName] = this.castAttrToOption(attrVal, emptyAsTrue);
       }
     }
   }, {
     key: "castAttrToOption",
-    value: function castAttrToOption(val) {
-      if (val === '' || val === 'true' || val === '1') {
+    value: function castAttrToOption(val, emptyAsTrue) {
+      if (emptyAsTrue && val === '') {
+        return true;
+      }
+
+      if (val === 'true' || val === '1') {
         return true;
       }
 
