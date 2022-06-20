@@ -177,40 +177,6 @@ function getElementEvents(element) {
     return eventRegistry[uid];
 }
 
-function internalHandler(element, fn) {
-    return function handler(event) {
-        event.delegateTarget = element;
-
-        if (handler.oneOff) {
-            Events.off(element, event.type, fn);
-        }
-
-        return fn.apply(element, [event]);
-    }
-}
-
-function internalDelegationHandler(element, selector, fn) {
-    return function handler(event) {
-        const domElements = element.querySelectorAll(selector);
-
-        for (let { target } = event; target && target !== this; target = target.parentNode) {
-            for (const domElement of domElements) {
-                if (domElement !== target) {
-                    continue;
-                }
-
-                event.delegateTarget = target;
-
-                if (handler.oneOff) {
-                    Events.off(element, event.type, selector, fn);
-                }
-
-                return fn.apply(target, [event]);
-            }
-        }
-    }
-}
-
 function findHandler(events, callable, delegationSelector = null) {
     return Object.values(events)
         .find(event => event.callable === callable && event.delegationSelector === delegationSelector);
@@ -281,6 +247,40 @@ function removeHandler(element, events, typeEvent, handler, delegationSelector) 
 
     element.removeEventListener(typeEvent, fn);
     delete events[typeEvent][fn.uidEvent];
+}
+
+function internalHandler(element, fn) {
+    return function handler(event) {
+        event.delegateTarget = element;
+
+        if (handler.oneOff) {
+            Events.off(element, event.type, fn);
+        }
+
+        return fn.apply(element, [event]);
+    }
+}
+
+function internalDelegationHandler(element, selector, fn) {
+    return function handler(event) {
+        const domElements = element.querySelectorAll(selector);
+
+        for (let { target } = event; target && target !== this; target = target.parentNode) {
+            for (const domElement of domElements) {
+                if (domElement !== target) {
+                    continue;
+                }
+
+                event.delegateTarget = target;
+
+                if (handler.oneOff) {
+                    Events.off(element, event.type, selector, fn);
+                }
+
+                return fn.apply(target, [event]);
+            }
+        }
+    }
 }
 
 function removeNamespacedHandlers(element, events, typeEvent, namespace) {

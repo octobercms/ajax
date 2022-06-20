@@ -261,7 +261,7 @@ function resolveSelectorResponse(selector) {
         return [];
     }
 
-    // Prepend, append, replace with or custom selector
+    // Append, prepend, replace with or custom selector
     if (['@', '^', '!', '='].indexOf(selector.charAt(0)) !== -1) {
         selector = selector.substring(1);
     }

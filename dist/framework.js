@@ -1448,7 +1448,7 @@ function resolveSelectorResponse(selector) {
   // Invalid selector
   if (['#', '.', '@', '^', '!', '='].indexOf(selector.charAt(0)) === -1) {
     return [];
-  } // Prepend, append, replace with or custom selector
+  } // Append, prepend, replace with or custom selector
 
 
   if (['@', '^', '!', '='].indexOf(selector.charAt(0)) !== -1) {
@@ -2896,51 +2896,6 @@ function getElementEvents(element) {
   return eventRegistry[uid];
 }
 
-function internalHandler(element, fn) {
-  return function handler(event) {
-    event.delegateTarget = element;
-
-    if (handler.oneOff) {
-      Events.off(element, event.type, fn);
-    }
-
-    return fn.apply(element, [event]);
-  };
-}
-
-function internalDelegationHandler(element, selector, fn) {
-  return function handler(event) {
-    var domElements = element.querySelectorAll(selector);
-
-    for (var target = event.target; target && target !== this; target = target.parentNode) {
-      var _iterator = _createForOfIteratorHelper(domElements),
-          _step;
-
-      try {
-        for (_iterator.s(); !(_step = _iterator.n()).done;) {
-          var domElement = _step.value;
-
-          if (domElement !== target) {
-            continue;
-          }
-
-          event.delegateTarget = target;
-
-          if (handler.oneOff) {
-            Events.off(element, event.type, selector, fn);
-          }
-
-          return fn.apply(target, [event]);
-        }
-      } catch (err) {
-        _iterator.e(err);
-      } finally {
-        _iterator.f();
-      }
-    }
-  };
-}
-
 function findHandler(events, callable) {
   var delegationSelector = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
   return Object.values(events).find(function (event) {
@@ -3013,6 +2968,51 @@ function removeHandler(element, events, typeEvent, handler, delegationSelector) 
 
   element.removeEventListener(typeEvent, fn);
   delete events[typeEvent][fn.uidEvent];
+}
+
+function internalHandler(element, fn) {
+  return function handler(event) {
+    event.delegateTarget = element;
+
+    if (handler.oneOff) {
+      Events.off(element, event.type, fn);
+    }
+
+    return fn.apply(element, [event]);
+  };
+}
+
+function internalDelegationHandler(element, selector, fn) {
+  return function handler(event) {
+    var domElements = element.querySelectorAll(selector);
+
+    for (var target = event.target; target && target !== this; target = target.parentNode) {
+      var _iterator = _createForOfIteratorHelper(domElements),
+          _step;
+
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+          var domElement = _step.value;
+
+          if (domElement !== target) {
+            continue;
+          }
+
+          event.delegateTarget = target;
+
+          if (handler.oneOff) {
+            Events.off(element, event.type, selector, fn);
+          }
+
+          return fn.apply(target, [event]);
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
+    }
+  };
 }
 
 function removeNamespacedHandlers(element, events, typeEvent, namespace) {
