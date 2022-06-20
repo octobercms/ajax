@@ -862,8 +862,11 @@ var Controller = /*#__PURE__*/function () {
   }, {
     key: "documentOnClick",
     value: function documentOnClick(event) {
-      event.preventDefault();
-      _request_builder__WEBPACK_IMPORTED_MODULE_1__.RequestBuilder.fromElement(event.target);
+      event.preventDefault(); // Wait for onclick to change attributes
+
+      (0,_util__WEBPACK_IMPORTED_MODULE_2__.defer)(function () {
+        _request_builder__WEBPACK_IMPORTED_MODULE_1__.RequestBuilder.fromElement(event.target);
+      });
     }
   }, {
     key: "documentOnChange",
