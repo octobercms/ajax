@@ -1,4 +1,5 @@
 import { RequestBuilder } from '../framework/request-builder';
+import { JsonParser } from "./json-parser";
 
 export class Migrate
 {
@@ -65,7 +66,7 @@ export class Migrate
         this.migratejQueryEvent(window, 'ajax:error-message', 'ajaxErrorMessage', ['message']);
 
         // Data adapter
-        this.migratejQueryAttachData(document, 'click', 'a[data-request], button[data-request], input[type=button][data-request], input[type=submit][data-request]');
+        this.migratejQueryAttachData(document, 'ajax:setup', 'a[data-request], button[data-request], input[type=button][data-request], input[type=submit][data-request]');
     }
 
     // Private
@@ -99,19 +100,18 @@ export class Migrate
 
     // For instances where data() is populated in the jQ instance
     migratejQueryAttachData(target, eventName, selector) {
-        $(target).on(eventName, selector, function() {
+        $(target).on(eventName, selector, function(event) {
             var dataObj = $(this).data('request-data');
             if (!dataObj) {
                 return;
             }
 
+            var options = event.detail.context.options;
             if (dataObj.constructor === {}.constructor) {
-                $(this).one('ajaxSetup', function(event, context) {
-                    Object.assign(context.options.data, dataObj);
-                });
+                Object.assign(options.data, dataObj);
             }
             else if (typeof dataObj === 'string') {
-                this.dataset.requestData = dataObj;
+                Object.assign(options.data, JsonParser.paramToObj('request-data', dataObj));
             }
         });
     }

@@ -793,13 +793,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _util_events__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../util/events */ "./src/util/events.js");
 /* harmony import */ var _request_builder__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./request-builder */ "./src/framework/request-builder.js");
-/* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../util */ "./src/util/index.js");
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
-
 
 
 
@@ -862,11 +860,8 @@ var Controller = /*#__PURE__*/function () {
   }, {
     key: "documentOnClick",
     value: function documentOnClick(event) {
-      event.preventDefault(); // Wait for onclick to change attributes
-
-      (0,_util__WEBPACK_IMPORTED_MODULE_2__.defer)(function () {
-        _request_builder__WEBPACK_IMPORTED_MODULE_1__.RequestBuilder.fromElement(event.target);
-      });
+      event.preventDefault();
+      _request_builder__WEBPACK_IMPORTED_MODULE_1__.RequestBuilder.fromElement(event.target);
     }
   }, {
     key: "documentOnChange",
@@ -1395,6 +1390,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "Migrate": () => (/* binding */ Migrate)
 /* harmony export */ });
 /* harmony import */ var _framework_request_builder__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../framework/request-builder */ "./src/framework/request-builder.js");
+/* harmony import */ var _json_parser__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./json-parser */ "./src/framework/json-parser.js");
 function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -1402,6 +1398,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+
 
 
 var Migrate = /*#__PURE__*/function () {
@@ -1472,7 +1469,7 @@ var Migrate = /*#__PURE__*/function () {
       this.migratejQueryEvent(window, 'ajax:confirm-message', 'ajaxConfirmMessage', ['message', 'promise']);
       this.migratejQueryEvent(window, 'ajax:error-message', 'ajaxErrorMessage', ['message']); // Data adapter
 
-      this.migratejQueryAttachData(document, 'click', 'a[data-request], button[data-request], input[type=button][data-request], input[type=submit][data-request]');
+      this.migratejQueryAttachData(document, 'ajax:setup', 'a[data-request], button[data-request], input[type=button][data-request], input[type=submit][data-request]');
     } // Private
 
   }, {
@@ -1509,19 +1506,19 @@ var Migrate = /*#__PURE__*/function () {
   }, {
     key: "migratejQueryAttachData",
     value: function migratejQueryAttachData(target, eventName, selector) {
-      $(target).on(eventName, selector, function () {
+      $(target).on(eventName, selector, function (event) {
         var dataObj = $(this).data('request-data');
 
         if (!dataObj) {
           return;
         }
 
+        var options = event.detail.context.options;
+
         if (dataObj.constructor === {}.constructor) {
-          $(this).one('ajaxSetup', function (event, context) {
-            Object.assign(context.options.data, dataObj);
-          });
+          Object.assign(options.data, dataObj);
         } else if (typeof dataObj === 'string') {
-          this.dataset.requestData = dataObj;
+          Object.assign(options.data, _json_parser__WEBPACK_IMPORTED_MODULE_1__.JsonParser.paramToObj('request-data', dataObj));
         }
       });
     }
