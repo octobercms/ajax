@@ -245,17 +245,17 @@ export class Visit
     // Private
     getHistoryMethodForAction(action) {
         switch (action) {
-            case "replace":
+            case 'replace':
                 return this.controller.replaceHistoryWithLocationAndRestorationIdentifier;
 
-            case "advance":
-            case "restore":
+            case 'advance':
+            case 'restore':
                 return this.controller.pushHistoryWithLocationAndRestorationIdentifier;
         }
     }
 
     shouldIssueRequest() {
-        if (this.action == "restore") {
+        if (this.action == 'restore') {
             return !this.hasCachedSnapshot();
         }
         else if (this.isSamePage) {

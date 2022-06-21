@@ -3335,6 +3335,7 @@ var Controller = /*#__PURE__*/function () {
     this.history = new _history__WEBPACK_IMPORTED_MODULE_1__.History(this);
     this.restorationData = {};
     this.scrollManager = new _scroll_manager__WEBPACK_IMPORTED_MODULE_3__.ScrollManager(this);
+    this.useScroll = true;
     this.view = new _view__WEBPACK_IMPORTED_MODULE_6__.View(this);
     this.cache = new _snapshot_cache__WEBPACK_IMPORTED_MODULE_4__.SnapshotCache(10);
     this.enabled = true;
@@ -3422,6 +3423,7 @@ var Controller = /*#__PURE__*/function () {
 
       if (this.applicationAllowsVisitingLocation(location)) {
         if (this.locationIsVisitable(location)) {
+          this.useScroll = options.scroll !== false;
           var action = options.action || 'advance';
           this.adapter.visitProposedToLocationWithAction(location, action);
         } else {
@@ -3482,7 +3484,7 @@ var Controller = /*#__PURE__*/function () {
         this.location = location;
         this.restorationIdentifier = restorationIdentifier;
         var restorationData = this.getRestorationDataForIdentifier(restorationIdentifier);
-        this.startVisit(location, "restore", {
+        this.startVisit(location, 'restore', {
           restorationIdentifier: restorationIdentifier,
           restorationData: restorationData,
           historyChanged: true
@@ -3696,6 +3698,7 @@ var Controller = /*#__PURE__*/function () {
       }
 
       this.currentVisit = this.createVisit(location, action, properties);
+      this.currentVisit.scrolled = !this.useScroll;
       this.currentVisit.start();
       this.notifyApplicationAfterVisitingLocation(location);
     }
@@ -3733,7 +3736,7 @@ var Controller = /*#__PURE__*/function () {
   }, {
     key: "getVisitableLocationForLink",
     value: function getVisitableLocationForLink(link) {
-      var location = new _location__WEBPACK_IMPORTED_MODULE_2__.Location(link.getAttribute("href") || "");
+      var location = new _location__WEBPACK_IMPORTED_MODULE_2__.Location(link.getAttribute('href') || '');
 
       if (this.locationIsVisitable(location)) {
         return location;
@@ -3743,12 +3746,12 @@ var Controller = /*#__PURE__*/function () {
     key: "getActionForLink",
     value: function getActionForLink(link) {
       var action = link.getAttribute('data-turbo-action');
-      return this.isAction(action) ? action : "advance";
+      return this.isAction(action) ? action : 'advance';
     }
   }, {
     key: "isAction",
     value: function isAction(action) {
-      return action == "advance" || action == "replace" || action == "restore";
+      return action == 'advance' || action == 'replace' || action == 'restore';
     }
   }, {
     key: "documentIsEnabled",
@@ -5564,18 +5567,18 @@ var Visit = /*#__PURE__*/function () {
     key: "getHistoryMethodForAction",
     value: function getHistoryMethodForAction(action) {
       switch (action) {
-        case "replace":
+        case 'replace':
           return this.controller.replaceHistoryWithLocationAndRestorationIdentifier;
 
-        case "advance":
-        case "restore":
+        case 'advance':
+        case 'restore':
           return this.controller.pushHistoryWithLocationAndRestorationIdentifier;
       }
     }
   }, {
     key: "shouldIssueRequest",
     value: function shouldIssueRequest() {
-      if (this.action == "restore") {
+      if (this.action == 'restore') {
         return !this.hasCachedSnapshot();
       } else if (this.isSamePage) {
         return false;

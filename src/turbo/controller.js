@@ -14,6 +14,7 @@ export class Controller
         this.history = new History(this);
         this.restorationData = {};
         this.scrollManager = new ScrollManager(this);
+        this.useScroll = true;
         this.view = new View(this);
         this.cache = new SnapshotCache(10);
         this.enabled = true;
@@ -85,6 +86,7 @@ export class Controller
         location = Location.wrap(location);
         if (this.applicationAllowsVisitingLocation(location)) {
             if (this.locationIsVisitable(location)) {
+                this.useScroll = options.scroll !== false;
                 const action = options.action || 'advance';
                 this.adapter.visitProposedToLocationWithAction(location, action);
             }
@@ -138,7 +140,7 @@ export class Controller
             this.location = location;
             this.restorationIdentifier = restorationIdentifier;
             const restorationData = this.getRestorationDataForIdentifier(restorationIdentifier);
-            this.startVisit(location, "restore", { restorationIdentifier, restorationData, historyChanged: true });
+            this.startVisit(location, 'restore', { restorationIdentifier, restorationData, historyChanged: true });
         }
         else {
             this.adapter.pageInvalidated();
@@ -278,6 +280,7 @@ export class Controller
             this.currentVisit.cancel();
         }
         this.currentVisit = this.createVisit(location, action, properties);
+        this.currentVisit.scrolled = !this.useScroll;
         this.currentVisit.start();
         this.notifyApplicationAfterVisitingLocation(location);
     }
@@ -316,7 +319,7 @@ export class Controller
     }
 
     getVisitableLocationForLink(link) {
-        const location = new Location(link.getAttribute("href") || "");
+        const location = new Location(link.getAttribute('href') || '');
         if (this.locationIsVisitable(location)) {
             return location;
         }
@@ -324,11 +327,11 @@ export class Controller
 
     getActionForLink(link) {
         const action = link.getAttribute('data-turbo-action');
-        return this.isAction(action) ? action : "advance";
+        return this.isAction(action) ? action : 'advance';
     }
 
     isAction(action) {
-        return action == "advance" || action == "replace" || action == "restore";
+        return action == 'advance' || action == 'replace' || action == 'restore';
     }
 
     documentIsEnabled() {
