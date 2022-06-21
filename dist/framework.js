@@ -1081,10 +1081,14 @@ var RequestBuilder = /*#__PURE__*/function () {
 
         if (otherFunc) {
           return otherFunc(data, responseCode, xhr);
-        } // The other function wasn't supplied, keep logic going
+        } // The other function wasn't supplied, keep logic going.
+        // beforeUpdate and afterUpdate are not part of context
+        // since they have no base logic and won't exist here
 
 
-        return this[optionName](data, responseCode, xhr);
+        if (this[optionName]) {
+          return this[optionName](data, responseCode, xhr);
+        }
       };
     }
   }, {
@@ -1234,9 +1238,13 @@ var Actions = /*#__PURE__*/function () {
     value: function invoke(method, args) {
       if (this.options[method]) {
         return this.options[method].apply(this.context, args);
-      }
+      } // beforeUpdate and afterUpdate are not part of context
+      // since they have no base logic and won't exist here
 
-      return this[method].apply(this, _toConsumableArray(args));
+
+      if (this[method]) {
+        return this[method].apply(this, _toConsumableArray(args));
+      }
     } // Public
 
   }, {
@@ -1306,13 +1314,7 @@ var Actions = /*#__PURE__*/function () {
     key: "complete",
     value: function complete(data, responseCode, xhr) {
       this.delegate.notifyApplicationRequestComplete(data, responseCode, xhr);
-    }
-  }, {
-    key: "beforeUpdate",
-    value: function beforeUpdate(data, responseCode, xhr) {}
-  }, {
-    key: "afterUpdate",
-    value: function afterUpdate(data, responseCode, xhr) {} // Custom function, requests confirmation from the user
+    } // Custom function, requests confirmation from the user
 
   }, {
     key: "handleConfirmMessage",

@@ -21,7 +21,11 @@ export class Actions
             return this.options[method].apply(this.context, args);
         }
 
-        return this[method](...args);
+        // beforeUpdate and afterUpdate are not part of context
+        // since they have no base logic and won't exist here
+        if (this[method]) {
+            return this[method](...args);
+        }
     }
 
     // Public
@@ -94,12 +98,6 @@ export class Actions
 
     complete(data, responseCode, xhr) {
         this.delegate.notifyApplicationRequestComplete(data, responseCode, xhr);
-    }
-
-    beforeUpdate(data, responseCode, xhr) {
-    }
-
-    afterUpdate(data, responseCode, xhr) {
     }
 
     // Custom function, requests confirmation from the user

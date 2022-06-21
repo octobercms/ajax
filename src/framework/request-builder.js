@@ -97,8 +97,12 @@ export class RequestBuilder
                 return otherFunc(data, responseCode, xhr);
             }
 
-            // The other function wasn't supplied, keep logic going
-            return this[optionName](data, responseCode, xhr);
+            // The other function wasn't supplied, keep logic going.
+            // beforeUpdate and afterUpdate are not part of context
+            // since they have no base logic and won't exist here
+            if (this[optionName]) {
+                return this[optionName](data, responseCode, xhr);
+            }
         }
     }
 
