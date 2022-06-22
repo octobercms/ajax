@@ -1,4 +1,4 @@
-export var DeferredStateCode = {
+export var DeferredState = {
     pending: 'pending',
     rejected: 'rejected',
     resolved: 'resolved'
@@ -26,7 +26,7 @@ export class Deferred
         if (this.stateStr === DeferredState.pending) {
             this.resolveArgs = arguments;
             this.callFunction.call(this, this.successFuncs, this.resolveArgs);
-            this.stateStr = DeferredStateCode.resolved;
+            this.stateStr = DeferredState.resolved;
         }
 
         return this;
@@ -36,7 +36,7 @@ export class Deferred
         if (this.stateStr === DeferredState.pending) {
             this.rejectArgs = arguments;
             this.callFunction.call(this, this.failureFuncs, this.rejectArgs);
-            this.stateStr = DeferredStateCode.rejected;
+            this.stateStr = DeferredState.rejected;
         }
 
         return this;
@@ -59,7 +59,7 @@ export class Deferred
         var argumentsArray = Array.prototype.slice.call(arguments);
         this.successFuncs = this.successFuncs.concat(argumentsArray);
 
-        if (this.stateStr === DeferredStateCode.resolved) {
+        if (this.stateStr === DeferredState.resolved) {
             this.callFunction.call(this, argumentsArray, this.resolveArgs);
         }
 
@@ -70,7 +70,7 @@ export class Deferred
         var argumentsArray = Array.prototype.slice.call(arguments);
         this.failureFuncs = this.failureFuncs.concat(argumentsArray);
 
-        if (this.stateStr === DeferredStateCode.rejected) {
+        if (this.stateStr === DeferredState.rejected) {
             this.callFunction.call(this, argumentsArray, this.rejectArgs);
         }
 
