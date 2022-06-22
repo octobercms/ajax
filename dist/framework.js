@@ -2558,7 +2558,8 @@ var Request = /*#__PURE__*/function () {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "Deferred": () => (/* binding */ Deferred)
+/* harmony export */   "Deferred": () => (/* binding */ Deferred),
+/* harmony export */   "DeferredStateCode": () => (/* binding */ DeferredStateCode)
 /* harmony export */ });
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -2566,12 +2567,17 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
 
+var DeferredStateCode = {
+  pending: 'pending',
+  rejected: 'rejected',
+  resolved: 'resolved'
+};
 var Deferred = /*#__PURE__*/function () {
   function Deferred(options) {
     _classCallCheck(this, Deferred);
 
     this.options = options || {};
-    this.stateStr = 'pending';
+    this.stateStr = DeferredState.pending;
     this.successFuncs = [];
     this.failureFuncs = [];
     this.progressFuncs = [];
@@ -2585,10 +2591,10 @@ var Deferred = /*#__PURE__*/function () {
   _createClass(Deferred, [{
     key: "resolve",
     value: function resolve() {
-      if (this.stateStr === 'pending') {
+      if (this.stateStr === DeferredState.pending) {
         this.resolveArgs = arguments;
         this.callFunction.call(this, this.successFuncs, this.resolveArgs);
-        this.stateStr = 'resolved';
+        this.stateStr = DeferredStateCode.resolved;
       }
 
       return this;
@@ -2596,10 +2602,10 @@ var Deferred = /*#__PURE__*/function () {
   }, {
     key: "reject",
     value: function reject() {
-      if (this.stateStr === 'pending') {
+      if (this.stateStr === DeferredState.pending) {
         this.rejectArgs = arguments;
         this.callFunction.call(this, this.failureFuncs, this.rejectArgs);
-        this.stateStr = 'rejected';
+        this.stateStr = DeferredStateCode.rejected;
       }
 
       return this;
@@ -2607,7 +2613,7 @@ var Deferred = /*#__PURE__*/function () {
   }, {
     key: "notify",
     value: function notify() {
-      if (this.stateStr === 'pending') {
+      if (this.stateStr === DeferredState.pending) {
         this.progressArgs = arguments;
         this.callFunction.call(this, this.progressFuncs, this.progressArgs);
         this.isProgressNotified = true;
@@ -2626,7 +2632,7 @@ var Deferred = /*#__PURE__*/function () {
       var argumentsArray = Array.prototype.slice.call(arguments);
       this.successFuncs = this.successFuncs.concat(argumentsArray);
 
-      if (this.stateStr === 'resolved') {
+      if (this.stateStr === DeferredStateCode.resolved) {
         this.callFunction.call(this, argumentsArray, this.resolveArgs);
       }
 
@@ -2638,7 +2644,7 @@ var Deferred = /*#__PURE__*/function () {
       var argumentsArray = Array.prototype.slice.call(arguments);
       this.failureFuncs = this.failureFuncs.concat(argumentsArray);
 
-      if (this.stateStr === 'rejected') {
+      if (this.stateStr === DeferredStateCode.rejected) {
         this.callFunction.call(this, argumentsArray, this.rejectArgs);
       }
 
@@ -2650,7 +2656,7 @@ var Deferred = /*#__PURE__*/function () {
       var argumentsArray = Array.prototype.slice.call(arguments);
       this.progressFuncs = this.progressFuncs.concat(argumentsArray);
 
-      if (this.stateStr === 'pending' && this.isProgressNotified) {
+      if (this.stateStr === DeferredState.pending && this.isProgressNotified) {
         this.callFunction.call(this, argumentsArray, this.progressArgs);
       }
 
@@ -2663,7 +2669,7 @@ var Deferred = /*#__PURE__*/function () {
       this.successFuncs = this.successFuncs.concat(argumentsArray);
       this.failureFuncs = this.failureFuncs.concat(argumentsArray);
 
-      if (this.stateStr !== 'pending') {
+      if (this.stateStr !== DeferredState.pending) {
         this.callFunction.call(this, argumentsArray, this.resolveArgs || this.rejectArgs);
       }
 
