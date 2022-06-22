@@ -1,8 +1,14 @@
+export var DeferredStateCode = {
+    pending: 'pending',
+    rejected: 'rejected',
+    resolved: 'resolved'
+}
+
 export class Deferred
 {
     constructor(options) {
         this.options = options || {};
-        this.stateStr = 'pending';
+        this.stateStr = DeferredState.pending;
 
         this.successFuncs = [];
         this.failureFuncs = [];
@@ -17,27 +23,27 @@ export class Deferred
 
     // Public
     resolve() {
-        if (this.stateStr === 'pending') {
+        if (this.stateStr === DeferredState.pending) {
             this.resolveArgs = arguments;
             this.callFunction.call(this, this.successFuncs, this.resolveArgs);
-            this.stateStr = 'resolved';
+            this.stateStr = DeferredStateCode.resolved;
         }
 
         return this;
     }
 
     reject() {
-        if (this.stateStr === 'pending') {
+        if (this.stateStr === DeferredState.pending) {
             this.rejectArgs = arguments;
             this.callFunction.call(this, this.failureFuncs, this.rejectArgs);
-            this.stateStr = 'rejected';
+            this.stateStr = DeferredStateCode.rejected;
         }
 
         return this;
     }
 
     notify() {
-        if (this.stateStr === 'pending') {
+        if (this.stateStr === DeferredState.pending) {
             this.progressArgs = arguments;
             this.callFunction.call(this, this.progressFuncs, this.progressArgs);
             this.isProgressNotified = true;
@@ -53,7 +59,7 @@ export class Deferred
         var argumentsArray = Array.prototype.slice.call(arguments);
         this.successFuncs = this.successFuncs.concat(argumentsArray);
 
-        if (this.stateStr === 'resolved') {
+        if (this.stateStr === DeferredStateCode.resolved) {
             this.callFunction.call(this, argumentsArray, this.resolveArgs);
         }
 
@@ -64,7 +70,7 @@ export class Deferred
         var argumentsArray = Array.prototype.slice.call(arguments);
         this.failureFuncs = this.failureFuncs.concat(argumentsArray);
 
-        if (this.stateStr === 'rejected') {
+        if (this.stateStr === DeferredStateCode.rejected) {
             this.callFunction.call(this, argumentsArray, this.rejectArgs);
         }
 
@@ -75,7 +81,7 @@ export class Deferred
         var argumentsArray = Array.prototype.slice.call(arguments);
         this.progressFuncs = this.progressFuncs.concat(argumentsArray);
 
-        if (this.stateStr === 'pending' && this.isProgressNotified) {
+        if (this.stateStr === DeferredState.pending && this.isProgressNotified) {
             this.callFunction.call(this, argumentsArray, this.progressArgs);
         }
 
@@ -87,7 +93,7 @@ export class Deferred
         this.successFuncs = this.successFuncs.concat(argumentsArray);
         this.failureFuncs = this.failureFuncs.concat(argumentsArray);
 
-        if (this.stateStr !== 'pending') {
+        if (this.stateStr !== DeferredState.pending) {
             this.callFunction.call(this, argumentsArray, this.resolveArgs || this.rejectArgs);
         }
 
