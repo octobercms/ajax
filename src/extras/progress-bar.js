@@ -48,7 +48,11 @@ export class ProgressBar
         };
     }
 
-    show() {
+    show(options = {}) {
+        if (options.cssClass) {
+            this.progressElement.classList.add(options.cssClass);
+        }
+
         if (!this.visible) {
             this.visible = true;
             this.installStylesheetElement();

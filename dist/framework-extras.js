@@ -540,6 +540,12 @@ var ProgressBar = /*#__PURE__*/function () {
   _createClass(ProgressBar, [{
     key: "show",
     value: function show() {
+      var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+      if (options.cssClass) {
+        this.progressElement.classList.add(options.cssClass);
+      }
+
       if (!this.visible) {
         this.visible = true;
         this.installStylesheetElement();
@@ -2711,7 +2717,9 @@ var Request = /*#__PURE__*/function () {
     this.progressBar = new _extras_progress_bar__WEBPACK_IMPORTED_MODULE_5__.ProgressBar();
 
     this.showProgressBar = function () {
-      _this.progressBar.show();
+      _this.progressBar.show({
+        cssClass: 'is-ajax'
+      });
     };
   }
 
@@ -3189,7 +3197,9 @@ var BrowserAdapter = /*#__PURE__*/function () {
     this.progressBar = new _extras_progress_bar__WEBPACK_IMPORTED_MODULE_1__.ProgressBar();
 
     this.showProgressBar = function () {
-      _this.progressBar.show();
+      _this.progressBar.show({
+        cssClass: 'is-turbo'
+      });
     };
 
     this.controller = controller;
@@ -3269,16 +3279,20 @@ var BrowserAdapter = /*#__PURE__*/function () {
   }, {
     key: "showProgressBarAfterDelay",
     value: function showProgressBarAfterDelay() {
-      this.progressBarTimeout = window.setTimeout(this.showProgressBar, this.controller.progressBarDelay);
+      if (this.controller.progressBarVisible) {
+        this.progressBarTimeout = window.setTimeout(this.showProgressBar, this.controller.progressBarDelay);
+      }
     }
   }, {
     key: "hideProgressBar",
     value: function hideProgressBar() {
-      this.progressBar.hide();
+      if (this.controller.progressBarVisible) {
+        this.progressBar.hide();
 
-      if (this.progressBarTimeout !== null) {
-        window.clearTimeout(this.progressBarTimeout);
-        delete this.progressBarTimeout;
+        if (this.progressBarTimeout !== null) {
+          window.clearTimeout(this.progressBarTimeout);
+          delete this.progressBarTimeout;
+        }
       }
     }
   }, {
@@ -3341,6 +3355,7 @@ var Controller = /*#__PURE__*/function () {
     this.enabled = true;
     this.pendingAssets = 0;
     this.progressBarDelay = 500;
+    this.progressBarVisible = true;
     this.started = false; // Event handlers
 
     this.pageLoaded = function () {
@@ -3442,6 +3457,11 @@ var Controller = /*#__PURE__*/function () {
       } else {
         window.location.href = location.toString();
       }
+    }
+  }, {
+    key: "setProgressBarVisible",
+    value: function setProgressBarVisible(value) {
+      this.progressBarVisible = value;
     }
   }, {
     key: "setProgressBarDelay",
@@ -4416,6 +4436,9 @@ var controller = new _controller__WEBPACK_IMPORTED_MODULE_0__.Controller();
   },
   clearCache: function clearCache() {
     controller.clearCache();
+  },
+  setProgressBarVisible: function setProgressBarVisible(value) {
+    controller.setProgressBarVisible(value);
   },
   setProgressBarDelay: function setProgressBarDelay(delay) {
     controller.setProgressBarDelay(delay);

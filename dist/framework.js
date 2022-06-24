@@ -46,6 +46,12 @@ var ProgressBar = /*#__PURE__*/function () {
   _createClass(ProgressBar, [{
     key: "show",
     value: function show() {
+      var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+      if (options.cssClass) {
+        this.progressElement.classList.add(options.cssClass);
+      }
+
       if (!this.visible) {
         this.visible = true;
         this.installStylesheetElement();
@@ -2103,7 +2109,9 @@ var Request = /*#__PURE__*/function () {
     this.progressBar = new _extras_progress_bar__WEBPACK_IMPORTED_MODULE_5__.ProgressBar();
 
     this.showProgressBar = function () {
-      _this.progressBar.show();
+      _this.progressBar.show({
+        cssClass: 'is-ajax'
+      });
     };
   }
 

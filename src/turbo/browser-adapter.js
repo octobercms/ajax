@@ -7,7 +7,7 @@ export class BrowserAdapter
     constructor(controller) {
         this.progressBar = new ProgressBar;
         this.showProgressBar = () => {
-            this.progressBar.show();
+            this.progressBar.show({ cssClass: 'is-turbo' });
         };
         this.controller = controller;
     }
@@ -74,14 +74,18 @@ export class BrowserAdapter
 
     // Private
     showProgressBarAfterDelay() {
-        this.progressBarTimeout = window.setTimeout(this.showProgressBar, this.controller.progressBarDelay);
+        if (this.controller.progressBarVisible) {
+            this.progressBarTimeout = window.setTimeout(this.showProgressBar, this.controller.progressBarDelay);
+        }
     }
 
     hideProgressBar() {
-        this.progressBar.hide();
-        if (this.progressBarTimeout !== null) {
-            window.clearTimeout(this.progressBarTimeout);
-            delete this.progressBarTimeout;
+        if (this.controller.progressBarVisible) {
+            this.progressBar.hide();
+            if (this.progressBarTimeout !== null) {
+                window.clearTimeout(this.progressBarTimeout);
+                delete this.progressBarTimeout;
+            }
         }
     }
 

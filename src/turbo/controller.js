@@ -20,6 +20,7 @@ export class Controller
         this.enabled = true;
         this.pendingAssets = 0;
         this.progressBarDelay = 500;
+        this.progressBarVisible = true;
         this.started = false;
 
         // Event handlers
@@ -104,6 +105,10 @@ export class Controller
         else {
             window.location.href = location.toString();
         }
+    }
+
+    setProgressBarVisible(value) {
+        this.progressBarVisible = value;
     }
 
     setProgressBarDelay(delay) {

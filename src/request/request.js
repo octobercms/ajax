@@ -16,7 +16,7 @@ export class Request
 
         this.progressBar = new ProgressBar;
         this.showProgressBar = () => {
-            this.progressBar.show();
+            this.progressBar.show({ cssClass: 'is-ajax' });
         };
     }
 

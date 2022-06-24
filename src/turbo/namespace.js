@@ -16,6 +16,10 @@ export default {
         controller.clearCache();
     },
 
+    setProgressBarVisible(value) {
+        controller.setProgressBarVisible(value);
+    },
+
     setProgressBarDelay(delay) {
         controller.setProgressBarDelay(delay);
     },
