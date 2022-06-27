@@ -151,7 +151,10 @@ export class RequestBuilder
     }
 
     assignRequestData() {
-        var data = this.options.data || {};
+        const data = {};
+        if (this.options.data) {
+            Object.assign(data, this.options.data);
+        }
 
         const attr = this.ogElement.getAttribute('data-request-data');
         if (attr) {

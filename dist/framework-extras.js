@@ -1751,7 +1751,12 @@ var RequestBuilder = /*#__PURE__*/function () {
   }, {
     key: "assignRequestData",
     value: function assignRequestData() {
-      var data = this.options.data || {};
+      var data = {};
+
+      if (this.options.data) {
+        Object.assign(data, this.options.data);
+      }
+
       var attr = this.ogElement.getAttribute('data-request-data');
 
       if (attr) {
