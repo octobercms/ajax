@@ -1069,9 +1069,11 @@ var RequestBuilder = /*#__PURE__*/function () {
 
       if (!attrVal) {
         return;
-      }
+      } // Store the existing option function, if it exists
 
-      var otherFunc = this.options[optionName];
+
+      var otherFunc = this.options[optionName]; // Rewrite option with custom eval inheritance logic. In this function,
+      // the "this" variable is referring to the context object
 
       this.options[optionName] = function (data, responseCode, xhr) {
         // Call eval code, with halting
@@ -1083,7 +1085,7 @@ var RequestBuilder = /*#__PURE__*/function () {
 
 
         if (otherFunc) {
-          return otherFunc(data, responseCode, xhr);
+          return otherFunc.apply(this, [data, responseCode, xhr]);
         } // The other function wasn't supplied, keep logic going.
         // beforeUpdate and afterUpdate are not part of context
         // since they have no base logic and won't exist here

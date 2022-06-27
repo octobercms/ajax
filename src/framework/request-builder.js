@@ -84,7 +84,11 @@ export class RequestBuilder
             return;
         }
 
+        // Store the existing option function, if it exists
         const otherFunc = this.options[optionName];
+
+        // Rewrite option with custom eval inheritance logic. In this function,
+        // the "this" variable is referring to the context object
         this.options[optionName] = function(data, responseCode, xhr) {
             // Call eval code, with halting
             var result = (new Function('data', attrVal)).apply(this.el, [data]);
@@ -94,7 +98,7 @@ export class RequestBuilder
 
             // Call other function from options, if supplied
             if (otherFunc) {
-                return otherFunc(data, responseCode, xhr);
+                return otherFunc.apply(this, [data, responseCode, xhr]);
             }
 
             // The other function wasn't supplied, keep logic going.
