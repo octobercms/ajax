@@ -52,7 +52,6 @@ export class Actions
 
         updatePromise.done(function() {
             self.delegate.notifyApplicationRequestSuccess(data, responseCode, xhr);
-            self.invoke('afterUpdate', [data, responseCode, xhr]);
         });
 
         return updatePromise;
@@ -222,6 +221,7 @@ export class Actions
             // Wait for update method to finish rendering from partial updates
             setTimeout(function() {
                 self.delegate.notifyApplicationUpdateComplete(data, responseCode, xhr);
+                self.invoke('afterUpdate', [data, responseCode, xhr]);
             }, 0);
         })
 

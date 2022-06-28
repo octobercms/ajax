@@ -1281,7 +1281,6 @@ var Actions = /*#__PURE__*/function () {
           updatePromise = this.invoke('handleUpdateResponse', [data, responseCode, xhr]);
       updatePromise.done(function () {
         self.delegate.notifyApplicationRequestSuccess(data, responseCode, xhr);
-        self.invoke('afterUpdate', [data, responseCode, xhr]);
       });
       return updatePromise;
     }
@@ -1451,6 +1450,7 @@ var Actions = /*#__PURE__*/function () {
 
         setTimeout(function () {
           self.delegate.notifyApplicationUpdateComplete(data, responseCode, xhr);
+          self.invoke('afterUpdate', [data, responseCode, xhr]);
         }, 0);
       }); // Handle redirect
 
