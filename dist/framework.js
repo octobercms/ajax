@@ -990,11 +990,11 @@ var RequestBuilder = /*#__PURE__*/function () {
       return _request_namespace__WEBPACK_IMPORTED_MODULE_0__["default"].send(handler, this.options);
     }
 
-    this.assignAsEval('beforeUpdate', 'requestBeforeUpdate');
-    this.assignAsEval('afterUpdate', 'requestAfterUpdate');
-    this.assignAsEval('success', 'requestSuccess');
-    this.assignAsEval('error', 'requestError');
-    this.assignAsEval('complete', 'requestComplete');
+    this.assignAsEval('beforeUpdateFunc', 'requestBeforeUpdate');
+    this.assignAsEval('afterUpdateFunc', 'requestAfterUpdate');
+    this.assignAsEval('successFunc', 'requestSuccess');
+    this.assignAsEval('errorFunc', 'requestError');
+    this.assignAsEval('completeFunc', 'requestComplete');
     this.assignAsData('progressBar', 'requestProgressBar');
     this.assignAsData('confirm', 'requestConfirm');
     this.assignAsData('redirect', 'requestRedirect');
@@ -1069,31 +1069,10 @@ var RequestBuilder = /*#__PURE__*/function () {
 
       if (!attrVal) {
         return;
-      } // Store the existing option function, if it exists
+      }
 
-
-      var otherFunc = this.options[optionName]; // Rewrite option with custom eval inheritance logic. In this function,
-      // the "this" variable is referring to the context object
-
-      this.options[optionName] = function (data, responseCode, xhr) {
-        // Call eval code, with halting
-        var result = new Function('data', attrVal).apply(this.el, [data]);
-
-        if (result === false) {
-          return;
-        } // Call other function from options, if supplied
-
-
-        if (otherFunc) {
-          return otherFunc.apply(this, [data, responseCode, xhr]);
-        } // The other function wasn't supplied, keep logic going.
-        // beforeUpdate and afterUpdate are not part of context
-        // since they have no base logic and won't exist here
-
-
-        if (this[optionName]) {
-          return this[optionName](data, responseCode, xhr);
-        }
+      this.options[optionName] = function (element, data) {
+        return new Function('data', attrVal).apply(element, [data]);
       };
     }
   }, {
@@ -1233,6 +1212,7 @@ var Actions = /*#__PURE__*/function () {
   function Actions(delegate, context, options) {
     _classCallCheck(this, Actions);
 
+    this.el = delegate.el;
     this.delegate = delegate;
     this.context = context;
     this.options = options; // Allow override to call parent logic
@@ -1255,6 +1235,15 @@ var Actions = /*#__PURE__*/function () {
       if (this[method]) {
         return this[method].apply(this, _toConsumableArray(args));
       }
+    } // Options can also specify a non-interference "func" method, typically
+    // used by eval-based data attributes that takes minimal arguments
+
+  }, {
+    key: "invokeFunc",
+    value: function invokeFunc(method, data) {
+      if (this.options[method]) {
+        return this.options[method](this.el, data);
+      }
     } // Public
 
   }, {
@@ -1262,6 +1251,11 @@ var Actions = /*#__PURE__*/function () {
     value: function success(data, responseCode, xhr) {
       // Halt here if beforeUpdate() or data-request-before-update returns false
       if (this.invoke('beforeUpdate', [data, responseCode, xhr]) === false) {
+        return;
+      } // Halt here if the error function returns false
+
+
+      if (this.invokeFunc('beforeUpdateFunc', data) === false) {
         return;
       } // Trigger 'ajaxBeforeUpdate' on the form, halt if event.preventDefault() is called
 
@@ -1281,6 +1275,7 @@ var Actions = /*#__PURE__*/function () {
           updatePromise = this.invoke('handleUpdateResponse', [data, responseCode, xhr]);
       updatePromise.done(function () {
         self.delegate.notifyApplicationRequestSuccess(data, responseCode, xhr);
+        self.invokeFunc('successFunc', data);
       });
       return updatePromise;
     }
@@ -1309,9 +1304,18 @@ var Actions = /*#__PURE__*/function () {
       }
 
       updatePromise.done(function () {
-        self.delegate.el !== document && self.delegate.el.setAttribute('data-error-message', errorMsg); // Trigger 'ajaxError' on the form, halt if event.preventDefault() is called
+        // Capture the error message on the node
+        if (self.el !== document) {
+          self.el.setAttribute('data-error-message', errorMsg);
+        } // Trigger 'ajaxError' on the form, halt if event.preventDefault() is called
+
 
         if (!self.delegate.applicationAllowsError(data, responseCode, xhr)) {
+          return;
+        } // Halt here if the error function returns false
+
+
+        if (self.invokeFunc('errorFunc', data) === false) {
           return;
         }
 
@@ -1323,6 +1327,7 @@ var Actions = /*#__PURE__*/function () {
     key: "complete",
     value: function complete(data, responseCode, xhr) {
       this.delegate.notifyApplicationRequestComplete(data, responseCode, xhr);
+      this.invokeFunc('completeFunc', data);
     } // Custom function, requests confirmation from the user
 
   }, {
@@ -1451,6 +1456,7 @@ var Actions = /*#__PURE__*/function () {
         setTimeout(function () {
           self.delegate.notifyApplicationUpdateComplete(data, responseCode, xhr);
           self.invoke('afterUpdate', [data, responseCode, xhr]);
+          self.invokeFunc('afterUpdateFunc', data);
         }, 0);
       }); // Handle redirect
 
