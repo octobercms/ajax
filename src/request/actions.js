@@ -5,6 +5,7 @@ import { Deferred } from "../util/deferred";
 export class Actions
 {
     constructor(delegate, context, options) {
+        this.el = delegate.el;
         this.delegate = delegate;
         this.context = context;
         this.options = options;
@@ -28,10 +29,23 @@ export class Actions
         }
     }
 
+    // Options can also specify a non-interference "func" method, typically
+    // used by eval-based data attributes that takes minimal arguments
+    invokeFunc(method, data) {
+        if (this.options[method]) {
+            return this.options[method](this.el, data);
+        }
+    }
+
     // Public
     success(data, responseCode, xhr) {
         // Halt here if beforeUpdate() or data-request-before-update returns false
         if (this.invoke('beforeUpdate', [data, responseCode, xhr]) === false) {
+            return;
+        }
+
+        // Halt here if the error function returns false
+        if (this.invokeFunc('beforeUpdateFunc', data) === false) {
             return;
         }
 
@@ -52,6 +66,7 @@ export class Actions
 
         updatePromise.done(function() {
             self.delegate.notifyApplicationRequestSuccess(data, responseCode, xhr);
+            self.invokeFunc('successFunc', data);
         });
 
         return updatePromise;
@@ -82,10 +97,18 @@ export class Actions
         }
 
         updatePromise.done(function() {
-            self.delegate.el !== document && self.delegate.el.setAttribute('data-error-message', errorMsg);
+            // Capture the error message on the node
+            if (self.el !== document) {
+                self.el.setAttribute('data-error-message', errorMsg);
+            }
 
             // Trigger 'ajaxError' on the form, halt if event.preventDefault() is called
             if (!self.delegate.applicationAllowsError(data, responseCode, xhr)) {
+                return;
+            }
+
+            // Halt here if the error function returns false
+            if (self.invokeFunc('errorFunc', data) === false) {
                 return;
             }
 
@@ -97,6 +120,7 @@ export class Actions
 
     complete(data, responseCode, xhr) {
         this.delegate.notifyApplicationRequestComplete(data, responseCode, xhr);
+        this.invokeFunc('completeFunc', data);
     }
 
     // Custom function, requests confirmation from the user
@@ -222,6 +246,7 @@ export class Actions
             setTimeout(function() {
                 self.delegate.notifyApplicationUpdateComplete(data, responseCode, xhr);
                 self.invoke('afterUpdate', [data, responseCode, xhr]);
+                self.invokeFunc('afterUpdateFunc', data);
             }, 0);
         })
 

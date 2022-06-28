@@ -12,11 +12,11 @@ export class RequestBuilder
             return Request.send(handler, this.options);
         }
 
-        this.assignAsEval('beforeUpdate', 'requestBeforeUpdate');
-        this.assignAsEval('afterUpdate', 'requestAfterUpdate');
-        this.assignAsEval('success', 'requestSuccess');
-        this.assignAsEval('error', 'requestError');
-        this.assignAsEval('complete', 'requestComplete');
+        this.assignAsEval('beforeUpdateFunc', 'requestBeforeUpdate');
+        this.assignAsEval('afterUpdateFunc', 'requestAfterUpdate');
+        this.assignAsEval('successFunc', 'requestSuccess');
+        this.assignAsEval('errorFunc', 'requestError');
+        this.assignAsEval('completeFunc', 'requestComplete');
 
         this.assignAsData('progressBar', 'requestProgressBar');
         this.assignAsData('confirm', 'requestConfirm');
@@ -84,29 +84,8 @@ export class RequestBuilder
             return;
         }
 
-        // Store the existing option function, if it exists
-        const otherFunc = this.options[optionName];
-
-        // Rewrite option with custom eval inheritance logic. In this function,
-        // the "this" variable is referring to the context object
-        this.options[optionName] = function(data, responseCode, xhr) {
-            // Call eval code, with halting
-            var result = (new Function('data', attrVal)).apply(this.el, [data]);
-            if (result === false) {
-                return;
-            }
-
-            // Call other function from options, if supplied
-            if (otherFunc) {
-                return otherFunc.apply(this, [data, responseCode, xhr]);
-            }
-
-            // The other function wasn't supplied, keep logic going.
-            // beforeUpdate and afterUpdate are not part of context
-            // since they have no base logic and won't exist here
-            if (this[optionName]) {
-                return this[optionName](data, responseCode, xhr);
-            }
+        this.options[optionName] = function(element, data) {
+            return (new Function('data', attrVal)).apply(element, [data]);
         }
     }
 
