@@ -11,6 +11,9 @@ if (!window.oc.AjaxFramework) {
     // Namespace
     window.oc.AjaxFramework = namespace;
 
+    // Request on element with builder
+    window.oc.request = namespace.requestElement;
+
     // Selector events
     window.oc.Events = Events;
 

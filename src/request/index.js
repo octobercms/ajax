@@ -16,6 +16,8 @@ if (!window.oc.AjaxRequest) {
     // Request without element
     window.oc.ajax = namespace.send;
 
-    // Request on element
-    window.oc.request = namespace.sendElement;
+    // Request on element (framework can override)
+    if (!window.oc.request) {
+        window.oc.request = namespace.sendElement;
+    }
 }
