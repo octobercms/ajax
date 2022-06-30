@@ -40,6 +40,10 @@ export class RequestBuilder
     }
 
     static fromElement(element, handler, options) {
+        if (typeof element === 'string') {
+            element = document.querySelector(element);
+        }
+
         return new RequestBuilder(element, handler, options);
     }
 
