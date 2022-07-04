@@ -154,8 +154,13 @@ var Controller = /*#__PURE__*/function () {
 
 
     this.flashMessageBind = function (event) {
-      var self = this;
       var options = event.detail.context.options;
+
+      if (!options.flash) {
+        return;
+      }
+
+      var self = this;
 
       options.handleErrorMessage = function (message) {
         self.flashMessage.show({
@@ -189,17 +194,17 @@ var Controller = /*#__PURE__*/function () {
       addEventListener('ajax:setup', this.enableProgressBar); // Attach loader
 
       this.attachLoader = new _attach_loader__WEBPACK_IMPORTED_MODULE_1__.AttachLoader();
-      _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.on(document, 'ajax:promise', '[data-request]', this.showAttachLoader);
-      _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.on(document, 'ajax:fail', '[data-request]', this.hideAttachLoader);
-      _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.on(document, 'ajax:done', '[data-request]', this.hideAttachLoader); // Validator
+      _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.on(document, 'ajax:promise', 'form, [data-attach-loading]', this.showAttachLoader);
+      _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.on(document, 'ajax:fail', 'form, [data-attach-loading]', this.hideAttachLoader);
+      _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.on(document, 'ajax:done', 'form, [data-attach-loading]', this.hideAttachLoader); // Validator
 
       this.validator = new _validator__WEBPACK_IMPORTED_MODULE_0__.Validator();
-      _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.on(document, 'ajax:before-validate', '[data-request][data-request-validate]', this.validatorValidate);
-      _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.on(document, 'ajax:promise', '[data-request][data-request-validate]', this.validatorSubmit); // Flash message
+      _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.on(document, 'ajax:before-validate', '[data-request-validate]', this.validatorValidate);
+      _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.on(document, 'ajax:promise', '[data-request-validate]', this.validatorSubmit); // Flash message
 
       this.flashMessage = new _flash_message__WEBPACK_IMPORTED_MODULE_2__.FlashMessage();
       addEventListener('render', this.flashMessageRender);
-      _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.on(document, 'ajax:setup', '[data-request][data-request-flash]', this.flashMessageBind);
+      addEventListener('ajax:setup', this.flashMessageBind);
     }
   }, {
     key: "stop",
@@ -213,17 +218,17 @@ var Controller = /*#__PURE__*/function () {
       removeEventListener('ajax:setup', this.enableProgressBar); // Attach loader
 
       this.attachLoader = null;
-      _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.off(document, 'ajax:promise', '[data-request]', this.showAttachLoader);
-      _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.off(document, 'ajax:fail', '[data-request]', this.hideAttachLoader);
-      _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.off(document, 'ajax:done', '[data-request]', this.hideAttachLoader); // Validator
+      _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.off(document, 'ajax:promise', 'form, [data-attach-loading]', this.showAttachLoader);
+      _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.off(document, 'ajax:fail', 'form, [data-attach-loading]', this.hideAttachLoader);
+      _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.off(document, 'ajax:done', 'form, [data-attach-loading]', this.hideAttachLoader); // Validator
 
       this.validator = null;
-      _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.off(document, 'ajax:before-validate', '[data-request][data-request-validate]', this.validatorValidate);
-      _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.off(document, 'ajax:promise', '[data-request][data-request-validate]', this.validatorSubmit); // Flash message
+      _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.off(document, 'ajax:before-validate', '[data-request-validate]', this.validatorValidate);
+      _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.off(document, 'ajax:promise', '[data-request-validate]', this.validatorSubmit); // Flash message
 
       this.flashMessage = null;
       removeEventListener('render', this.flashMessageRender);
-      _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.off(document, 'ajax:setup', '[data-request][data-request-flash]', this.flashMessageBind);
+      removeEventListener('ajax:setup', this.flashMessageBind);
     }
   }]);
 
