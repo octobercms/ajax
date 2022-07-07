@@ -1,6 +1,6 @@
 {
     "name": "octobercms",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "description": "AJAX Framework for October CMS",
     "main": "src/index.js",
     "devDependencies": {
