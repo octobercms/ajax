@@ -1,4 +1,4 @@
-import { dispatch, getjQuery } from './index'
+import { dispatch } from './index'
 
 /**
  * Constants
@@ -113,51 +113,6 @@ export class Events
 
     static dispatch(eventName, { target, detail, cancelable = true } = {}) {
         return dispatch(eventName, { target, detail, cancelable });
-    }
-
-    static trigger(element, eventName, args = {}) {
-        if (typeof eventName !== 'string' || !element) {
-            return null;
-        }
-
-        const $ = getjQuery();
-        const typeEvent = getTypeEvent(eventName);
-        const inNamespace = eventName !== typeEvent;
-
-        let jQueryEvent = null;
-        let nativeDispatch = true;
-        let defaultPrevented = false;
-
-        if (inNamespace && $) {
-            jQueryEvent = $.Event(eventName, args);
-
-            $(element).trigger(jQueryEvent);
-            bubbles = !jQueryEvent.isPropagationStopped();
-            nativeDispatch = !jQueryEvent.isImmediatePropagationStopped();
-            defaultPrevented = jQueryEvent.isDefaultPrevented();
-        }
-
-        let evt = new CustomEvent(eventName, {
-            bubbles: true,
-            cancelable: args.cancelable === true,
-            detail: args.detail || {}
-        });
-
-        evt = hydrateObj(evt, args);
-
-        if (defaultPrevented) {
-            evt.preventDefault();
-        }
-
-        if (nativeDispatch) {
-            element.dispatchEvent(evt);
-        }
-
-        if (evt.defaultPrevented && jQueryEvent) {
-            jQueryEvent.preventDefault();
-        }
-
-        return evt;
     }
 }
 
@@ -298,16 +253,4 @@ function removeNamespacedHandlers(element, events, typeEvent, namespace) {
 function getTypeEvent(event) {
     event = event.replace(stripNameRegex, '');
     return customEvents[event] || event;
-}
-
-function hydrateObj(obj, meta) {
-    for (const [key, value] of Object.entries(meta || {})) {
-        Object.defineProperty(obj, key, {
-            get() {
-                return value;
-            }
-        });
-    }
-
-    return obj;
 }

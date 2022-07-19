@@ -5986,51 +5986,6 @@ var Events = /*#__PURE__*/function () {
         cancelable: cancelable
       });
     }
-  }, {
-    key: "trigger",
-    value: function trigger(element, eventName) {
-      var args = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-
-      if (typeof eventName !== 'string' || !element) {
-        return null;
-      }
-
-      var $ = (0,_index__WEBPACK_IMPORTED_MODULE_0__.getjQuery)();
-      var typeEvent = getTypeEvent(eventName);
-      var inNamespace = eventName !== typeEvent;
-      var jQueryEvent = null;
-      var nativeDispatch = true;
-      var defaultPrevented = false;
-
-      if (inNamespace && $) {
-        jQueryEvent = $.Event(eventName, args);
-        $(element).trigger(jQueryEvent);
-        bubbles = !jQueryEvent.isPropagationStopped();
-        nativeDispatch = !jQueryEvent.isImmediatePropagationStopped();
-        defaultPrevented = jQueryEvent.isDefaultPrevented();
-      }
-
-      var evt = new CustomEvent(eventName, {
-        bubbles: true,
-        cancelable: args.cancelable === true,
-        detail: args.detail || {}
-      });
-      evt = hydrateObj(evt, args);
-
-      if (defaultPrevented) {
-        evt.preventDefault();
-      }
-
-      if (nativeDispatch) {
-        element.dispatchEvent(evt);
-      }
-
-      if (evt.defaultPrevented && jQueryEvent) {
-        jQueryEvent.preventDefault();
-      }
-
-      return evt;
-    }
   }]);
 
   return Events;
@@ -6186,26 +6141,6 @@ function removeNamespacedHandlers(element, events, typeEvent, namespace) {
 function getTypeEvent(event) {
   event = event.replace(stripNameRegex, '');
   return customEvents[event] || event;
-}
-
-function hydrateObj(obj, meta) {
-  var _loop = function _loop() {
-    var _Object$entries$_i = _slicedToArray(_Object$entries[_i5], 2),
-        key = _Object$entries$_i[0],
-        value = _Object$entries$_i[1];
-
-    Object.defineProperty(obj, key, {
-      get: function get() {
-        return value;
-      }
-    });
-  };
-
-  for (var _i5 = 0, _Object$entries = Object.entries(meta || {}); _i5 < _Object$entries.length; _i5++) {
-    _loop();
-  }
-
-  return obj;
 }
 
 /***/ }),
@@ -6435,7 +6370,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "array": () => (/* binding */ array),
 /* harmony export */   "defer": () => (/* binding */ defer),
 /* harmony export */   "dispatch": () => (/* binding */ dispatch),
-/* harmony export */   "getjQuery": () => (/* binding */ getjQuery),
 /* harmony export */   "unindent": () => (/* binding */ unindent),
 /* harmony export */   "uuid": () => (/* binding */ uuid)
 /* harmony export */ });
@@ -6498,13 +6432,6 @@ function uuid() {
       return Math.floor(Math.random() * 15).toString(16);
     }
   }).join("");
-}
-function getjQuery() {
-  if (window.jQuery && !document.body.hasAttribute('data-no-jquery')) {
-    return window.jQuery;
-  }
-
-  return null;
 }
 
 /***/ })
