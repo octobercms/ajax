@@ -19,11 +19,11 @@ if (!window.oc.AjaxFramework) {
 
     // JSON parser
     window.oc.parseJSON = JsonParser.parseJSON;
-}
 
-// Boot controller
-if (!isAMD() && !isCommonJS()) {
-    namespace.start();
+    // Boot controller
+    if (!isAMD() && !isCommonJS()) {
+        namespace.start();
+    }
 }
 
 function isAMD() {

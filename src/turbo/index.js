@@ -9,14 +9,16 @@ if (!window.oc.AjaxTurbo) {
     // Namespace
     window.oc.AjaxTurbo = namespace;
 
-    // Helpers
+    // Visit helper
     window.oc.visit = namespace.visit;
-    window.oc.useTurbo = namespace.isEnabled;
-}
 
-// Boot controller
-if (!isAMD() && !isCommonJS()) {
-    namespace.start();
+    // Enabled helper
+    window.oc.useTurbo = namespace.isEnabled;
+
+    // Boot controller
+    if (!isAMD() && !isCommonJS()) {
+        namespace.start();
+    }
 }
 
 function isAMD() {

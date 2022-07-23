@@ -10,13 +10,17 @@ if (!window.oc) {
 if (!window.oc.AjaxExtras) {
     // Namespace
     window.oc.AjaxExtras = namespace;
-    window.oc.flashMsg = FlashMessage.flashMsg;
-    window.oc.progressBar = ProgressBar.progressBar();
-}
 
-// Boot controller
-if (!isAMD() && !isCommonJS()) {
-    namespace.start();
+    // Flash messages
+    window.oc.flashMsg = FlashMessage.flashMsg;
+
+    // Progress bar
+    window.oc.progressBar = ProgressBar.progressBar();
+
+    // Boot controller
+    if (!isAMD() && !isCommonJS()) {
+        namespace.start();
+    }
 }
 
 function isAMD() {
