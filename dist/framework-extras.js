@@ -186,25 +186,23 @@ var Controller = /*#__PURE__*/function () {
     key: "start",
     value: function start() {
       if (this.started) {
-        return;
+        // Progress bar
+        addEventListener('ajax:setup', this.enableProgressBar); // Attach loader
+
+        this.attachLoader = new _attach_loader__WEBPACK_IMPORTED_MODULE_1__.AttachLoader();
+        _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.on(document, 'ajax:promise', 'form, [data-attach-loading]', this.showAttachLoader);
+        _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.on(document, 'ajax:fail', 'form, [data-attach-loading]', this.hideAttachLoader);
+        _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.on(document, 'ajax:done', 'form, [data-attach-loading]', this.hideAttachLoader); // Validator
+
+        this.validator = new _validator__WEBPACK_IMPORTED_MODULE_0__.Validator();
+        _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.on(document, 'ajax:before-validate', '[data-request-validate]', this.validatorValidate);
+        _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.on(document, 'ajax:promise', '[data-request-validate]', this.validatorSubmit); // Flash message
+
+        this.flashMessage = new _flash_message__WEBPACK_IMPORTED_MODULE_2__.FlashMessage();
+        addEventListener('render', this.flashMessageRender);
+        addEventListener('ajax:setup', this.flashMessageBind);
+        this.started = true;
       }
-
-      this.started = true; // Progress bar
-
-      addEventListener('ajax:setup', this.enableProgressBar); // Attach loader
-
-      this.attachLoader = new _attach_loader__WEBPACK_IMPORTED_MODULE_1__.AttachLoader();
-      _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.on(document, 'ajax:promise', 'form, [data-attach-loading]', this.showAttachLoader);
-      _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.on(document, 'ajax:fail', 'form, [data-attach-loading]', this.hideAttachLoader);
-      _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.on(document, 'ajax:done', 'form, [data-attach-loading]', this.hideAttachLoader); // Validator
-
-      this.validator = new _validator__WEBPACK_IMPORTED_MODULE_0__.Validator();
-      _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.on(document, 'ajax:before-validate', '[data-request-validate]', this.validatorValidate);
-      _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.on(document, 'ajax:promise', '[data-request-validate]', this.validatorSubmit); // Flash message
-
-      this.flashMessage = new _flash_message__WEBPACK_IMPORTED_MODULE_2__.FlashMessage();
-      addEventListener('render', this.flashMessageRender);
-      addEventListener('ajax:setup', this.flashMessageBind);
     }
   }, {
     key: "stop",
@@ -824,27 +822,26 @@ var Controller = /*#__PURE__*/function () {
     key: "start",
     value: function start() {
       if (!this.started) {
+        // Track unload event for request lib
+        window.onbeforeunload = this.documentOnBeforeUnload; // First page load
+
+        addEventListener('DOMContentLoaded', this.render); // Again, after new scripts load
+
+        addEventListener('page:updated', this.render); // Again after AJAX request
+
+        addEventListener('ajax:update-complete', this.render); // Submit form
+
+        _util_events__WEBPACK_IMPORTED_MODULE_0__.Events.on(document, 'submit', '[data-request]', this.documentOnSubmit); // Track input
+
+        _util_events__WEBPACK_IMPORTED_MODULE_0__.Events.on(document, 'input', 'input[data-request][data-track-input]', this.documentOnKeyup); // Change select, checkbox, radio, file input
+
+        _util_events__WEBPACK_IMPORTED_MODULE_0__.Events.on(document, 'change', 'select[data-request], input[type=radio][data-request], input[type=checkbox][data-request], input[type=file][data-request]', this.documentOnChange); // Press enter on orphan input
+
+        _util_events__WEBPACK_IMPORTED_MODULE_0__.Events.on(document, 'keydown', 'input[type=text][data-request], input[type=submit][data-request], input[type=password][data-request]', this.documentOnKeydown); // Click submit button or link
+
+        _util_events__WEBPACK_IMPORTED_MODULE_0__.Events.on(document, 'click', 'a[data-request], button[data-request], input[type=button][data-request], input[type=submit][data-request]', this.documentOnClick);
         this.started = true;
-      } // Track unload event for request lib
-
-
-      window.onbeforeunload = this.documentOnBeforeUnload; // First page load
-
-      addEventListener('DOMContentLoaded', this.render); // Again, after new scripts load
-
-      addEventListener('page:updated', this.render); // Again after AJAX request
-
-      addEventListener('ajax:update-complete', this.render); // Submit form
-
-      _util_events__WEBPACK_IMPORTED_MODULE_0__.Events.on(document, 'submit', '[data-request]', this.documentOnSubmit); // Track input
-
-      _util_events__WEBPACK_IMPORTED_MODULE_0__.Events.on(document, 'input', 'input[data-request][data-track-input]', this.documentOnKeyup); // Change select, checkbox, radio, file input
-
-      _util_events__WEBPACK_IMPORTED_MODULE_0__.Events.on(document, 'change', 'select[data-request], input[type=radio][data-request], input[type=checkbox][data-request], input[type=file][data-request]', this.documentOnChange); // Press enter on orphan input
-
-      _util_events__WEBPACK_IMPORTED_MODULE_0__.Events.on(document, 'keydown', 'input[type=text][data-request], input[type=submit][data-request], input[type=password][data-request]', this.documentOnKeydown); // Click submit button or link
-
-      _util_events__WEBPACK_IMPORTED_MODULE_0__.Events.on(document, 'click', 'a[data-request], button[data-request], input[type=button][data-request], input[type=submit][data-request]', this.documentOnClick);
+      }
     }
   }, {
     key: "stop",
