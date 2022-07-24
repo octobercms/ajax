@@ -358,12 +358,11 @@ if (!window.oc.AjaxFramework) {
 
   window.oc.Events = _util_events__WEBPACK_IMPORTED_MODULE_1__.Events; // JSON parser
 
-  window.oc.parseJSON = _json_parser__WEBPACK_IMPORTED_MODULE_0__.JsonParser.parseJSON;
-} // Boot controller
+  window.oc.parseJSON = _json_parser__WEBPACK_IMPORTED_MODULE_0__.JsonParser.parseJSON; // Boot controller
 
-
-if (!isAMD() && !isCommonJS()) {
-  _namespace__WEBPACK_IMPORTED_MODULE_2__["default"].start();
+  if (!isAMD() && !isCommonJS()) {
+    _namespace__WEBPACK_IMPORTED_MODULE_2__["default"].start();
+  }
 }
 
 function isAMD() {

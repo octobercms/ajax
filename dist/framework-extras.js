@@ -412,14 +412,15 @@ if (!window.oc) {
 
 if (!window.oc.AjaxExtras) {
   // Namespace
-  window.oc.AjaxExtras = _namespace__WEBPACK_IMPORTED_MODULE_2__["default"];
-  window.oc.flashMsg = _flash_message__WEBPACK_IMPORTED_MODULE_0__.FlashMessage.flashMsg;
-  window.oc.progressBar = _progress_bar__WEBPACK_IMPORTED_MODULE_1__.ProgressBar.progressBar();
-} // Boot controller
+  window.oc.AjaxExtras = _namespace__WEBPACK_IMPORTED_MODULE_2__["default"]; // Flash messages
 
+  window.oc.flashMsg = _flash_message__WEBPACK_IMPORTED_MODULE_0__.FlashMessage.flashMsg; // Progress bar
 
-if (!isAMD() && !isCommonJS()) {
-  _namespace__WEBPACK_IMPORTED_MODULE_2__["default"].start();
+  window.oc.progressBar = _progress_bar__WEBPACK_IMPORTED_MODULE_1__.ProgressBar.progressBar(); // Boot controller
+
+  if (!isAMD() && !isCommonJS()) {
+    _namespace__WEBPACK_IMPORTED_MODULE_2__["default"].start();
+  }
 }
 
 function isAMD() {
@@ -971,12 +972,11 @@ if (!window.oc.AjaxFramework) {
 
   window.oc.Events = _util_events__WEBPACK_IMPORTED_MODULE_1__.Events; // JSON parser
 
-  window.oc.parseJSON = _json_parser__WEBPACK_IMPORTED_MODULE_0__.JsonParser.parseJSON;
-} // Boot controller
+  window.oc.parseJSON = _json_parser__WEBPACK_IMPORTED_MODULE_0__.JsonParser.parseJSON; // Boot controller
 
-
-if (!isAMD() && !isCommonJS()) {
-  _namespace__WEBPACK_IMPORTED_MODULE_2__["default"].start();
+  if (!isAMD() && !isCommonJS()) {
+    _namespace__WEBPACK_IMPORTED_MODULE_2__["default"].start();
+  }
 }
 
 function isAMD() {
@@ -4290,15 +4290,15 @@ if (!window.oc) {
 
 if (!window.oc.AjaxTurbo) {
   // Namespace
-  window.oc.AjaxTurbo = _namespace__WEBPACK_IMPORTED_MODULE_0__["default"]; // Helpers
+  window.oc.AjaxTurbo = _namespace__WEBPACK_IMPORTED_MODULE_0__["default"]; // Visit helper
 
-  window.oc.visit = _namespace__WEBPACK_IMPORTED_MODULE_0__["default"].visit;
-  window.oc.useTurbo = _namespace__WEBPACK_IMPORTED_MODULE_0__["default"].isEnabled;
-} // Boot controller
+  window.oc.visit = _namespace__WEBPACK_IMPORTED_MODULE_0__["default"].visit; // Enabled helper
 
+  window.oc.useTurbo = _namespace__WEBPACK_IMPORTED_MODULE_0__["default"].isEnabled; // Boot controller
 
-if (!isAMD() && !isCommonJS()) {
-  _namespace__WEBPACK_IMPORTED_MODULE_0__["default"].start();
+  if (!isAMD() && !isCommonJS()) {
+    _namespace__WEBPACK_IMPORTED_MODULE_0__["default"].start();
+  }
 }
 
 function isAMD() {
