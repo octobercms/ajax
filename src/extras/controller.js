@@ -58,7 +58,7 @@ export class Controller
     }
 
     start() {
-        if (this.started) {
+        if (!this.started) {
             // Progress bar
             addEventListener('ajax:setup', this.enableProgressBar);
 
@@ -83,28 +83,27 @@ export class Controller
     }
 
     stop() {
-        if (!this.started) {
-            return;
+        if (this.started) {
+            // Progress bar
+            removeEventListener('ajax:setup', this.enableProgressBar);
+
+            // Attach loader
+            this.attachLoader = null;
+            Events.off(document, 'ajax:promise', 'form, [data-attach-loading]', this.showAttachLoader);
+            Events.off(document, 'ajax:fail', 'form, [data-attach-loading]', this.hideAttachLoader);
+            Events.off(document, 'ajax:done', 'form, [data-attach-loading]', this.hideAttachLoader);
+
+            // Validator
+            this.validator = null;
+            Events.off(document, 'ajax:before-validate', '[data-request-validate]', this.validatorValidate);
+            Events.off(document, 'ajax:promise', '[data-request-validate]', this.validatorSubmit);
+
+            // Flash message
+            this.flashMessage = null;
+            removeEventListener('render', this.flashMessageRender);
+            removeEventListener('ajax:setup', this.flashMessageBind);
+
+            this.started = false;
         }
-        this.started = false;
-
-        // Progress bar
-        removeEventListener('ajax:setup', this.enableProgressBar);
-
-        // Attach loader
-        this.attachLoader = null;
-        Events.off(document, 'ajax:promise', 'form, [data-attach-loading]', this.showAttachLoader);
-        Events.off(document, 'ajax:fail', 'form, [data-attach-loading]', this.hideAttachLoader);
-        Events.off(document, 'ajax:done', 'form, [data-attach-loading]', this.hideAttachLoader);
-
-        // Validator
-        this.validator = null;
-        Events.off(document, 'ajax:before-validate', '[data-request-validate]', this.validatorValidate);
-        Events.off(document, 'ajax:promise', '[data-request-validate]', this.validatorSubmit);
-
-        // Flash message
-        this.flashMessage = null;
-        removeEventListener('render', this.flashMessageRender);
-        removeEventListener('ajax:setup', this.flashMessageBind);
     }
 }
