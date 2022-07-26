@@ -32,6 +32,7 @@ var ProgressBar = /*#__PURE__*/function () {
 
     _classCallCheck(this, ProgressBar);
 
+    this.htmlElement = document.documentElement;
     this.stylesheetElement = this.createStylesheetElement();
     this.progressElement = this.createProgressElement();
     this.hiding = false;
@@ -57,6 +58,7 @@ var ProgressBar = /*#__PURE__*/function () {
         this.installStylesheetElement();
         this.installProgressElement();
         this.startTrickling();
+        this.markAsProgress(true);
       }
     }
   }, {
@@ -73,6 +75,8 @@ var ProgressBar = /*#__PURE__*/function () {
 
           _this2.visible = false;
           _this2.hiding = false;
+
+          _this2.markAsProgress(false);
         });
       }
     }
@@ -147,6 +151,15 @@ var ProgressBar = /*#__PURE__*/function () {
       var element = document.createElement('div');
       element.className = 'oc-progress-bar';
       return element;
+    }
+  }, {
+    key: "markAsProgress",
+    value: function markAsProgress(isProgress) {
+      if (isProgress) {
+        this.htmlElement.setAttribute('data-ajax-progress', '');
+      } else {
+        this.htmlElement.removeAttribute('data-ajax-progress');
+      }
     }
   }], [{
     key: "defaultCSS",
@@ -1810,10 +1823,10 @@ var Data = /*#__PURE__*/function () {
       return Object.keys(flatData).map(function (key) {
         if (key.endsWith('[]')) {
           return flatData[key].map(function (val) {
-            return key + '=' + encodeURIComponent(val);
+            return encodeURIComponent(key) + '=' + encodeURIComponent(val);
           }).join('&');
         } else {
-          return key + '=' + encodeURIComponent(flatData[key]);
+          return encodeURIComponent(key) + '=' + encodeURIComponent(flatData[key]);
         }
       }).join('&');
     }
