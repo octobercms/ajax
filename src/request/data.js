@@ -120,11 +120,11 @@ export class Data
             .map(function(key) {
                 if (key.endsWith('[]')) {
                     return flatData[key].map(function(val) {
-                        return key + '=' + encodeURIComponent(val);
+                        return encodeURIComponent(key) + '=' + encodeURIComponent(val);
                     }).join('&');
                 }
                 else {
-                    return key + '=' + encodeURIComponent(flatData[key]);
+                    return encodeURIComponent(key) + '=' + encodeURIComponent(flatData[key]);
                 }
             })
             .join('&');
