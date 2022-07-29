@@ -1966,8 +1966,7 @@ var Actions = /*#__PURE__*/function () {
       var self = this;
       var promise = new _util_deferred__WEBPACK_IMPORTED_MODULE_2__.Deferred();
       promise.done(function () {
-        self.delegate.options.confirm = null;
-        self.delegate.request.send();
+        self.delegate.sendInternal();
       });
       var event = this.delegate.notifyApplicationConfirmMessage(message, promise);
 
@@ -2807,6 +2806,12 @@ var Request = /*#__PURE__*/function () {
       } // Send request
 
 
+      this.sendInternal();
+      return this.promise;
+    }
+  }, {
+    key: "sendInternal",
+    value: function sendInternal() {
       var self = this;
       this.notifyApplicationBeforeSend();
       this.notifyApplicationAjaxPromise();
@@ -2822,7 +2827,6 @@ var Request = /*#__PURE__*/function () {
         self.notifyApplicationAjaxAlways(data, responseCode, xhr);
       });
       this.request.send();
-      return this.promise;
     }
   }, {
     key: "toggleRedirect",

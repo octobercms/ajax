@@ -128,8 +128,7 @@ export class Actions
         var self = this;
         const promise = new Deferred;
         promise.done(function() {
-            self.delegate.options.confirm = null;
-            self.delegate.request.send();
+            self.delegate.sendInternal();
         });
 
         const event = this.delegate.notifyApplicationConfirmMessage(message, promise);

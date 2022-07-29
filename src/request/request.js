@@ -67,6 +67,11 @@ export class Request
         }
 
         // Send request
+        this.sendInternal();
+        return this.promise;
+    }
+
+    sendInternal() {
         var self = this;
         this.notifyApplicationBeforeSend();
         this.notifyApplicationAjaxPromise();
@@ -86,7 +91,6 @@ export class Request
             });
 
         this.request.send();
-        return this.promise;
     }
 
     static send(handler, options) {
