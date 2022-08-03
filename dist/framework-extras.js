@@ -6366,7 +6366,7 @@ function contentTypeIsHTML(contentType) {
 }
 
 function contentTypeIsJSON(contentType) {
-  return contentType === 'application/json';
+  return (contentType || '').includes('application/json');
 }
 
 /***/ }),
