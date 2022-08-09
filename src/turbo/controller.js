@@ -218,9 +218,10 @@ export class Controller
         this.adapter.pageInvalidated();
     }
 
-    viewWillRender(newBody) {
+    viewAllowsImmediateRender(newBody, options) {
         this.notifyApplicationUnload();
-        this.notifyApplicationBeforeRender(newBody);
+        const event = this.notifyApplicationBeforeRender(newBody, options);
+        return !event.defaultPrevented;
     }
 
     viewRendered() {
@@ -255,8 +256,8 @@ export class Controller
         return dispatch('page:before-cache', { cancelable: false });
     }
 
-    notifyApplicationBeforeRender(newBody) {
-        return dispatch('page:before-render', { detail: { newBody }, cancelable: false });
+    notifyApplicationBeforeRender(newBody, options) {
+        return dispatch('page:before-render', { detail: { newBody, ...options } });
     }
 
     notifyApplicationAfterRender() {

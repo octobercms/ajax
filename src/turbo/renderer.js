@@ -3,9 +3,16 @@ import { array } from "../util";
 export class Renderer
 {
     renderView(callback) {
-        this.delegate.viewWillRender(this.newBody);
-        callback();
-        this.delegate.viewRendered(this.newBody);
+        const renderInterception = () => {
+            callback();
+            this.delegate.viewRendered(this.newBody);
+        };
+
+        const options = { resume: renderInterception };
+        const immediateRender = this.delegate.viewAllowsImmediateRender(this.newBody, options);
+        if (immediateRender) {
+            renderInterception();
+        }
     }
 
     invalidateView() {

@@ -3366,6 +3366,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../util */ "./src/util/index.js");
 /* harmony import */ var _view__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./view */ "./src/turbo/view.js");
 /* harmony import */ var _visit__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./visit */ "./src/turbo/visit.js");
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { _defineProperty(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -3640,10 +3646,11 @@ var Controller = /*#__PURE__*/function () {
       this.adapter.pageInvalidated();
     }
   }, {
-    key: "viewWillRender",
-    value: function viewWillRender(newBody) {
+    key: "viewAllowsImmediateRender",
+    value: function viewAllowsImmediateRender(newBody, options) {
       this.notifyApplicationUnload();
-      this.notifyApplicationBeforeRender(newBody);
+      var event = this.notifyApplicationBeforeRender(newBody, options);
+      return !event.defaultPrevented;
     }
   }, {
     key: "viewRendered",
@@ -3702,12 +3709,11 @@ var Controller = /*#__PURE__*/function () {
     }
   }, {
     key: "notifyApplicationBeforeRender",
-    value: function notifyApplicationBeforeRender(newBody) {
+    value: function notifyApplicationBeforeRender(newBody, options) {
       return (0,_util__WEBPACK_IMPORTED_MODULE_5__.dispatch)('page:before-render', {
-        detail: {
+        detail: _objectSpread({
           newBody: newBody
-        },
-        cancelable: false
+        }, options)
       });
     }
   }, {
@@ -4526,9 +4532,22 @@ var Renderer = /*#__PURE__*/function () {
   _createClass(Renderer, [{
     key: "renderView",
     value: function renderView(callback) {
-      this.delegate.viewWillRender(this.newBody);
-      callback();
-      this.delegate.viewRendered(this.newBody);
+      var _this = this;
+
+      var renderInterception = function renderInterception() {
+        callback();
+
+        _this.delegate.viewRendered(_this.newBody);
+      };
+
+      var options = {
+        resume: renderInterception
+      };
+      var immediateRender = this.delegate.viewAllowsImmediateRender(this.newBody, options);
+
+      if (immediateRender) {
+        renderInterception();
+      }
     }
   }, {
     key: "invalidateView",
