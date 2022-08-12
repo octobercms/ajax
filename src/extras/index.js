@@ -1,5 +1,3 @@
-import { FlashMessage } from "./flash-message";
-import { ProgressBar } from "./progress-bar";
 import namespace from "./namespace";
 export default namespace;
 
@@ -12,10 +10,10 @@ if (!window.oc.AjaxExtras) {
     window.oc.AjaxExtras = namespace;
 
     // Flash messages
-    window.oc.flashMsg = FlashMessage.flashMsg;
+    window.oc.flashMsg = namespace.flashMsg;
 
     // Progress bar
-    window.oc.progressBar = ProgressBar.progressBar();
+    window.oc.progressBar = namespace.progressBar();
 
     // Boot controller
     if (!isAMD() && !isCommonJS()) {

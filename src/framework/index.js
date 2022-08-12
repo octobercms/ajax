@@ -1,4 +1,3 @@
-import { JsonParser } from "./json-parser";
 import { Events } from "../util/events";
 import namespace from "./namespace";
 export default namespace;
@@ -14,11 +13,11 @@ if (!window.oc.AjaxFramework) {
     // Request on element with builder
     window.oc.request = namespace.requestElement;
 
+    // JSON parser
+    window.oc.parseJSON = namespace.parseJSON;
+
     // Selector events
     window.oc.Events = Events;
-
-    // JSON parser
-    window.oc.parseJSON = JsonParser.parseJSON;
 
     // Boot controller
     if (!isAMD() && !isCommonJS()) {
