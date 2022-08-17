@@ -58,6 +58,10 @@ export class Options
             headers['X-CSRF-TOKEN'] = csrfToken;
         }
 
+        if (options.headers && options.headers.constructor === {}.constructor) {
+            Object.assign(headers, options.headers);
+        }
+
         return headers;
     }
 
