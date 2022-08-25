@@ -320,7 +320,14 @@ export class Controller
 
     getVisitableLinkForTarget(target) {
         if (target instanceof Element && this.elementIsVisitable(target)) {
-            return target.closest('a[href]:not([target]):not([download])');
+            var container = target.closest('a[href]:not([download])');
+            if (container
+                && container.getAttribute('target')
+                && container.getAttribute('target') != '_self') {
+                return null;
+            }
+
+            return container;
         }
     }
 
