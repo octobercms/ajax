@@ -66,7 +66,7 @@ export class Migrate
         this.migratejQueryEvent(window, 'ajax:error-message', 'ajaxErrorMessage', ['message']);
 
         // Data adapter
-        this.migratejQueryAttachData(document, 'ajax:setup', 'a[data-request], button[data-request], a[data-handler], button[data-handler]');
+        this.migratejQueryAttachData(document, 'ajax:setup', 'a[data-request], button[data-request], form[data-request], a[data-handler], button[data-handler]');
     }
 
     // Private

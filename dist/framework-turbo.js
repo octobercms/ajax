@@ -878,7 +878,7 @@ var Migrate = /*#__PURE__*/function () {
       this.migratejQueryEvent(window, 'ajax:confirm-message', 'ajaxConfirmMessage', ['message', 'promise']);
       this.migratejQueryEvent(window, 'ajax:error-message', 'ajaxErrorMessage', ['message']); // Data adapter
 
-      this.migratejQueryAttachData(document, 'ajax:setup', 'a[data-request], button[data-request], a[data-handler], button[data-handler]');
+      this.migratejQueryAttachData(document, 'ajax:setup', 'a[data-request], button[data-request], form[data-request], a[data-handler], button[data-handler]');
     } // Private
 
   }, {
