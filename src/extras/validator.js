@@ -33,7 +33,7 @@ export class Validator
             // Display message next to field
             var field = form.querySelector('[data-validate-for="'+fieldName+'"]');
             if (field) {
-                if (!field.innerHTML || field.dataset.emptyMode === true) {
+                if (!field.innerHTML || field.dataset.emptyMode) {
                     field.dataset.emptyMode = true;
                     field.innerHTML = fieldMessages.join(', ');
                 }
