@@ -759,7 +759,7 @@ var Validator = /*#__PURE__*/function () {
         var field = form.querySelector('[data-validate-for="' + fieldName + '"]');
 
         if (field) {
-          if (!field.innerHTML || field.dataset.emptyMode === true) {
+          if (!field.innerHTML || field.dataset.emptyMode) {
             field.dataset.emptyMode = true;
             field.innerHTML = fieldMessages.join(', ');
           }
