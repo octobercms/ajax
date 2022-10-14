@@ -54,6 +54,12 @@ export class Actions
             return;
         }
 
+        if (this.delegate.options.download && data instanceof Blob) {
+            if (this.invoke('handleFileDownload', [data, xhr])) {
+                return;
+            }
+        }
+
         if (this.delegate.options.flash && data['X_OCTOBER_FLASH_MESSAGES']) {
             for (var type in data['X_OCTOBER_FLASH_MESSAGES']) {
                 this.invoke('handleFlashMessage', [data['X_OCTOBER_FLASH_MESSAGES'][type], type]);
@@ -275,6 +281,29 @@ export class Actions
 
         return updatePromise;
     }
+
+    // Custom function, download a file response from the server
+    handleFileDownload(data, xhr) {
+        console.log(this.options)
+        if (this.options.browserTarget) {
+            window.open(window.URL.createObjectURL(data), this.options.browserTarget);
+            return true;
+        }
+
+        const fileName = typeof this.options.download === 'string'
+            ? this.options.download
+            : getFilenameFromHttpResponse(xhr);
+
+        if (fileName) {
+            const anchor = document.createElement('a');
+            anchor.href = window.URL.createObjectURL(data);
+            anchor.download = fileName;
+            anchor.target = '_blank';
+            anchor.click();
+            window.URL.revokeObjectURL(anchor.href);
+            return true;
+        }
+    }
 }
 
 function resolveSelectorResponse(selector) {
@@ -300,4 +329,28 @@ function runScriptsOnElement(el) {
         newScript.appendChild(document.createTextNode(oldScript.innerHTML));
         oldScript.parentNode.replaceChild(newScript, oldScript);
     });
+}
+
+function getFilenameFromHttpResponse(xhr) {
+    const contentDisposition = xhr.getResponseHeader('Content-Disposition');
+    if (!contentDisposition) {
+        return null;
+    }
+
+    const filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/g;
+    let match = null;
+    let tmpMatch = null;
+
+    while ((tmpMatch = filenameRegex.exec(contentDisposition)) !== null) {
+        match = tmpMatch;
+    }
+
+    if (match !== null && match[1]) {
+        // Decide ASCII or UTF-8 file name
+        return (/filename[^;*=\n]*\*=[^']*''/.exec(match[0]) === null)
+            ? match[1].replace(/['"]/g, '')
+            : decodeURIComponent(match[1].substring(match[1].indexOf("''") + 2));
+    }
+
+    return null;
 }
