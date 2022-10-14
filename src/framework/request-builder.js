@@ -28,6 +28,7 @@ export class RequestBuilder
         this.assignAsData('bulk', 'requestBulk', { emptyAsTrue: true });
         this.assignAsData('files', 'requestFiles', { emptyAsTrue: true });
         this.assignAsData('flash', 'requestFlash', { emptyAsTrue: true });
+        this.assignAsData('download', 'requestDownload', { emptyAsTrue: true });
         this.assignAsData('browserValidate', 'browserValidate', { emptyAsTrue: true });
 
         this.assignRequestData();

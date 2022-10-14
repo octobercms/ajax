@@ -22,6 +22,7 @@ export class HttpRequest
 
         this.headers = options.headers || {};
         this.method = options.method || 'GET';
+        this.responseType = options.responseType || '';
         this.data = options.data;
 
         // XMLHttpRequest events
@@ -33,22 +34,24 @@ export class HttpRequest
 
         this.requestLoaded = () => {
             this.endRequest(xhr => {
-                const contentType = xhr.getResponseHeader('Content-Type');
-                const responseData = contentTypeIsJSON(contentType) ? JSON.parse(xhr.responseText) : xhr.responseText;
+                this.processResponseData(xhr, (xhr, data) => {
+                    const contentType = xhr.getResponseHeader('Content-Type');
+                    const responseData = contentTypeIsJSON(contentType) ? JSON.parse(data) : data;
 
-                if (this.options.htmlOnly && !contentTypeIsHTML(contentType)) {
-                    this.failed = true;
-                    this.delegate.requestFailedWithStatusCode(SystemStatusCode.contentTypeMismatch);
-                    return;
-                }
+                    if (this.options.htmlOnly && !contentTypeIsHTML(contentType)) {
+                        this.failed = true;
+                        this.delegate.requestFailedWithStatusCode(SystemStatusCode.contentTypeMismatch);
+                        return;
+                    }
 
-                if (xhr.status >= 200 && xhr.status < 300) {
-                    this.delegate.requestCompletedWithResponse(responseData, xhr.status, contentResponseIsRedirect(xhr, this.url));
-                }
-                else {
-                    this.failed = true;
-                    this.delegate.requestFailedWithStatusCode(xhr.status, responseData);
-                }
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        this.delegate.requestCompletedWithResponse(responseData, xhr.status, contentResponseIsRedirect(xhr, this.url));
+                    }
+                    else {
+                        this.failed = true;
+                        this.delegate.requestFailedWithStatusCode(xhr.status, responseData);
+                    }
+                });
             });
         };
 
@@ -113,6 +116,7 @@ export class HttpRequest
 
         xhr.open(this.method, this.url, true);
         xhr.timeout = timeout;
+        xhr.responseType = this.responseType;
 
         xhr.onprogress = this.requestProgressed;
         xhr.onload = this.requestLoaded;
@@ -143,6 +147,25 @@ export class HttpRequest
     destroy() {
         this.setProgress(1);
         this.delegate.requestFinished();
+    }
+
+    processResponseData(xhr, callback) {
+        if (this.responseType !== 'blob') {
+            callback(xhr, xhr.responseText);
+            return;
+        }
+
+        // Confirm response is a download
+        const contentDisposition = xhr.getResponseHeader('Content-Disposition') || '';
+        if (contentDisposition.indexOf('attachment') === 0 || contentDisposition.indexOf('inline') === 0) {
+            callback(xhr, xhr.response);
+            return;
+        }
+
+        // Convert blob to text
+        const reader = new FileReader;
+        reader.addEventListener('load', () => { callback(xhr, reader.result); });
+        reader.readAsText(xhr.response);
     }
 }
 

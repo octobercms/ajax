@@ -27,6 +27,7 @@ export class Options
             method: 'POST',
             url: this.options.url ? this.options.url : window.location.href,
             headers: this.buildHeaders(this.handler, this.options),
+            responseType: this.options.download === false ? '' : 'blob'
         };
     }
 
