@@ -284,7 +284,6 @@ export class Actions
 
     // Custom function, download a file response from the server
     handleFileDownload(data, xhr) {
-        console.log(this.options)
         if (this.options.browserTarget) {
             window.open(window.URL.createObjectURL(data), this.options.browserTarget);
             return true;

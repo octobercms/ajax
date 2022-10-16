@@ -1642,6 +1642,10 @@ var RequestBuilder = /*#__PURE__*/function () {
     this.assignAsData('flash', 'requestFlash', {
       emptyAsTrue: true
     });
+    this.assignAsData('download', 'requestDownload', {
+      emptyAsTrue: true
+    });
+    this.assignAsData('browserTarget', 'browserTarget');
     this.assignAsData('browserValidate', 'browserValidate', {
       emptyAsTrue: true
     });
@@ -1897,6 +1901,12 @@ var Actions = /*#__PURE__*/function () {
         return;
       }
 
+      if (this.delegate.options.download && data instanceof Blob) {
+        if (this.invoke('handleFileDownload', [data, xhr])) {
+          return;
+        }
+      }
+
       if (this.delegate.options.flash && data['X_OCTOBER_FLASH_MESSAGES']) {
         for (var type in data['X_OCTOBER_FLASH_MESSAGES']) {
           this.invoke('handleFlashMessage', [data['X_OCTOBER_FLASH_MESSAGES'][type], type]);
@@ -2115,6 +2125,27 @@ var Actions = /*#__PURE__*/function () {
       }
 
       return updatePromise;
+    } // Custom function, download a file response from the server
+
+  }, {
+    key: "handleFileDownload",
+    value: function handleFileDownload(data, xhr) {
+      if (this.options.browserTarget) {
+        window.open(window.URL.createObjectURL(data), this.options.browserTarget);
+        return true;
+      }
+
+      var fileName = typeof this.options.download === 'string' ? this.options.download : getFilenameFromHttpResponse(xhr);
+
+      if (fileName) {
+        var anchor = document.createElement('a');
+        anchor.href = window.URL.createObjectURL(data);
+        anchor.download = fileName;
+        anchor.target = '_blank';
+        anchor.click();
+        window.URL.revokeObjectURL(anchor.href);
+        return true;
+      }
     }
   }]);
 
@@ -2145,6 +2176,29 @@ function runScriptsOnElement(el) {
     newScript.appendChild(document.createTextNode(oldScript.innerHTML));
     oldScript.parentNode.replaceChild(newScript, oldScript);
   });
+}
+
+function getFilenameFromHttpResponse(xhr) {
+  var contentDisposition = xhr.getResponseHeader('Content-Disposition');
+
+  if (!contentDisposition) {
+    return null;
+  }
+
+  var filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/g;
+  var match = null;
+  var tmpMatch = null;
+
+  while ((tmpMatch = filenameRegex.exec(contentDisposition)) !== null) {
+    match = tmpMatch;
+  }
+
+  if (match !== null && match[1]) {
+    // Decide ASCII or UTF-8 file name
+    return /filename[^;*=\n]*\*=[^']*''/.exec(match[0]) === null ? match[1].replace(/['"]/g, '') : decodeURIComponent(match[1].substring(match[1].indexOf("''") + 2));
+  }
+
+  return null;
 }
 
 /***/ }),
@@ -2613,7 +2667,8 @@ var Options = /*#__PURE__*/function () {
       return {
         method: 'POST',
         url: this.options.url ? this.options.url : window.location.href,
-        headers: this.buildHeaders(this.handler, this.options)
+        headers: this.buildHeaders(this.handler, this.options),
+        responseType: this.options.download === false ? '' : 'blob'
       };
     } // Private
 
@@ -2795,11 +2850,13 @@ var Request = /*#__PURE__*/function () {
       var _Options$fetch = _options__WEBPACK_IMPORTED_MODULE_0__.Options.fetch(this.handler, this.options),
           url = _Options$fetch.url,
           headers = _Options$fetch.headers,
-          method = _Options$fetch.method;
+          method = _Options$fetch.method,
+          responseType = _Options$fetch.responseType;
 
       this.request = new _util_http_request__WEBPACK_IMPORTED_MODULE_3__.HttpRequest(this, url, {
         method: method,
         headers: headers,
+        responseType: responseType,
         data: data,
         trackAbort: true
       });
@@ -3189,6 +3246,9 @@ var Request = /*#__PURE__*/function () {
         update: {},
         files: false,
         bulk: false,
+        download: false,
+        browserValidate: false,
+        browserTarget: null,
         progressBarDelay: 500,
         progressBar: null
       };
@@ -3728,6 +3788,7 @@ var HttpRequest = /*#__PURE__*/function () {
     this.options = options;
     this.headers = options.headers || {};
     this.method = options.method || 'GET';
+    this.responseType = options.responseType || '';
     this.data = options.data; // XMLHttpRequest events
 
     this.requestProgressed = function (event) {
@@ -3738,24 +3799,26 @@ var HttpRequest = /*#__PURE__*/function () {
 
     this.requestLoaded = function () {
       _this.endRequest(function (xhr) {
-        var contentType = xhr.getResponseHeader('Content-Type');
-        var responseData = contentTypeIsJSON(contentType) ? JSON.parse(xhr.responseText) : xhr.responseText;
+        _this.processResponseData(xhr, function (xhr, data) {
+          var contentType = xhr.getResponseHeader('Content-Type');
+          var responseData = contentTypeIsJSON(contentType) ? JSON.parse(data) : data;
 
-        if (_this.options.htmlOnly && !contentTypeIsHTML(contentType)) {
-          _this.failed = true;
+          if (_this.options.htmlOnly && !contentTypeIsHTML(contentType)) {
+            _this.failed = true;
 
-          _this.delegate.requestFailedWithStatusCode(SystemStatusCode.contentTypeMismatch);
+            _this.delegate.requestFailedWithStatusCode(SystemStatusCode.contentTypeMismatch);
 
-          return;
-        }
+            return;
+          }
 
-        if (xhr.status >= 200 && xhr.status < 300) {
-          _this.delegate.requestCompletedWithResponse(responseData, xhr.status, contentResponseIsRedirect(xhr, _this.url));
-        } else {
-          _this.failed = true;
+          if (xhr.status >= 200 && xhr.status < 300) {
+            _this.delegate.requestCompletedWithResponse(responseData, xhr.status, contentResponseIsRedirect(xhr, _this.url));
+          } else {
+            _this.failed = true;
 
-          _this.delegate.requestFailedWithStatusCode(xhr.status, responseData);
-        }
+            _this.delegate.requestFailedWithStatusCode(xhr.status, responseData);
+          }
+        });
       });
     };
 
@@ -3839,6 +3902,7 @@ var HttpRequest = /*#__PURE__*/function () {
       var timeout = HttpRequest.timeout * 1000;
       xhr.open(this.method, this.url, true);
       xhr.timeout = timeout;
+      xhr.responseType = this.responseType;
       xhr.onprogress = this.requestProgressed;
       xhr.onload = this.requestLoaded;
       xhr.onerror = this.requestFailed;
@@ -3873,6 +3937,29 @@ var HttpRequest = /*#__PURE__*/function () {
     value: function destroy() {
       this.setProgress(1);
       this.delegate.requestFinished();
+    }
+  }, {
+    key: "processResponseData",
+    value: function processResponseData(xhr, callback) {
+      if (this.responseType !== 'blob') {
+        callback(xhr, xhr.responseText);
+        return;
+      } // Confirm response is a download
+
+
+      var contentDisposition = xhr.getResponseHeader('Content-Disposition') || '';
+
+      if (contentDisposition.indexOf('attachment') === 0 || contentDisposition.indexOf('inline') === 0) {
+        callback(xhr, xhr.response);
+        return;
+      } // Convert blob to text
+
+
+      var reader = new FileReader();
+      reader.addEventListener('load', function () {
+        callback(xhr, reader.result);
+      });
+      reader.readAsText(xhr.response);
     }
   }]);
 
