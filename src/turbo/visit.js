@@ -103,6 +103,10 @@ export class Visit
             options.headers['Accept'] = 'text/html, application/xhtml+xml';
             options.headers['X-PJAX'] = 1;
 
+            if (this.hasCachedSnapshot()) {
+                options.headers['X-PJAX-CACHED'] = 1;
+            }
+
             if (this.referrer) {
                 options.headers['X-OCTOBER-REFERRER'] = Location.wrap(this.referrer).absoluteURL;
             }

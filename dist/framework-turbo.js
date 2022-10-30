@@ -4922,6 +4922,10 @@ var Visit = /*#__PURE__*/function () {
         options.headers['Accept'] = 'text/html, application/xhtml+xml';
         options.headers['X-PJAX'] = 1;
 
+        if (this.hasCachedSnapshot()) {
+          options.headers['X-PJAX-CACHED'] = 1;
+        }
+
         if (this.referrer) {
           options.headers['X-OCTOBER-REFERRER'] = _location__WEBPACK_IMPORTED_MODULE_1__.Location.wrap(this.referrer).absoluteURL;
         }
