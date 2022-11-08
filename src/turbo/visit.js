@@ -98,7 +98,12 @@ export class Visit
     issueRequest() {
         if (this.shouldIssueRequest() && !this.request) {
             const url = Location.wrap(this.location).absoluteURL;
-            const options = { method: 'GET', headers: {}, htmlOnly: true };
+            const options = {
+                method: 'GET',
+                headers: {},
+                htmlOnly: true,
+                timeout: 240
+            };
 
             options.headers['Accept'] = 'text/html, application/xhtml+xml';
             options.headers['X-PJAX'] = 1;

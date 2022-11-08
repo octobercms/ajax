@@ -9,8 +9,6 @@ export var SystemStatusCode = {
 
 export class HttpRequest
 {
-    static timeout = 240;
-
     constructor(delegate, url, options) {
         this.failed = false;
         this.progress = 0;
@@ -24,6 +22,7 @@ export class HttpRequest
         this.method = options.method || 'GET';
         this.responseType = options.responseType || '';
         this.data = options.data;
+        this.timeout = options.timeout || 0;
 
         // XMLHttpRequest events
         this.requestProgressed = (event) => {
@@ -112,10 +111,8 @@ export class HttpRequest
     // Private
     createXHR() {
         const xhr = this.xhr = new XMLHttpRequest;
-        const timeout = HttpRequest.timeout * 1000;
-
         xhr.open(this.method, this.url, true);
-        xhr.timeout = timeout;
+        xhr.timeout = this.timeout ? this.timeout * 1000 : 0;
         xhr.responseType = this.responseType;
 
         xhr.onprogress = this.requestProgressed;
