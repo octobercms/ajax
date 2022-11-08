@@ -2858,6 +2858,7 @@ var Request = /*#__PURE__*/function () {
         headers: headers,
         responseType: responseType,
         data: data,
+        timeout: 0,
         trackAbort: true
       });
       this.promise = new _util_deferred__WEBPACK_IMPORTED_MODULE_4__.Deferred({
@@ -3765,8 +3766,6 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
 
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
 
 var SystemStatusCode = {
   networkFailure: 0,
@@ -3789,7 +3788,8 @@ var HttpRequest = /*#__PURE__*/function () {
     this.headers = options.headers || {};
     this.method = options.method || 'GET';
     this.responseType = options.responseType || '';
-    this.data = options.data; // XMLHttpRequest events
+    this.data = options.data;
+    this.timeout = options.timeout || 240; // XMLHttpRequest events
 
     this.requestProgressed = function (event) {
       if (event.lengthComputable) {
@@ -3899,7 +3899,7 @@ var HttpRequest = /*#__PURE__*/function () {
     key: "createXHR",
     value: function createXHR() {
       var xhr = this.xhr = new XMLHttpRequest();
-      var timeout = HttpRequest.timeout * 1000;
+      var timeout = this.timeout * 1000;
       xhr.open(this.method, this.url, true);
       xhr.timeout = timeout;
       xhr.responseType = this.responseType;
@@ -3965,8 +3965,6 @@ var HttpRequest = /*#__PURE__*/function () {
 
   return HttpRequest;
 }();
-
-_defineProperty(HttpRequest, "timeout", 240);
 
 function contentResponseIsRedirect(xhr, url) {
   if (xhr.getResponseHeader('X-OCTOBER-LOCATION')) {
