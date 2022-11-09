@@ -112,7 +112,6 @@ export class HttpRequest
     createXHR() {
         const xhr = this.xhr = new XMLHttpRequest;
         xhr.open(this.method, this.url, true);
-        xhr.timeout = this.timeout ? this.timeout * 1000 : 0;
         xhr.responseType = this.responseType;
 
         xhr.onprogress = this.requestProgressed;
@@ -120,6 +119,10 @@ export class HttpRequest
         xhr.onerror = this.requestFailed;
         xhr.ontimeout = this.requestTimedOut;
         xhr.onabort = this.requestCanceled;
+
+        if (this.timeout) {
+            xhr.timeout = this.timeout * 1000;
+        }
 
         for (var i in this.headers) {
             xhr.setRequestHeader(i, this.headers[i]);

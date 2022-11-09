@@ -2858,7 +2858,6 @@ var Request = /*#__PURE__*/function () {
         headers: headers,
         responseType: responseType,
         data: data,
-        timeout: 0,
         trackAbort: true
       });
       this.promise = new _util_deferred__WEBPACK_IMPORTED_MODULE_4__.Deferred({
@@ -5530,7 +5529,8 @@ var Visit = /*#__PURE__*/function () {
         var options = {
           method: 'GET',
           headers: {},
-          htmlOnly: true
+          htmlOnly: true,
+          timeout: 240
         };
         options.headers['Accept'] = 'text/html, application/xhtml+xml';
         options.headers['X-PJAX'] = 1;
@@ -6295,7 +6295,7 @@ var HttpRequest = /*#__PURE__*/function () {
     this.method = options.method || 'GET';
     this.responseType = options.responseType || '';
     this.data = options.data;
-    this.timeout = options.timeout || 240; // XMLHttpRequest events
+    this.timeout = options.timeout || 0; // XMLHttpRequest events
 
     this.requestProgressed = function (event) {
       if (event.lengthComputable) {
@@ -6405,15 +6405,17 @@ var HttpRequest = /*#__PURE__*/function () {
     key: "createXHR",
     value: function createXHR() {
       var xhr = this.xhr = new XMLHttpRequest();
-      var timeout = this.timeout * 1000;
       xhr.open(this.method, this.url, true);
-      xhr.timeout = timeout;
       xhr.responseType = this.responseType;
       xhr.onprogress = this.requestProgressed;
       xhr.onload = this.requestLoaded;
       xhr.onerror = this.requestFailed;
       xhr.ontimeout = this.requestTimedOut;
       xhr.onabort = this.requestCanceled;
+
+      if (this.timeout) {
+        xhr.timeout = this.timeout * 1000;
+      }
 
       for (var i in this.headers) {
         xhr.setRequestHeader(i, this.headers[i]);
