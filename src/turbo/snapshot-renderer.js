@@ -49,7 +49,7 @@ export class SnapshotRenderer extends Renderer
     }
 
     shouldRender() {
-        return this.newSnapshot.isVisitable() && this.trackedElementsAreIdentical();
+        return this.currentSnapshot.isEnabled() && this.newSnapshot.isVisitable() && this.trackedElementsAreIdentical();
     }
 
     trackedElementsAreIdentical() {

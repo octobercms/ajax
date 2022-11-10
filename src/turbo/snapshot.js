@@ -84,6 +84,10 @@ export class Snapshot
         return this.getCacheControlValue() != 'no-cache';
     }
 
+    isEnabled() {
+        return this.getSetting('visit-control') != 'disable';
+    }
+
     isVisitable() {
         return ['reload', 'disable'].indexOf(this.getSetting('visit-control')) === -1;
     }
