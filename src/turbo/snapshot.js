@@ -89,7 +89,7 @@ export class Snapshot
     }
 
     isVisitable() {
-        return ['reload', 'disable'].indexOf(this.getSetting('visit-control')) === -1;
+        return this.isEnabled() && this.getSetting('visit-control') != 'reload';
     }
 
     getSetting(name, defaultValue) {
