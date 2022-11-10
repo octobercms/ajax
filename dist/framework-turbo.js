@@ -4335,7 +4335,7 @@ var SnapshotRenderer = /*#__PURE__*/function (_Renderer) {
   }, {
     key: "shouldRender",
     value: function shouldRender() {
-      return this.newSnapshot.isVisitable() && this.trackedElementsAreIdentical();
+      return this.currentSnapshot.isEnabled() && this.newSnapshot.isVisitable() && this.trackedElementsAreIdentical();
     }
   }, {
     key: "trackedElementsAreIdentical",
@@ -4655,9 +4655,14 @@ var Snapshot = /*#__PURE__*/function () {
       return this.getCacheControlValue() != 'no-cache';
     }
   }, {
+    key: "isEnabled",
+    value: function isEnabled() {
+      return this.getSetting('visit-control') != 'disable';
+    }
+  }, {
     key: "isVisitable",
     value: function isVisitable() {
-      return ['reload', 'disable'].indexOf(this.getSetting('visit-control')) === -1;
+      return this.isEnabled() && this.getSetting('visit-control') != 'reload';
     }
   }, {
     key: "getSetting",
