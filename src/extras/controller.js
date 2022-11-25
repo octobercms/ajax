@@ -19,11 +19,11 @@ export class Controller
 
         // Attach loader
         this.showAttachLoader = (function(event) {
-            this.attachLoader.show(event.target);
+            this.attachLoader.showForm(event.target);
         }).bind(this);
 
         this.hideAttachLoader = (function(event) {
-            this.attachLoader.hide(event.target);
+            this.attachLoader.hideForm(event.target);
         }).bind(this);
 
         // Validator

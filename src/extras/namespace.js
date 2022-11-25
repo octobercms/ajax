@@ -2,6 +2,7 @@ import { Controller } from "./controller";
 import { Migrate } from "./migrate";
 import { FlashMessage } from "./flash-message";
 import { ProgressBar } from "./progress-bar";
+import { AttachLoader } from "./attach-loader";
 const controller = new Controller;
 
 export default {
@@ -10,6 +11,8 @@ export default {
     flashMsg: FlashMessage.flashMsg,
 
     progressBar: ProgressBar.progressBar,
+
+    attachLoader: AttachLoader.attachLoader,
 
     start() {
         controller.start();

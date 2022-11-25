@@ -15,6 +15,9 @@ if (!window.oc.AjaxExtras) {
     // Progress bar
     window.oc.progressBar = namespace.progressBar();
 
+    // Attach loader
+    window.oc.attachLoader = namespace.attachLoader();
+
     // Boot controller
     if (!isAMD() && !isCommonJS()) {
         namespace.start();

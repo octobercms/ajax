@@ -29,5 +29,6 @@ export const
     parseJSON = () => AjaxFramework.parseJSON(...arguments),
     flashMsg = () => AjaxExtras.flashMsg(...arguments),
     progressBar = () => AjaxExtras.progressBar(...arguments),
+    attachLoader = () => AjaxExtras.attachLoader(...arguments),
     useTurbo = () => AjaxTurbo.isEnabled(...arguments),
     visit = () => AjaxTurbo.visit(...arguments);

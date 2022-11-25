@@ -31,33 +31,50 @@ export class AttachLoader
     `;
     }
 
+    static attachLoader() {
+        return {
+            show: function(el) {
+                (new AttachLoader).show(resolveElement(el));
+            },
+            hide: function(el) {
+                (new AttachLoader).hide(resolveElement(el));
+            }
+        };
+    }
+
     // Public
     show(el) {
         this.installStylesheetElement();
 
+        el.classList.add('oc-attach-loader');
+        el.disabled = true;
+    }
+
+    hide(el) {
+        el.classList.remove('oc-attach-loader');
+        el.disabled = false;
+    }
+
+    showForm(el) {
         if (el.dataset.attachLoading !== undefined) {
-            el.classList.add('oc-attach-loader');
-            el.disabled = true;
+            this.show(el);
         }
 
         if (el.matches('form')) {
             el.querySelectorAll('[data-attach-loading]').forEach(function(otherEl) {
-                otherEl.classList.add('oc-attach-loader');
-                otherEl.disabled = true;
+                this.show(otherEl);
             });
         }
     }
 
-    hide(el) {
+    hideForm(el) {
         if (el.dataset.attachLoading !== undefined) {
-            el.classList.remove('oc-attach-loader');
-            el.disabled = false;
+            this.hide(el);
         }
 
         if (el.matches('form')) {
             el.querySelectorAll('[data-attach-loading]').forEach(function(otherEl) {
-                otherEl.classList.remove('oc-attach-loader');
-                otherEl.disabled = false;
+                this.hide(otherEl);
             });
         }
     }
@@ -75,4 +92,16 @@ export class AttachLoader
         element.textContent = AttachLoader.defaultCSS;
         return element;
     }
+}
+
+function resolveElement(el) {
+    if (typeof el === 'string') {
+        el = document.querySelector(el);
+    }
+
+    if (!el) {
+        throw new Error("Invalid element for attach loader.");
+    }
+
+    return el;
 }
