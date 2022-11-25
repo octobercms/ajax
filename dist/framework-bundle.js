@@ -38,31 +38,38 @@ var AttachLoader = /*#__PURE__*/function () {
     value: // Public
     function show(el) {
       this.installStylesheetElement();
-
-      if (el.dataset.attachLoading !== undefined) {
-        el.classList.add('oc-attach-loader');
-        el.disabled = true;
-      }
-
-      if (el.matches('form')) {
-        el.querySelectorAll('[data-attach-loading]').forEach(function (otherEl) {
-          otherEl.classList.add('oc-attach-loader');
-          otherEl.disabled = true;
-        });
-      }
+      el.classList.add('oc-attach-loader');
+      el.disabled = true;
     }
   }, {
     key: "hide",
     value: function hide(el) {
+      el.classList.remove('oc-attach-loader');
+      el.disabled = false;
+    }
+  }, {
+    key: "showForm",
+    value: function showForm(el) {
       if (el.dataset.attachLoading !== undefined) {
-        el.classList.remove('oc-attach-loader');
-        el.disabled = false;
+        this.show(el);
       }
 
       if (el.matches('form')) {
         el.querySelectorAll('[data-attach-loading]').forEach(function (otherEl) {
-          otherEl.classList.remove('oc-attach-loader');
-          otherEl.disabled = false;
+          this.show(otherEl);
+        });
+      }
+    }
+  }, {
+    key: "hideForm",
+    value: function hideForm(el) {
+      if (el.dataset.attachLoading !== undefined) {
+        this.hide(el);
+      }
+
+      if (el.matches('form')) {
+        el.querySelectorAll('[data-attach-loading]').forEach(function (otherEl) {
+          this.hide(otherEl);
         });
       }
     } // Private
@@ -87,12 +94,36 @@ var AttachLoader = /*#__PURE__*/function () {
     get: function get() {
       return (0,_util__WEBPACK_IMPORTED_MODULE_0__.unindent)(_templateObject || (_templateObject = _taggedTemplateLiteral(["\n        .oc-attach-loader:after {\n            content: '';\n            display: inline-block;\n            vertical-align: middle;\n            margin-left: .4em;\n            height: 1em;\n            width: 1em;\n            animation: oc-rotate-loader 0.8s infinite linear;\n            border: .2em solid currentColor;\n            border-right-color: transparent;\n            border-radius: 50%;\n            opacity: .5;\n        }\n\n        @keyframes oc-rotate-loader {\n            0%    { transform: rotate(0deg); }\n            100%  { transform: rotate(360deg); }\n        }\n    "])));
     }
+  }, {
+    key: "attachLoader",
+    value: function attachLoader() {
+      return {
+        show: function show(el) {
+          new AttachLoader().show(resolveElement(el));
+        },
+        hide: function hide(el) {
+          new AttachLoader().hide(resolveElement(el));
+        }
+      };
+    }
   }]);
 
   return AttachLoader;
 }();
 
 _defineProperty(AttachLoader, "stylesheetReady", false);
+
+function resolveElement(el) {
+  if (typeof el === 'string') {
+    el = document.querySelector(el);
+  }
+
+  if (!el) {
+    throw new Error("Invalid element for attach loader.");
+  }
+
+  return el;
+}
 
 /***/ }),
 
@@ -136,11 +167,11 @@ var Controller = /*#__PURE__*/function () {
 
 
     this.showAttachLoader = function (event) {
-      this.attachLoader.show(event.target);
+      this.attachLoader.showForm(event.target);
     }.bind(this);
 
     this.hideAttachLoader = function (event) {
-      this.attachLoader.hide(event.target);
+      this.attachLoader.hideForm(event.target);
     }.bind(this); // Validator
 
 
@@ -408,7 +439,9 @@ if (!window.oc.AjaxExtras) {
 
   window.oc.flashMsg = _namespace__WEBPACK_IMPORTED_MODULE_0__["default"].flashMsg; // Progress bar
 
-  window.oc.progressBar = _namespace__WEBPACK_IMPORTED_MODULE_0__["default"].progressBar(); // Boot controller
+  window.oc.progressBar = _namespace__WEBPACK_IMPORTED_MODULE_0__["default"].progressBar(); // Attach loader
+
+  window.oc.attachLoader = _namespace__WEBPACK_IMPORTED_MODULE_0__["default"].attachLoader(); // Boot controller
 
   if (!isAMD() && !isCommonJS()) {
     _namespace__WEBPACK_IMPORTED_MODULE_0__["default"].start();
@@ -477,6 +510,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _migrate__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./migrate */ "./src/extras/migrate.js");
 /* harmony import */ var _flash_message__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./flash-message */ "./src/extras/flash-message.js");
 /* harmony import */ var _progress_bar__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./progress-bar */ "./src/extras/progress-bar.js");
+/* harmony import */ var _attach_loader__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./attach-loader */ "./src/extras/attach-loader.js");
+
 
 
 
@@ -486,6 +521,7 @@ var controller = new _controller__WEBPACK_IMPORTED_MODULE_0__.Controller();
   controller: controller,
   flashMsg: _flash_message__WEBPACK_IMPORTED_MODULE_2__.FlashMessage.flashMsg,
   progressBar: _progress_bar__WEBPACK_IMPORTED_MODULE_3__.ProgressBar.progressBar,
+  attachLoader: _attach_loader__WEBPACK_IMPORTED_MODULE_4__.AttachLoader.attachLoader,
   start: function start() {
     controller.start();
 
