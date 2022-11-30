@@ -2,6 +2,13 @@ import { AssetManager } from "./asset-manager";
 import { SystemStatusCode } from "../util/http-request";
 import { Deferred } from "../util/deferred";
 
+export var ActionsUpdateMode = {
+    replaceWith: 'replace',
+    prepend: 'prepend',
+    append: 'append',
+    update: 'update'
+}
+
 export class Actions
 {
     constructor(delegate, context, options) {
@@ -218,25 +225,25 @@ export class Actions
             for (var partial in data) {
                 // If a partial has been supplied on the client side that matches the server supplied key, look up
                 // it's selector and use that. If not, we assume it is an explicit selector reference.
-                const selector = updateOptions[partial] || partial,
-                    isString = typeof selector === 'string';
+                const selector = updateOptions[partial] || partial;
 
-                let selectedEl = isString ? resolveSelectorResponse(selector) : [selector];
-                selectedEl.forEach(function(el) {
+                resolveSelectorResponse(selector).forEach(function(el) {
+                    const updateMode = getSelectorUpdateMode(selector, el);
+
                     // Replace With
-                    if (isString && selector.charAt(0) === '!') {
+                    if (updateMode === ActionsUpdateMode.replaceWith) {
                         const parentNode = el.parentNode;
                         el.insertAdjacentHTML('afterEnd', data[partial]);
                         parentNode.removeChild(el);
                         runScriptsOnFragment(parentNode, data[partial]);
                     }
                     // Append
-                    else if (isString && selector.charAt(0) === '@') {
+                    else if (updateMode === ActionsUpdateMode.append) {
                         el.insertAdjacentHTML('beforeEnd', data[partial]);
                         runScriptsOnFragment(el, data[partial]);
                     }
                     // Prepend
-                    else if (isString && selector.charAt(0) === '^') {
+                    else if (updateMode === ActionsUpdateMode.prepend) {
                         el.insertAdjacentHTML('afterBegin', data[partial]);
                         runScriptsOnFragment(el, data[partial]);
                     }
@@ -310,6 +317,11 @@ export class Actions
 }
 
 function resolveSelectorResponse(selector) {
+    // Selector is DOM element
+    if (typeof selector !== 'string') {
+        return [selector];
+    }
+
     // Invalid selector
     if (['#', '.', '@', '^', '!', '='].indexOf(selector.charAt(0)) === -1) {
         return [];
@@ -321,6 +333,35 @@ function resolveSelectorResponse(selector) {
     }
 
     return document.querySelectorAll(selector);
+}
+
+function getSelectorUpdateMode(selector, el) {
+    // Look at selector prefix
+    if (typeof selector === 'string') {
+        if (selector.charAt(0) === '!') {
+            return ActionsUpdateMode.replaceWith;
+        }
+        if (selector.charAt(0) === '@') {
+            return ActionsUpdateMode.append;
+        }
+        if (selector.charAt(0) === '^') {
+            return ActionsUpdateMode.prepend;
+        }
+    }
+
+    // Look at element dataset
+    if (el.dataset.requestUpdateReplace !== undefined) {
+        return ActionsUpdateMode.replaceWith;
+    }
+    if (el.dataset.requestUpdateAppend !== undefined) {
+        return ActionsUpdateMode.append;
+    }
+    if (el.dataset.requestUpdatePrepend !== undefined) {
+        return ActionsUpdateMode.prepend;
+    }
+
+    // Default mode
+    return ActionsUpdateMode.update;
 }
 
 // Replaces blocked scripts with fresh nodes
