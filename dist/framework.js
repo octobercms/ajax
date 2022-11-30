@@ -766,12 +766,16 @@ var JsonParser = /*#__PURE__*/function () {
         value = '';
       }
 
-      if (_typeof(value) == 'object') {
+      if (_typeof(value) === 'object') {
         return value;
       }
 
+      if (value.charAt(0) !== '{') {
+        value = "{" + value + "}";
+      }
+
       try {
-        return this.parseJSON("{" + value + "}");
+        return this.parseJSON(value);
       } catch (e) {
         throw new Error('Error parsing the ' + name + ' attribute value. ' + e);
       }
@@ -1207,7 +1211,8 @@ function normalizeDataKey(key) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "Actions": () => (/* binding */ Actions)
+/* harmony export */   "Actions": () => (/* binding */ Actions),
+/* harmony export */   "ActionsUpdateMode": () => (/* binding */ ActionsUpdateMode)
 /* harmony export */ });
 /* harmony import */ var _asset_manager__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./asset-manager */ "./src/request/asset-manager.js");
 /* harmony import */ var _util_http_request__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../util/http-request */ "./src/util/http-request.js");
@@ -1233,6 +1238,12 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 
 
+var ActionsUpdateMode = {
+  replaceWith: 'replace',
+  prepend: 'prepend',
+  append: 'append',
+  update: 'update'
+};
 var Actions = /*#__PURE__*/function () {
   function Actions(delegate, context, options) {
     _classCallCheck(this, Actions);
@@ -1453,22 +1464,21 @@ var Actions = /*#__PURE__*/function () {
         var _loop = function _loop() {
           // If a partial has been supplied on the client side that matches the server supplied key, look up
           // it's selector and use that. If not, we assume it is an explicit selector reference.
-          var selector = updateOptions[partial] || partial,
-              isString = typeof selector === 'string';
-          var selectedEl = isString ? resolveSelectorResponse(selector) : [selector];
-          selectedEl.forEach(function (el) {
-            // Replace With
-            if (isString && selector.charAt(0) === '!') {
+          var selector = updateOptions[partial] || partial;
+          resolveSelectorResponse(selector).forEach(function (el) {
+            var updateMode = getSelectorUpdateMode(selector, el); // Replace With
+
+            if (updateMode === ActionsUpdateMode.replaceWith) {
               var parentNode = el.parentNode;
               el.insertAdjacentHTML('afterEnd', data[partial]);
               parentNode.removeChild(el);
               runScriptsOnFragment(parentNode, data[partial]);
             } // Append
-            else if (isString && selector.charAt(0) === '@') {
+            else if (updateMode === ActionsUpdateMode.append) {
               el.insertAdjacentHTML('beforeEnd', data[partial]);
               runScriptsOnFragment(el, data[partial]);
             } // Prepend
-            else if (isString && selector.charAt(0) === '^') {
+            else if (updateMode === ActionsUpdateMode.prepend) {
               el.insertAdjacentHTML('afterBegin', data[partial]);
               runScriptsOnFragment(el, data[partial]);
             } // Insert
@@ -1545,7 +1555,12 @@ var Actions = /*#__PURE__*/function () {
 }();
 
 function resolveSelectorResponse(selector) {
-  // Invalid selector
+  // Selector is DOM element
+  if (typeof selector !== 'string') {
+    return [selector];
+  } // Invalid selector
+
+
   if (['#', '.', '@', '^', '!', '='].indexOf(selector.charAt(0)) === -1) {
     return [];
   } // Append, prepend, replace with or custom selector
@@ -1556,6 +1571,39 @@ function resolveSelectorResponse(selector) {
   }
 
   return document.querySelectorAll(selector);
+}
+
+function getSelectorUpdateMode(selector, el) {
+  // Look at selector prefix
+  if (typeof selector === 'string') {
+    if (selector.charAt(0) === '!') {
+      return ActionsUpdateMode.replaceWith;
+    }
+
+    if (selector.charAt(0) === '@') {
+      return ActionsUpdateMode.append;
+    }
+
+    if (selector.charAt(0) === '^') {
+      return ActionsUpdateMode.prepend;
+    }
+  } // Look at element dataset
+
+
+  if (el.dataset.requestUpdateReplace !== undefined) {
+    return ActionsUpdateMode.replaceWith;
+  }
+
+  if (el.dataset.requestUpdateAppend !== undefined) {
+    return ActionsUpdateMode.append;
+  }
+
+  if (el.dataset.requestUpdatePrepend !== undefined) {
+    return ActionsUpdateMode.prepend;
+  } // Default mode
+
+
+  return ActionsUpdateMode.update;
 } // Replaces blocked scripts with fresh nodes
 
 
