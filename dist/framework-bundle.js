@@ -2107,14 +2107,18 @@ var Actions = /*#__PURE__*/function () {
           selectedEl.forEach(function (el) {
             // Replace With
             if (isString && selector.charAt(0) === '!') {
+              var parentNode = el.parentNode;
               el.insertAdjacentHTML('afterEnd', data[partial]);
-              el.parentNode.removeChild(el);
+              parentNode.removeChild(el);
+              runScriptsOnFragment(parentNode, data[partial]);
             } // Append
             else if (isString && selector.charAt(0) === '@') {
               el.insertAdjacentHTML('beforeEnd', data[partial]);
+              runScriptsOnFragment(el, data[partial]);
             } // Prepend
             else if (isString && selector.charAt(0) === '^') {
               el.insertAdjacentHTML('afterBegin', data[partial]);
+              runScriptsOnFragment(el, data[partial]);
             } // Insert
             else {
               self.delegate.notifyApplicationBeforeReplace(el);
@@ -2200,10 +2204,10 @@ function resolveSelectorResponse(selector) {
   }
 
   return document.querySelectorAll(selector);
-}
+} // Replaces blocked scripts with fresh nodes
+
 
 function runScriptsOnElement(el) {
-  // Replace blocked scripts with fresh nodes
   Array.from(el.querySelectorAll('script')).forEach(function (oldScript) {
     var newScript = document.createElement('script');
     Array.from(oldScript.attributes).forEach(function (attr) {
@@ -2211,6 +2215,21 @@ function runScriptsOnElement(el) {
     });
     newScript.appendChild(document.createTextNode(oldScript.innerHTML));
     oldScript.parentNode.replaceChild(newScript, oldScript);
+  });
+} // Runs scripts on a fragment inside a container
+
+
+function runScriptsOnFragment(container, html) {
+  var div = document.createElement('div');
+  div.innerHTML = html;
+  Array.from(div.querySelectorAll('script')).forEach(function (oldScript) {
+    var newScript = document.createElement('script');
+    Array.from(oldScript.attributes).forEach(function (attr) {
+      return newScript.setAttribute(attr.name, attr.value);
+    });
+    newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+    container.appendChild(newScript);
+    container.removeChild(newScript);
   });
 }
 
