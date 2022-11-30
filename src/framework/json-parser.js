@@ -6,15 +6,19 @@ export class JsonParser
             value = '';
         }
 
-        if (typeof value == 'object') {
+        if (typeof value === 'object') {
             return value;
         }
 
+        if (value.charAt(0) !== '{') {
+            value = "{" + value + "}";
+        }
+
         try {
-            return this.parseJSON("{" + value + "}");
+            return this.parseJSON(value);
         }
         catch (e) {
-            throw new Error('Error parsing the '+name+' attribute value. '+e);
+            throw new Error('Error parsing the ' + name + ' attribute value. ' + e);
         }
     }
 
