@@ -2,6 +2,1017 @@
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
+/***/ "./src/core/controller.js":
+/*!********************************!*\
+  !*** ./src/core/controller.js ***!
+  \********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Controller": () => (/* binding */ Controller)
+/* harmony export */ });
+/* harmony import */ var _util_events__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../util/events */ "./src/util/events.js");
+/* harmony import */ var _request_builder__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./request-builder */ "./src/core/request-builder.js");
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+
+
+
+var Controller = /*#__PURE__*/function () {
+  function Controller() {
+    _classCallCheck(this, Controller);
+
+    this.started = false;
+  }
+
+  _createClass(Controller, [{
+    key: "start",
+    value: function start() {
+      if (!this.started) {
+        // Track unload event for request lib
+        window.onbeforeunload = this.documentOnBeforeUnload; // First page load
+
+        addEventListener('DOMContentLoaded', this.render); // Again, after new scripts load
+
+        addEventListener('page:updated', this.render); // Again after AJAX request
+
+        addEventListener('ajax:update-complete', this.render); // Submit form
+
+        _util_events__WEBPACK_IMPORTED_MODULE_0__.Events.on(document, 'submit', '[data-request]', this.documentOnSubmit); // Track input
+
+        _util_events__WEBPACK_IMPORTED_MODULE_0__.Events.on(document, 'input', 'input[data-request][data-track-input]', this.documentOnKeyup); // Change select, checkbox, radio, file input
+
+        _util_events__WEBPACK_IMPORTED_MODULE_0__.Events.on(document, 'change', 'select[data-request], input[type=radio][data-request], input[type=checkbox][data-request], input[type=file][data-request]', this.documentOnChange); // Press enter on orphan input
+
+        _util_events__WEBPACK_IMPORTED_MODULE_0__.Events.on(document, 'keydown', 'input[type=text][data-request], input[type=submit][data-request], input[type=password][data-request]', this.documentOnKeydown); // Click submit button or link
+
+        _util_events__WEBPACK_IMPORTED_MODULE_0__.Events.on(document, 'click', 'a[data-request], button[data-request], input[type=button][data-request], input[type=submit][data-request]', this.documentOnClick);
+        this.started = true;
+      }
+    }
+  }, {
+    key: "stop",
+    value: function stop() {
+      if (this.started) {
+        this.started = false;
+      }
+    }
+  }, {
+    key: "render",
+    value: function render(event) {
+      // Pre render event, used to move nodes around
+      _util_events__WEBPACK_IMPORTED_MODULE_0__.Events.dispatch('before-render'); // Render event, used to initialize controls
+
+      _util_events__WEBPACK_IMPORTED_MODULE_0__.Events.dispatch('render'); // Resize event to adjust all measurements
+
+      window.dispatchEvent(new Event('resize'));
+    }
+  }, {
+    key: "documentOnSubmit",
+    value: function documentOnSubmit(event) {
+      event.preventDefault();
+      _request_builder__WEBPACK_IMPORTED_MODULE_1__.RequestBuilder.fromElement(event.target);
+    }
+  }, {
+    key: "documentOnClick",
+    value: function documentOnClick(event) {
+      event.preventDefault();
+      _request_builder__WEBPACK_IMPORTED_MODULE_1__.RequestBuilder.fromElement(event.target);
+    }
+  }, {
+    key: "documentOnChange",
+    value: function documentOnChange(event) {
+      _request_builder__WEBPACK_IMPORTED_MODULE_1__.RequestBuilder.fromElement(event.target);
+    }
+  }, {
+    key: "documentOnKeyup",
+    value: function documentOnKeyup(event) {
+      var el = event.target,
+          lastValue = el.dataset.ocLastValue;
+
+      if (['email', 'number', 'password', 'search', 'text'].indexOf(el.type) === -1) {
+        return;
+      }
+
+      if (lastValue !== undefined && lastValue == el.value) {
+        return;
+      }
+
+      el.dataset.ocLastValue = el.value;
+
+      if (this.dataTrackInputTimer !== undefined) {
+        window.clearTimeout(this.dataTrackInputTimer);
+      }
+
+      var interval = el.getAttribute('data-track-input');
+
+      if (!interval) {
+        interval = 300;
+      }
+
+      var self = this;
+      this.dataTrackInputTimer = window.setTimeout(function () {
+        if (self.lastDataTrackInputRequest) {
+          self.lastDataTrackInputRequest.abort();
+        }
+
+        self.lastDataTrackInputRequest = _request_builder__WEBPACK_IMPORTED_MODULE_1__.RequestBuilder.fromElement(el);
+      }, interval);
+    }
+  }, {
+    key: "documentOnKeydown",
+    value: function documentOnKeydown(event) {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+
+        if (this.dataTrackInputTimer !== undefined) {
+          window.clearTimeout(this.dataTrackInputTimer);
+        }
+
+        _request_builder__WEBPACK_IMPORTED_MODULE_1__.RequestBuilder.fromElement(event.target);
+      }
+    }
+  }, {
+    key: "documentOnBeforeUnload",
+    value: function documentOnBeforeUnload(event) {
+      window.ocUnloading = true;
+    }
+  }]);
+
+  return Controller;
+}();
+
+/***/ }),
+
+/***/ "./src/core/index.js":
+/*!***************************!*\
+  !*** ./src/core/index.js ***!
+  \***************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _util_events__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../util/events */ "./src/util/events.js");
+/* harmony import */ var _namespace__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./namespace */ "./src/core/namespace.js");
+function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
+
+
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_namespace__WEBPACK_IMPORTED_MODULE_1__["default"]);
+
+if (!window.oc) {
+  window.oc = {};
+}
+
+if (!window.oc.AjaxFramework) {
+  // Namespace
+  window.oc.AjaxFramework = _namespace__WEBPACK_IMPORTED_MODULE_1__["default"]; // Request on element with builder
+
+  window.oc.request = _namespace__WEBPACK_IMPORTED_MODULE_1__["default"].requestElement; // JSON parser
+
+  window.oc.parseJSON = _namespace__WEBPACK_IMPORTED_MODULE_1__["default"].parseJSON; // Selector events
+
+  window.oc.Events = _util_events__WEBPACK_IMPORTED_MODULE_0__.Events; // Boot controller
+
+  if (!isAMD() && !isCommonJS()) {
+    _namespace__WEBPACK_IMPORTED_MODULE_1__["default"].start();
+  }
+}
+
+function isAMD() {
+  return typeof define == "function" && __webpack_require__.amdO;
+}
+
+function isCommonJS() {
+  return (typeof exports === "undefined" ? "undefined" : _typeof(exports)) == "object" && "object" != "undefined";
+}
+
+/***/ }),
+
+/***/ "./src/core/json-parser.js":
+/*!*********************************!*\
+  !*** ./src/core/json-parser.js ***!
+  \*********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "JsonParser": () => (/* binding */ JsonParser)
+/* harmony export */ });
+function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+
+var JsonParser = /*#__PURE__*/function () {
+  function JsonParser() {
+    _classCallCheck(this, JsonParser);
+  }
+
+  _createClass(JsonParser, [{
+    key: "parseString",
+    value: // Private
+    function parseString(str) {
+      str = str.trim();
+
+      if (!str.length) {
+        throw new Error("Broken JSON object.");
+      }
+
+      var result = "";
+      /*
+       * the mistake ','
+       */
+
+      while (str && str[0] === ",") {
+        str = str.substr(1);
+      }
+      /*
+       * string
+       */
+
+
+      if (str[0] === "\"" || str[0] === "'") {
+        if (str[str.length - 1] !== str[0]) {
+          throw new Error("Invalid string JSON object.");
+        }
+
+        var body = "\"";
+
+        for (var i = 1; i < str.length; i++) {
+          if (str[i] === "\\") {
+            if (str[i + 1] === "'") {
+              body += str[i + 1];
+            } else {
+              body += str[i];
+              body += str[i + 1];
+            }
+
+            i++;
+          } else if (str[i] === str[0]) {
+            body += "\"";
+            return body;
+          } else if (str[i] === "\"") {
+            body += "\\\"";
+          } else body += str[i];
+        }
+
+        throw new Error("Invalid string JSON object.");
+      }
+      /*
+       * boolean
+       */
+
+
+      if (str === "true" || str === "false") {
+        return str;
+      }
+      /*
+       * null
+       */
+
+
+      if (str === "null") {
+        return "null";
+      }
+      /*
+       * number
+       */
+
+
+      var num = parseFloat(str);
+
+      if (!isNaN(num)) {
+        return num.toString();
+      }
+      /*
+       * object
+       */
+
+
+      if (str[0] === "{") {
+        var type = "needKey";
+        var result = "{";
+
+        for (var i = 1; i < str.length; i++) {
+          if (this.isBlankChar(str[i])) {
+            continue;
+          } else if (type === "needKey" && (str[i] === "\"" || str[i] === "'")) {
+            var key = this.parseKey(str, i + 1, str[i]);
+            result += "\"" + key + "\"";
+            i += key.length;
+            i += 1;
+            type = "afterKey";
+          } else if (type === "needKey" && this.canBeKeyHead(str[i])) {
+            var key = this.parseKey(str, i);
+            result += "\"";
+            result += key;
+            result += "\"";
+            i += key.length - 1;
+            type = "afterKey";
+          } else if (type === "afterKey" && str[i] === ":") {
+            result += ":";
+            type = ":";
+          } else if (type === ":") {
+            var body = this.getBody(str, i);
+            i = i + body.originLength - 1;
+            result += this.parseString(body.body);
+            type = "afterBody";
+          } else if (type === "afterBody" || type === "needKey") {
+            var last = i;
+
+            while (str[last] === "," || this.isBlankChar(str[last])) {
+              last++;
+            }
+
+            if (str[last] === "}" && last === str.length - 1) {
+              while (result[result.length - 1] === ",") {
+                result = result.substr(0, result.length - 1);
+              }
+
+              result += "}";
+              return result;
+            } else if (last !== i && result !== "{") {
+              result += ",";
+              type = "needKey";
+              i = last - 1;
+            }
+          }
+        }
+
+        throw new Error("Broken JSON object near " + result);
+      }
+      /*
+       * array
+       */
+
+
+      if (str[0] === "[") {
+        var result = "[";
+        var type = "needBody";
+
+        for (var i = 1; i < str.length; i++) {
+          if (" " === str[i] || "\n" === str[i] || "\t" === str[i]) {
+            continue;
+          } else if (type === "needBody") {
+            if (str[i] === ",") {
+              result += "null,";
+              continue;
+            }
+
+            if (str[i] === "]" && i === str.length - 1) {
+              if (result[result.length - 1] === ",") result = result.substr(0, result.length - 1);
+              result += "]";
+              return result;
+            }
+
+            var body = this.getBody(str, i);
+            i = i + body.originLength - 1;
+            result += this.parseString(body.body);
+            type = "afterBody";
+          } else if (type === "afterBody") {
+            if (str[i] === ",") {
+              result += ",";
+              type = "needBody"; // deal with mistake ","
+
+              while (str[i + 1] === "," || this.isBlankChar(str[i + 1])) {
+                if (str[i + 1] === ",") result += "null,";
+                i++;
+              }
+            } else if (str[i] === "]" && i === str.length - 1) {
+              result += "]";
+              return result;
+            }
+          }
+        }
+
+        throw new Error("Broken JSON array near " + result);
+      }
+    }
+  }, {
+    key: "parseKey",
+    value: function parseKey(str, pos, quote) {
+      var key = "";
+
+      for (var i = pos; i < str.length; i++) {
+        if (quote && quote === str[i]) {
+          return key;
+        } else if (!quote && (str[i] === " " || str[i] === ":")) {
+          return key;
+        }
+
+        key += str[i];
+
+        if (str[i] === "\\" && i + 1 < str.length) {
+          key += str[i + 1];
+          i++;
+        }
+      }
+
+      throw new Error("Broken JSON syntax near " + key);
+    }
+  }, {
+    key: "getBody",
+    value: function getBody(str, pos) {
+      // parse string body
+      if (str[pos] === "\"" || str[pos] === "'") {
+        var body = str[pos];
+
+        for (var i = pos + 1; i < str.length; i++) {
+          if (str[i] === "\\") {
+            body += str[i];
+            if (i + 1 < str.length) body += str[i + 1];
+            i++;
+          } else if (str[i] === str[pos]) {
+            body += str[pos];
+            return {
+              originLength: body.length,
+              body: body
+            };
+          } else body += str[i];
+        }
+
+        throw new Error("Broken JSON string body near " + body);
+      } // parse true / false
+
+
+      if (str[pos] === "t") {
+        if (str.indexOf("true", pos) === pos) {
+          return {
+            originLength: "true".length,
+            body: "true"
+          };
+        }
+
+        throw new Error("Broken JSON boolean body near " + str.substr(0, pos + 10));
+      }
+
+      if (str[pos] === "f") {
+        if (str.indexOf("f", pos) === pos) {
+          return {
+            originLength: "false".length,
+            body: "false"
+          };
+        }
+
+        throw new Error("Broken JSON boolean body near " + str.substr(0, pos + 10));
+      } // parse null
+
+
+      if (str[pos] === "n") {
+        if (str.indexOf("null", pos) === pos) {
+          return {
+            originLength: "null".length,
+            body: "null"
+          };
+        }
+
+        throw new Error("Broken JSON boolean body near " + str.substr(0, pos + 10));
+      } // parse number
+
+
+      if (str[pos] === "-" || str[pos] === "+" || str[pos] === "." || str[pos] >= "0" && str[pos] <= "9") {
+        var body = "";
+
+        for (var i = pos; i < str.length; i++) {
+          if (str[i] === "-" || str[i] === "+" || str[i] === "." || str[i] >= "0" && str[i] <= "9") {
+            body += str[i];
+          } else {
+            return {
+              originLength: body.length,
+              body: body
+            };
+          }
+        }
+
+        throw new Error("Broken JSON number body near " + body);
+      } // parse object
+
+
+      if (str[pos] === "{" || str[pos] === "[") {
+        var stack = [str[pos]];
+        var body = str[pos];
+
+        for (var i = pos + 1; i < str.length; i++) {
+          body += str[i];
+
+          if (str[i] === "\\") {
+            if (i + 1 < str.length) body += str[i + 1];
+            i++;
+          } else if (str[i] === "\"") {
+            if (stack[stack.length - 1] === "\"") {
+              stack.pop();
+            } else if (stack[stack.length - 1] !== "'") {
+              stack.push(str[i]);
+            }
+          } else if (str[i] === "'") {
+            if (stack[stack.length - 1] === "'") {
+              stack.pop();
+            } else if (stack[stack.length - 1] !== "\"") {
+              stack.push(str[i]);
+            }
+          } else if (stack[stack.length - 1] !== "\"" && stack[stack.length - 1] !== "'") {
+            if (str[i] === "{") {
+              stack.push("{");
+            } else if (str[i] === "}") {
+              if (stack[stack.length - 1] === "{") {
+                stack.pop();
+              } else {
+                throw new Error("Broken JSON " + (str[pos] === "{" ? "object" : "array") + " body near " + body);
+              }
+            } else if (str[i] === "[") {
+              stack.push("[");
+            } else if (str[i] === "]") {
+              if (stack[stack.length - 1] === "[") {
+                stack.pop();
+              } else {
+                throw new Error("Broken JSON " + (str[pos] === "{" ? "object" : "array") + " body near " + body);
+              }
+            }
+          }
+
+          if (!stack.length) {
+            return {
+              originLength: i - pos,
+              body: body
+            };
+          }
+        }
+
+        throw new Error("Broken JSON " + (str[pos] === "{" ? "object" : "array") + " body near " + body);
+      }
+
+      throw new Error("Broken JSON body near " + str.substr(pos - 5 >= 0 ? pos - 5 : 0, 50));
+    }
+  }, {
+    key: "canBeKeyHead",
+    value: function canBeKeyHead(ch) {
+      if (ch[0] === "\\") return false;
+      if (ch[0] >= 'a' && ch[0] <= 'z' || ch[0] >= 'A' && ch[0] <= 'Z' || ch[0] === '_') return true;
+      if (ch[0] >= '0' && ch[0] <= '9') return true;
+      if (ch[0] === '$') return true;
+      if (ch.charCodeAt(0) > 255) return true;
+      return false;
+    }
+  }, {
+    key: "isBlankChar",
+    value: function isBlankChar(ch) {
+      return ch === " " || ch === "\n" || ch === "\t";
+    }
+  }], [{
+    key: "paramToObj",
+    value: // Public
+    function paramToObj(name, value) {
+      if (value === undefined) {
+        value = '';
+      }
+
+      if (_typeof(value) === 'object') {
+        return value;
+      }
+
+      if (value.charAt(0) !== '{') {
+        value = "{" + value + "}";
+      }
+
+      try {
+        return this.parseJSON(value);
+      } catch (e) {
+        throw new Error('Error parsing the ' + name + ' attribute value. ' + e);
+      }
+    }
+  }, {
+    key: "parseJSON",
+    value: function parseJSON(json) {
+      return JSON.parse(new JsonParser().parseString(json));
+    }
+  }]);
+
+  return JsonParser;
+}();
+
+/***/ }),
+
+/***/ "./src/core/migrate.js":
+/*!*****************************!*\
+  !*** ./src/core/migrate.js ***!
+  \*****************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Migrate": () => (/* binding */ Migrate)
+/* harmony export */ });
+/* harmony import */ var _core_request_builder__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../core/request-builder */ "./src/core/request-builder.js");
+/* harmony import */ var _json_parser__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./json-parser */ "./src/core/json-parser.js");
+function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+
+
+
+var Migrate = /*#__PURE__*/function () {
+  function Migrate() {
+    _classCallCheck(this, Migrate);
+  }
+
+  _createClass(Migrate, [{
+    key: "bind",
+    value: function bind() {
+      this.bindRequestFunc();
+      this.bindRenderFunc();
+      this.bindjQueryEvents();
+    }
+  }, {
+    key: "bindRequestFunc",
+    value: function bindRequestFunc() {
+      var old = $.fn.request;
+
+      $.fn.request = function (handler, option) {
+        var options = _typeof(option) === 'object' ? option : {};
+        return new _core_request_builder__WEBPACK_IMPORTED_MODULE_0__.RequestBuilder(this.get(0), handler, options);
+      };
+
+      $.fn.request.Constructor = _core_request_builder__WEBPACK_IMPORTED_MODULE_0__.RequestBuilder; // Basic function
+
+      $.request = function (handler, option) {
+        return $(document).request(handler, option);
+      }; // No conflict
+
+
+      $.fn.request.noConflict = function () {
+        $.fn.request = old;
+        return this;
+      };
+    }
+  }, {
+    key: "bindRenderFunc",
+    value: function bindRenderFunc() {
+      $.fn.render = function (callback) {
+        $(document).on('render', callback);
+      };
+    }
+  }, {
+    key: "bindjQueryEvents",
+    value: function bindjQueryEvents() {
+      // Element
+      this.migratejQueryEvent(document, 'ajax:setup', 'ajaxSetup', ['context']);
+      this.migratejQueryEvent(document, 'ajax:promise', 'ajaxPromise', ['context']);
+      this.migratejQueryEvent(document, 'ajax:fail', 'ajaxFail', ['context', 'data', 'responseCode', 'xhr']);
+      this.migratejQueryEvent(document, 'ajax:done', 'ajaxDone', ['context', 'data', 'responseCode', 'xhr']);
+      this.migratejQueryEvent(document, 'ajax:always', 'ajaxAlways', ['context', 'data', 'responseCode', 'xhr']);
+      this.migratejQueryEvent(document, 'ajax:before-redirect', 'ajaxRedirect'); // Updated Element
+
+      this.migratejQueryEvent(document, 'ajax:update', 'ajaxUpdate', ['context', 'data', 'responseCode', 'xhr']);
+      this.migratejQueryEvent(document, 'ajax:before-replace', 'ajaxBeforeReplace'); // Trigger Element
+
+      this.migratejQueryEvent(document, 'ajax:before-request', 'oc.beforeRequest', ['context']);
+      this.migratejQueryEvent(document, 'ajax:before-update', 'ajaxBeforeUpdate', ['context', 'data', 'responseCode', 'xhr']);
+      this.migratejQueryEvent(document, 'ajax:request-success', 'ajaxSuccess', ['context', 'data', 'responseCode', 'xhr']);
+      this.migratejQueryEvent(document, 'ajax:request-complete', 'ajaxComplete', ['context', 'data', 'responseCode', 'xhr']);
+      this.migratejQueryEvent(document, 'ajax:request-error', 'ajaxError', ['context', 'message', 'responseCode', 'xhr']);
+      this.migratejQueryEvent(document, 'ajax:before-validate', 'ajaxValidation', ['context', 'message', 'fields']); // Window
+
+      this.migratejQueryEvent(window, 'ajax:before-send', 'ajaxBeforeSend', ['context']);
+      this.migratejQueryEvent(window, 'ajax:update-complete', 'ajaxUpdateComplete', ['context', 'data', 'responseCode', 'xhr']);
+      this.migratejQueryEvent(window, 'ajax:invalid-field', 'ajaxInvalidField', ['element', 'fieldName', 'fieldMessages', 'isFirst']);
+      this.migratejQueryEvent(window, 'ajax:confirm-message', 'ajaxConfirmMessage', ['message', 'promise']);
+      this.migratejQueryEvent(window, 'ajax:error-message', 'ajaxErrorMessage', ['message']); // Data adapter
+
+      this.migratejQueryAttachData(document, 'ajax:setup', 'a[data-request], button[data-request], form[data-request], a[data-handler], button[data-handler]');
+    } // Private
+
+  }, {
+    key: "migratejQueryEvent",
+    value: function migratejQueryEvent(target, jsName, jqName) {
+      var detailNames = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : [];
+      var self = this;
+      $(target).on(jsName, function (ev) {
+        self.triggerjQueryEvent(ev.originalEvent, jqName, detailNames);
+      });
+    }
+  }, {
+    key: "triggerjQueryEvent",
+    value: function triggerjQueryEvent(ev, eventName) {
+      var detailNames = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
+      var jQueryEvent = $.Event(eventName),
+          args = this.buildDetailArgs(ev, detailNames);
+      $(ev.target).trigger(jQueryEvent, args);
+
+      if (jQueryEvent.isDefaultPrevented()) {
+        ev.preventDefault();
+      }
+    }
+  }, {
+    key: "buildDetailArgs",
+    value: function buildDetailArgs(ev, detailNames) {
+      var args = [];
+      detailNames.forEach(function (name) {
+        args.push(ev.detail[name]);
+      });
+      return args;
+    } // For instances where data() is populated in the jQ instance
+
+  }, {
+    key: "migratejQueryAttachData",
+    value: function migratejQueryAttachData(target, eventName, selector) {
+      $(target).on(eventName, selector, function (event) {
+        var dataObj = $(this).data('request-data');
+
+        if (!dataObj) {
+          return;
+        }
+
+        var options = event.detail.context.options;
+
+        if (dataObj.constructor === {}.constructor) {
+          Object.assign(options.data, dataObj);
+        } else if (typeof dataObj === 'string') {
+          Object.assign(options.data, _json_parser__WEBPACK_IMPORTED_MODULE_1__.JsonParser.paramToObj('request-data', dataObj));
+        }
+      });
+    }
+  }]);
+
+  return Migrate;
+}();
+
+/***/ }),
+
+/***/ "./src/core/namespace.js":
+/*!*******************************!*\
+  !*** ./src/core/namespace.js ***!
+  \*******************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _controller__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./controller */ "./src/core/controller.js");
+/* harmony import */ var _migrate__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./migrate */ "./src/core/migrate.js");
+/* harmony import */ var _request_builder__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./request-builder */ "./src/core/request-builder.js");
+/* harmony import */ var _json_parser__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./json-parser */ "./src/core/json-parser.js");
+
+
+
+
+var controller = new _controller__WEBPACK_IMPORTED_MODULE_0__.Controller();
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  controller: controller,
+  parseJSON: _json_parser__WEBPACK_IMPORTED_MODULE_3__.JsonParser.parseJSON,
+  requestElement: _request_builder__WEBPACK_IMPORTED_MODULE_2__.RequestBuilder.fromElement,
+  start: function start() {
+    controller.start();
+
+    if (window.jQuery) {
+      new _migrate__WEBPACK_IMPORTED_MODULE_1__.Migrate().bind();
+    }
+  },
+  stop: function stop() {
+    controller.stop();
+  }
+});
+
+/***/ }),
+
+/***/ "./src/core/request-builder.js":
+/*!*************************************!*\
+  !*** ./src/core/request-builder.js ***!
+  \*************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "RequestBuilder": () => (/* binding */ RequestBuilder)
+/* harmony export */ });
+/* harmony import */ var _request_namespace__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../request/namespace */ "./src/request/namespace.js");
+/* harmony import */ var _json_parser__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./json-parser */ "./src/core/json-parser.js");
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+
+
+
+var RequestBuilder = /*#__PURE__*/function () {
+  function RequestBuilder(element, handler, options) {
+    _classCallCheck(this, RequestBuilder);
+
+    this.options = options || {};
+    this.ogElement = element;
+    this.element = this.findElement(element);
+
+    if (!this.element) {
+      return _request_namespace__WEBPACK_IMPORTED_MODULE_0__["default"].send(handler, this.options);
+    }
+
+    this.assignAsEval('beforeUpdateFunc', 'requestBeforeUpdate');
+    this.assignAsEval('afterUpdateFunc', 'requestAfterUpdate');
+    this.assignAsEval('successFunc', 'requestSuccess');
+    this.assignAsEval('errorFunc', 'requestError');
+    this.assignAsEval('completeFunc', 'requestComplete');
+    this.assignAsData('progressBar', 'requestProgressBar');
+    this.assignAsData('confirm', 'requestConfirm');
+    this.assignAsData('redirect', 'requestRedirect');
+    this.assignAsData('loading', 'requestLoading');
+    this.assignAsData('form', 'requestForm');
+    this.assignAsData('url', 'requestUrl');
+    this.assignAsData('update', 'requestUpdate', {
+      parseJson: true
+    });
+    this.assignAsData('bulk', 'requestBulk', {
+      emptyAsTrue: true
+    });
+    this.assignAsData('files', 'requestFiles', {
+      emptyAsTrue: true
+    });
+    this.assignAsData('flash', 'requestFlash', {
+      emptyAsTrue: true
+    });
+    this.assignAsData('download', 'requestDownload', {
+      emptyAsTrue: true
+    });
+    this.assignAsData('browserTarget', 'browserTarget');
+    this.assignAsData('browserValidate', 'browserValidate', {
+      emptyAsTrue: true
+    });
+    this.assignRequestData();
+
+    if (!handler) {
+      handler = this.getHandlerName();
+    }
+
+    return _request_namespace__WEBPACK_IMPORTED_MODULE_0__["default"].sendElement(this.element, handler, this.options);
+  }
+
+  _createClass(RequestBuilder, [{
+    key: "findElement",
+    value: // Event target may some random node inside the data-request container
+    // so it should bubble up but also capture the ogElement in case it is
+    // a button that contains data-request-data.
+    function findElement(element) {
+      if (!element || element === document) {
+        return null;
+      }
+
+      if (element.matches('[data-request]')) {
+        return element;
+      }
+
+      var parentEl = element.closest('[data-request]');
+
+      if (parentEl) {
+        return parentEl;
+      }
+
+      return element;
+    }
+  }, {
+    key: "getHandlerName",
+    value: function getHandlerName() {
+      if (this.element.dataset.dataRequest) {
+        return this.element.dataset.dataRequest;
+      }
+
+      return this.element.getAttribute('data-request');
+    }
+  }, {
+    key: "assignAsEval",
+    value: function assignAsEval(optionName, name) {
+      var attrVal;
+
+      if (this.element.dataset[name]) {
+        attrVal = this.element.dataset[name];
+      } else {
+        attrVal = this.element.getAttribute('data-' + normalizeDataKey(name));
+      }
+
+      if (!attrVal) {
+        return;
+      }
+
+      this.options[optionName] = function (element, data) {
+        return new Function('data', attrVal).apply(element, [data]);
+      };
+    }
+  }, {
+    key: "assignAsData",
+    value: function assignAsData(optionName, name) {
+      var _ref = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {},
+          _ref$parseJson = _ref.parseJson,
+          parseJson = _ref$parseJson === void 0 ? false : _ref$parseJson,
+          _ref$emptyAsTrue = _ref.emptyAsTrue,
+          emptyAsTrue = _ref$emptyAsTrue === void 0 ? false : _ref$emptyAsTrue;
+
+      var attrVal;
+
+      if (this.element.dataset[name]) {
+        attrVal = this.element.dataset[name];
+      } else {
+        attrVal = this.element.getAttribute('data-' + normalizeDataKey(name));
+      }
+
+      if (attrVal === null) {
+        return;
+      }
+
+      if (parseJson) {
+        this.options[optionName] = _json_parser__WEBPACK_IMPORTED_MODULE_1__.JsonParser.paramToObj('data-' + normalizeDataKey(name), attrVal);
+      } else {
+        this.options[optionName] = this.castAttrToOption(attrVal, emptyAsTrue);
+      }
+    }
+  }, {
+    key: "castAttrToOption",
+    value: function castAttrToOption(val, emptyAsTrue) {
+      if (emptyAsTrue && val === '') {
+        return true;
+      }
+
+      if (val === 'true' || val === '1') {
+        return true;
+      }
+
+      if (val === 'false' || val === '0') {
+        return false;
+      }
+
+      return val;
+    }
+  }, {
+    key: "assignRequestData",
+    value: function assignRequestData() {
+      var data = {};
+
+      if (this.options.data) {
+        Object.assign(data, this.options.data);
+      }
+
+      var attr = this.ogElement.getAttribute('data-request-data');
+
+      if (attr) {
+        Object.assign(data, _json_parser__WEBPACK_IMPORTED_MODULE_1__.JsonParser.paramToObj('data-request-data', attr));
+      }
+
+      elementParents(this.ogElement, '[data-request-data]').reverse().forEach(function (el) {
+        Object.assign(data, _json_parser__WEBPACK_IMPORTED_MODULE_1__.JsonParser.paramToObj('data-request-data', el.getAttribute('data-request-data')));
+      });
+      this.options.data = data;
+    }
+  }], [{
+    key: "fromElement",
+    value: function fromElement(element, handler, options) {
+      if (typeof element === 'string') {
+        element = document.querySelector(element);
+      }
+
+      return new RequestBuilder(element, handler, options);
+    }
+  }]);
+
+  return RequestBuilder;
+}();
+
+function elementParents(element, selector) {
+  var parents = [];
+
+  if (!element.parentNode) {
+    return parents;
+  }
+
+  var ancestor = element.parentNode.closest(selector);
+
+  while (ancestor) {
+    parents.push(ancestor);
+    ancestor = ancestor.parentNode.closest(selector);
+  }
+
+  return parents;
+}
+
+function normalizeDataKey(key) {
+  return key.replace(/[A-Z]/g, function (chr) {
+    return "-".concat(chr.toLowerCase());
+  });
+}
+
+/***/ }),
+
 /***/ "./src/extras/attach-loader.js":
 /*!*************************************!*\
   !*** ./src/extras/attach-loader.js ***!
@@ -837,1017 +1848,6 @@ var Validator = /*#__PURE__*/function () {
 
   return Validator;
 }();
-
-/***/ }),
-
-/***/ "./src/framework/controller.js":
-/*!*************************************!*\
-  !*** ./src/framework/controller.js ***!
-  \*************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "Controller": () => (/* binding */ Controller)
-/* harmony export */ });
-/* harmony import */ var _util_events__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../util/events */ "./src/util/events.js");
-/* harmony import */ var _request_builder__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./request-builder */ "./src/framework/request-builder.js");
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
-
-
-
-var Controller = /*#__PURE__*/function () {
-  function Controller() {
-    _classCallCheck(this, Controller);
-
-    this.started = false;
-  }
-
-  _createClass(Controller, [{
-    key: "start",
-    value: function start() {
-      if (!this.started) {
-        // Track unload event for request lib
-        window.onbeforeunload = this.documentOnBeforeUnload; // First page load
-
-        addEventListener('DOMContentLoaded', this.render); // Again, after new scripts load
-
-        addEventListener('page:updated', this.render); // Again after AJAX request
-
-        addEventListener('ajax:update-complete', this.render); // Submit form
-
-        _util_events__WEBPACK_IMPORTED_MODULE_0__.Events.on(document, 'submit', '[data-request]', this.documentOnSubmit); // Track input
-
-        _util_events__WEBPACK_IMPORTED_MODULE_0__.Events.on(document, 'input', 'input[data-request][data-track-input]', this.documentOnKeyup); // Change select, checkbox, radio, file input
-
-        _util_events__WEBPACK_IMPORTED_MODULE_0__.Events.on(document, 'change', 'select[data-request], input[type=radio][data-request], input[type=checkbox][data-request], input[type=file][data-request]', this.documentOnChange); // Press enter on orphan input
-
-        _util_events__WEBPACK_IMPORTED_MODULE_0__.Events.on(document, 'keydown', 'input[type=text][data-request], input[type=submit][data-request], input[type=password][data-request]', this.documentOnKeydown); // Click submit button or link
-
-        _util_events__WEBPACK_IMPORTED_MODULE_0__.Events.on(document, 'click', 'a[data-request], button[data-request], input[type=button][data-request], input[type=submit][data-request]', this.documentOnClick);
-        this.started = true;
-      }
-    }
-  }, {
-    key: "stop",
-    value: function stop() {
-      if (this.started) {
-        this.started = false;
-      }
-    }
-  }, {
-    key: "render",
-    value: function render(event) {
-      // Pre render event, used to move nodes around
-      _util_events__WEBPACK_IMPORTED_MODULE_0__.Events.dispatch('before-render'); // Render event, used to initialize controls
-
-      _util_events__WEBPACK_IMPORTED_MODULE_0__.Events.dispatch('render'); // Resize event to adjust all measurements
-
-      window.dispatchEvent(new Event('resize'));
-    }
-  }, {
-    key: "documentOnSubmit",
-    value: function documentOnSubmit(event) {
-      event.preventDefault();
-      _request_builder__WEBPACK_IMPORTED_MODULE_1__.RequestBuilder.fromElement(event.target);
-    }
-  }, {
-    key: "documentOnClick",
-    value: function documentOnClick(event) {
-      event.preventDefault();
-      _request_builder__WEBPACK_IMPORTED_MODULE_1__.RequestBuilder.fromElement(event.target);
-    }
-  }, {
-    key: "documentOnChange",
-    value: function documentOnChange(event) {
-      _request_builder__WEBPACK_IMPORTED_MODULE_1__.RequestBuilder.fromElement(event.target);
-    }
-  }, {
-    key: "documentOnKeyup",
-    value: function documentOnKeyup(event) {
-      var el = event.target,
-          lastValue = el.dataset.ocLastValue;
-
-      if (['email', 'number', 'password', 'search', 'text'].indexOf(el.type) === -1) {
-        return;
-      }
-
-      if (lastValue !== undefined && lastValue == el.value) {
-        return;
-      }
-
-      el.dataset.ocLastValue = el.value;
-
-      if (this.dataTrackInputTimer !== undefined) {
-        window.clearTimeout(this.dataTrackInputTimer);
-      }
-
-      var interval = el.getAttribute('data-track-input');
-
-      if (!interval) {
-        interval = 300;
-      }
-
-      var self = this;
-      this.dataTrackInputTimer = window.setTimeout(function () {
-        if (self.lastDataTrackInputRequest) {
-          self.lastDataTrackInputRequest.abort();
-        }
-
-        self.lastDataTrackInputRequest = _request_builder__WEBPACK_IMPORTED_MODULE_1__.RequestBuilder.fromElement(el);
-      }, interval);
-    }
-  }, {
-    key: "documentOnKeydown",
-    value: function documentOnKeydown(event) {
-      if (event.key === 'Enter') {
-        event.preventDefault();
-
-        if (this.dataTrackInputTimer !== undefined) {
-          window.clearTimeout(this.dataTrackInputTimer);
-        }
-
-        _request_builder__WEBPACK_IMPORTED_MODULE_1__.RequestBuilder.fromElement(event.target);
-      }
-    }
-  }, {
-    key: "documentOnBeforeUnload",
-    value: function documentOnBeforeUnload(event) {
-      window.ocUnloading = true;
-    }
-  }]);
-
-  return Controller;
-}();
-
-/***/ }),
-
-/***/ "./src/framework/index.js":
-/*!********************************!*\
-  !*** ./src/framework/index.js ***!
-  \********************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
-/* harmony export */ });
-/* harmony import */ var _util_events__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../util/events */ "./src/util/events.js");
-/* harmony import */ var _namespace__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./namespace */ "./src/framework/namespace.js");
-function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
-
-
-
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_namespace__WEBPACK_IMPORTED_MODULE_1__["default"]);
-
-if (!window.oc) {
-  window.oc = {};
-}
-
-if (!window.oc.AjaxFramework) {
-  // Namespace
-  window.oc.AjaxFramework = _namespace__WEBPACK_IMPORTED_MODULE_1__["default"]; // Request on element with builder
-
-  window.oc.request = _namespace__WEBPACK_IMPORTED_MODULE_1__["default"].requestElement; // JSON parser
-
-  window.oc.parseJSON = _namespace__WEBPACK_IMPORTED_MODULE_1__["default"].parseJSON; // Selector events
-
-  window.oc.Events = _util_events__WEBPACK_IMPORTED_MODULE_0__.Events; // Boot controller
-
-  if (!isAMD() && !isCommonJS()) {
-    _namespace__WEBPACK_IMPORTED_MODULE_1__["default"].start();
-  }
-}
-
-function isAMD() {
-  return typeof define == "function" && __webpack_require__.amdO;
-}
-
-function isCommonJS() {
-  return (typeof exports === "undefined" ? "undefined" : _typeof(exports)) == "object" && "object" != "undefined";
-}
-
-/***/ }),
-
-/***/ "./src/framework/json-parser.js":
-/*!**************************************!*\
-  !*** ./src/framework/json-parser.js ***!
-  \**************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "JsonParser": () => (/* binding */ JsonParser)
-/* harmony export */ });
-function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
-
-var JsonParser = /*#__PURE__*/function () {
-  function JsonParser() {
-    _classCallCheck(this, JsonParser);
-  }
-
-  _createClass(JsonParser, [{
-    key: "parseString",
-    value: // Private
-    function parseString(str) {
-      str = str.trim();
-
-      if (!str.length) {
-        throw new Error("Broken JSON object.");
-      }
-
-      var result = "";
-      /*
-       * the mistake ','
-       */
-
-      while (str && str[0] === ",") {
-        str = str.substr(1);
-      }
-      /*
-       * string
-       */
-
-
-      if (str[0] === "\"" || str[0] === "'") {
-        if (str[str.length - 1] !== str[0]) {
-          throw new Error("Invalid string JSON object.");
-        }
-
-        var body = "\"";
-
-        for (var i = 1; i < str.length; i++) {
-          if (str[i] === "\\") {
-            if (str[i + 1] === "'") {
-              body += str[i + 1];
-            } else {
-              body += str[i];
-              body += str[i + 1];
-            }
-
-            i++;
-          } else if (str[i] === str[0]) {
-            body += "\"";
-            return body;
-          } else if (str[i] === "\"") {
-            body += "\\\"";
-          } else body += str[i];
-        }
-
-        throw new Error("Invalid string JSON object.");
-      }
-      /*
-       * boolean
-       */
-
-
-      if (str === "true" || str === "false") {
-        return str;
-      }
-      /*
-       * null
-       */
-
-
-      if (str === "null") {
-        return "null";
-      }
-      /*
-       * number
-       */
-
-
-      var num = parseFloat(str);
-
-      if (!isNaN(num)) {
-        return num.toString();
-      }
-      /*
-       * object
-       */
-
-
-      if (str[0] === "{") {
-        var type = "needKey";
-        var result = "{";
-
-        for (var i = 1; i < str.length; i++) {
-          if (this.isBlankChar(str[i])) {
-            continue;
-          } else if (type === "needKey" && (str[i] === "\"" || str[i] === "'")) {
-            var key = this.parseKey(str, i + 1, str[i]);
-            result += "\"" + key + "\"";
-            i += key.length;
-            i += 1;
-            type = "afterKey";
-          } else if (type === "needKey" && this.canBeKeyHead(str[i])) {
-            var key = this.parseKey(str, i);
-            result += "\"";
-            result += key;
-            result += "\"";
-            i += key.length - 1;
-            type = "afterKey";
-          } else if (type === "afterKey" && str[i] === ":") {
-            result += ":";
-            type = ":";
-          } else if (type === ":") {
-            var body = this.getBody(str, i);
-            i = i + body.originLength - 1;
-            result += this.parseString(body.body);
-            type = "afterBody";
-          } else if (type === "afterBody" || type === "needKey") {
-            var last = i;
-
-            while (str[last] === "," || this.isBlankChar(str[last])) {
-              last++;
-            }
-
-            if (str[last] === "}" && last === str.length - 1) {
-              while (result[result.length - 1] === ",") {
-                result = result.substr(0, result.length - 1);
-              }
-
-              result += "}";
-              return result;
-            } else if (last !== i && result !== "{") {
-              result += ",";
-              type = "needKey";
-              i = last - 1;
-            }
-          }
-        }
-
-        throw new Error("Broken JSON object near " + result);
-      }
-      /*
-       * array
-       */
-
-
-      if (str[0] === "[") {
-        var result = "[";
-        var type = "needBody";
-
-        for (var i = 1; i < str.length; i++) {
-          if (" " === str[i] || "\n" === str[i] || "\t" === str[i]) {
-            continue;
-          } else if (type === "needBody") {
-            if (str[i] === ",") {
-              result += "null,";
-              continue;
-            }
-
-            if (str[i] === "]" && i === str.length - 1) {
-              if (result[result.length - 1] === ",") result = result.substr(0, result.length - 1);
-              result += "]";
-              return result;
-            }
-
-            var body = this.getBody(str, i);
-            i = i + body.originLength - 1;
-            result += this.parseString(body.body);
-            type = "afterBody";
-          } else if (type === "afterBody") {
-            if (str[i] === ",") {
-              result += ",";
-              type = "needBody"; // deal with mistake ","
-
-              while (str[i + 1] === "," || this.isBlankChar(str[i + 1])) {
-                if (str[i + 1] === ",") result += "null,";
-                i++;
-              }
-            } else if (str[i] === "]" && i === str.length - 1) {
-              result += "]";
-              return result;
-            }
-          }
-        }
-
-        throw new Error("Broken JSON array near " + result);
-      }
-    }
-  }, {
-    key: "parseKey",
-    value: function parseKey(str, pos, quote) {
-      var key = "";
-
-      for (var i = pos; i < str.length; i++) {
-        if (quote && quote === str[i]) {
-          return key;
-        } else if (!quote && (str[i] === " " || str[i] === ":")) {
-          return key;
-        }
-
-        key += str[i];
-
-        if (str[i] === "\\" && i + 1 < str.length) {
-          key += str[i + 1];
-          i++;
-        }
-      }
-
-      throw new Error("Broken JSON syntax near " + key);
-    }
-  }, {
-    key: "getBody",
-    value: function getBody(str, pos) {
-      // parse string body
-      if (str[pos] === "\"" || str[pos] === "'") {
-        var body = str[pos];
-
-        for (var i = pos + 1; i < str.length; i++) {
-          if (str[i] === "\\") {
-            body += str[i];
-            if (i + 1 < str.length) body += str[i + 1];
-            i++;
-          } else if (str[i] === str[pos]) {
-            body += str[pos];
-            return {
-              originLength: body.length,
-              body: body
-            };
-          } else body += str[i];
-        }
-
-        throw new Error("Broken JSON string body near " + body);
-      } // parse true / false
-
-
-      if (str[pos] === "t") {
-        if (str.indexOf("true", pos) === pos) {
-          return {
-            originLength: "true".length,
-            body: "true"
-          };
-        }
-
-        throw new Error("Broken JSON boolean body near " + str.substr(0, pos + 10));
-      }
-
-      if (str[pos] === "f") {
-        if (str.indexOf("f", pos) === pos) {
-          return {
-            originLength: "false".length,
-            body: "false"
-          };
-        }
-
-        throw new Error("Broken JSON boolean body near " + str.substr(0, pos + 10));
-      } // parse null
-
-
-      if (str[pos] === "n") {
-        if (str.indexOf("null", pos) === pos) {
-          return {
-            originLength: "null".length,
-            body: "null"
-          };
-        }
-
-        throw new Error("Broken JSON boolean body near " + str.substr(0, pos + 10));
-      } // parse number
-
-
-      if (str[pos] === "-" || str[pos] === "+" || str[pos] === "." || str[pos] >= "0" && str[pos] <= "9") {
-        var body = "";
-
-        for (var i = pos; i < str.length; i++) {
-          if (str[i] === "-" || str[i] === "+" || str[i] === "." || str[i] >= "0" && str[i] <= "9") {
-            body += str[i];
-          } else {
-            return {
-              originLength: body.length,
-              body: body
-            };
-          }
-        }
-
-        throw new Error("Broken JSON number body near " + body);
-      } // parse object
-
-
-      if (str[pos] === "{" || str[pos] === "[") {
-        var stack = [str[pos]];
-        var body = str[pos];
-
-        for (var i = pos + 1; i < str.length; i++) {
-          body += str[i];
-
-          if (str[i] === "\\") {
-            if (i + 1 < str.length) body += str[i + 1];
-            i++;
-          } else if (str[i] === "\"") {
-            if (stack[stack.length - 1] === "\"") {
-              stack.pop();
-            } else if (stack[stack.length - 1] !== "'") {
-              stack.push(str[i]);
-            }
-          } else if (str[i] === "'") {
-            if (stack[stack.length - 1] === "'") {
-              stack.pop();
-            } else if (stack[stack.length - 1] !== "\"") {
-              stack.push(str[i]);
-            }
-          } else if (stack[stack.length - 1] !== "\"" && stack[stack.length - 1] !== "'") {
-            if (str[i] === "{") {
-              stack.push("{");
-            } else if (str[i] === "}") {
-              if (stack[stack.length - 1] === "{") {
-                stack.pop();
-              } else {
-                throw new Error("Broken JSON " + (str[pos] === "{" ? "object" : "array") + " body near " + body);
-              }
-            } else if (str[i] === "[") {
-              stack.push("[");
-            } else if (str[i] === "]") {
-              if (stack[stack.length - 1] === "[") {
-                stack.pop();
-              } else {
-                throw new Error("Broken JSON " + (str[pos] === "{" ? "object" : "array") + " body near " + body);
-              }
-            }
-          }
-
-          if (!stack.length) {
-            return {
-              originLength: i - pos,
-              body: body
-            };
-          }
-        }
-
-        throw new Error("Broken JSON " + (str[pos] === "{" ? "object" : "array") + " body near " + body);
-      }
-
-      throw new Error("Broken JSON body near " + str.substr(pos - 5 >= 0 ? pos - 5 : 0, 50));
-    }
-  }, {
-    key: "canBeKeyHead",
-    value: function canBeKeyHead(ch) {
-      if (ch[0] === "\\") return false;
-      if (ch[0] >= 'a' && ch[0] <= 'z' || ch[0] >= 'A' && ch[0] <= 'Z' || ch[0] === '_') return true;
-      if (ch[0] >= '0' && ch[0] <= '9') return true;
-      if (ch[0] === '$') return true;
-      if (ch.charCodeAt(0) > 255) return true;
-      return false;
-    }
-  }, {
-    key: "isBlankChar",
-    value: function isBlankChar(ch) {
-      return ch === " " || ch === "\n" || ch === "\t";
-    }
-  }], [{
-    key: "paramToObj",
-    value: // Public
-    function paramToObj(name, value) {
-      if (value === undefined) {
-        value = '';
-      }
-
-      if (_typeof(value) === 'object') {
-        return value;
-      }
-
-      if (value.charAt(0) !== '{') {
-        value = "{" + value + "}";
-      }
-
-      try {
-        return this.parseJSON(value);
-      } catch (e) {
-        throw new Error('Error parsing the ' + name + ' attribute value. ' + e);
-      }
-    }
-  }, {
-    key: "parseJSON",
-    value: function parseJSON(json) {
-      return JSON.parse(new JsonParser().parseString(json));
-    }
-  }]);
-
-  return JsonParser;
-}();
-
-/***/ }),
-
-/***/ "./src/framework/migrate.js":
-/*!**********************************!*\
-  !*** ./src/framework/migrate.js ***!
-  \**********************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "Migrate": () => (/* binding */ Migrate)
-/* harmony export */ });
-/* harmony import */ var _framework_request_builder__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../framework/request-builder */ "./src/framework/request-builder.js");
-/* harmony import */ var _json_parser__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./json-parser */ "./src/framework/json-parser.js");
-function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
-
-
-
-var Migrate = /*#__PURE__*/function () {
-  function Migrate() {
-    _classCallCheck(this, Migrate);
-  }
-
-  _createClass(Migrate, [{
-    key: "bind",
-    value: function bind() {
-      this.bindRequestFunc();
-      this.bindRenderFunc();
-      this.bindjQueryEvents();
-    }
-  }, {
-    key: "bindRequestFunc",
-    value: function bindRequestFunc() {
-      var old = $.fn.request;
-
-      $.fn.request = function (handler, option) {
-        var options = _typeof(option) === 'object' ? option : {};
-        return new _framework_request_builder__WEBPACK_IMPORTED_MODULE_0__.RequestBuilder(this.get(0), handler, options);
-      };
-
-      $.fn.request.Constructor = _framework_request_builder__WEBPACK_IMPORTED_MODULE_0__.RequestBuilder; // Basic function
-
-      $.request = function (handler, option) {
-        return $(document).request(handler, option);
-      }; // No conflict
-
-
-      $.fn.request.noConflict = function () {
-        $.fn.request = old;
-        return this;
-      };
-    }
-  }, {
-    key: "bindRenderFunc",
-    value: function bindRenderFunc() {
-      $.fn.render = function (callback) {
-        $(document).on('render', callback);
-      };
-    }
-  }, {
-    key: "bindjQueryEvents",
-    value: function bindjQueryEvents() {
-      // Element
-      this.migratejQueryEvent(document, 'ajax:setup', 'ajaxSetup', ['context']);
-      this.migratejQueryEvent(document, 'ajax:promise', 'ajaxPromise', ['context']);
-      this.migratejQueryEvent(document, 'ajax:fail', 'ajaxFail', ['context', 'data', 'responseCode', 'xhr']);
-      this.migratejQueryEvent(document, 'ajax:done', 'ajaxDone', ['context', 'data', 'responseCode', 'xhr']);
-      this.migratejQueryEvent(document, 'ajax:always', 'ajaxAlways', ['context', 'data', 'responseCode', 'xhr']);
-      this.migratejQueryEvent(document, 'ajax:before-redirect', 'ajaxRedirect'); // Updated Element
-
-      this.migratejQueryEvent(document, 'ajax:update', 'ajaxUpdate', ['context', 'data', 'responseCode', 'xhr']);
-      this.migratejQueryEvent(document, 'ajax:before-replace', 'ajaxBeforeReplace'); // Trigger Element
-
-      this.migratejQueryEvent(document, 'ajax:before-request', 'oc.beforeRequest', ['context']);
-      this.migratejQueryEvent(document, 'ajax:before-update', 'ajaxBeforeUpdate', ['context', 'data', 'responseCode', 'xhr']);
-      this.migratejQueryEvent(document, 'ajax:request-success', 'ajaxSuccess', ['context', 'data', 'responseCode', 'xhr']);
-      this.migratejQueryEvent(document, 'ajax:request-complete', 'ajaxComplete', ['context', 'data', 'responseCode', 'xhr']);
-      this.migratejQueryEvent(document, 'ajax:request-error', 'ajaxError', ['context', 'message', 'responseCode', 'xhr']);
-      this.migratejQueryEvent(document, 'ajax:before-validate', 'ajaxValidation', ['context', 'message', 'fields']); // Window
-
-      this.migratejQueryEvent(window, 'ajax:before-send', 'ajaxBeforeSend', ['context']);
-      this.migratejQueryEvent(window, 'ajax:update-complete', 'ajaxUpdateComplete', ['context', 'data', 'responseCode', 'xhr']);
-      this.migratejQueryEvent(window, 'ajax:invalid-field', 'ajaxInvalidField', ['element', 'fieldName', 'fieldMessages', 'isFirst']);
-      this.migratejQueryEvent(window, 'ajax:confirm-message', 'ajaxConfirmMessage', ['message', 'promise']);
-      this.migratejQueryEvent(window, 'ajax:error-message', 'ajaxErrorMessage', ['message']); // Data adapter
-
-      this.migratejQueryAttachData(document, 'ajax:setup', 'a[data-request], button[data-request], form[data-request], a[data-handler], button[data-handler]');
-    } // Private
-
-  }, {
-    key: "migratejQueryEvent",
-    value: function migratejQueryEvent(target, jsName, jqName) {
-      var detailNames = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : [];
-      var self = this;
-      $(target).on(jsName, function (ev) {
-        self.triggerjQueryEvent(ev.originalEvent, jqName, detailNames);
-      });
-    }
-  }, {
-    key: "triggerjQueryEvent",
-    value: function triggerjQueryEvent(ev, eventName) {
-      var detailNames = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
-      var jQueryEvent = $.Event(eventName),
-          args = this.buildDetailArgs(ev, detailNames);
-      $(ev.target).trigger(jQueryEvent, args);
-
-      if (jQueryEvent.isDefaultPrevented()) {
-        ev.preventDefault();
-      }
-    }
-  }, {
-    key: "buildDetailArgs",
-    value: function buildDetailArgs(ev, detailNames) {
-      var args = [];
-      detailNames.forEach(function (name) {
-        args.push(ev.detail[name]);
-      });
-      return args;
-    } // For instances where data() is populated in the jQ instance
-
-  }, {
-    key: "migratejQueryAttachData",
-    value: function migratejQueryAttachData(target, eventName, selector) {
-      $(target).on(eventName, selector, function (event) {
-        var dataObj = $(this).data('request-data');
-
-        if (!dataObj) {
-          return;
-        }
-
-        var options = event.detail.context.options;
-
-        if (dataObj.constructor === {}.constructor) {
-          Object.assign(options.data, dataObj);
-        } else if (typeof dataObj === 'string') {
-          Object.assign(options.data, _json_parser__WEBPACK_IMPORTED_MODULE_1__.JsonParser.paramToObj('request-data', dataObj));
-        }
-      });
-    }
-  }]);
-
-  return Migrate;
-}();
-
-/***/ }),
-
-/***/ "./src/framework/namespace.js":
-/*!************************************!*\
-  !*** ./src/framework/namespace.js ***!
-  \************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
-/* harmony export */ });
-/* harmony import */ var _controller__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./controller */ "./src/framework/controller.js");
-/* harmony import */ var _migrate__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./migrate */ "./src/framework/migrate.js");
-/* harmony import */ var _request_builder__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./request-builder */ "./src/framework/request-builder.js");
-/* harmony import */ var _json_parser__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./json-parser */ "./src/framework/json-parser.js");
-
-
-
-
-var controller = new _controller__WEBPACK_IMPORTED_MODULE_0__.Controller();
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
-  controller: controller,
-  parseJSON: _json_parser__WEBPACK_IMPORTED_MODULE_3__.JsonParser.parseJSON,
-  requestElement: _request_builder__WEBPACK_IMPORTED_MODULE_2__.RequestBuilder.fromElement,
-  start: function start() {
-    controller.start();
-
-    if (window.jQuery) {
-      new _migrate__WEBPACK_IMPORTED_MODULE_1__.Migrate().bind();
-    }
-  },
-  stop: function stop() {
-    controller.stop();
-  }
-});
-
-/***/ }),
-
-/***/ "./src/framework/request-builder.js":
-/*!******************************************!*\
-  !*** ./src/framework/request-builder.js ***!
-  \******************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "RequestBuilder": () => (/* binding */ RequestBuilder)
-/* harmony export */ });
-/* harmony import */ var _request_namespace__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../request/namespace */ "./src/request/namespace.js");
-/* harmony import */ var _json_parser__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./json-parser */ "./src/framework/json-parser.js");
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
-
-
-
-var RequestBuilder = /*#__PURE__*/function () {
-  function RequestBuilder(element, handler, options) {
-    _classCallCheck(this, RequestBuilder);
-
-    this.options = options || {};
-    this.ogElement = element;
-    this.element = this.findElement(element);
-
-    if (!this.element) {
-      return _request_namespace__WEBPACK_IMPORTED_MODULE_0__["default"].send(handler, this.options);
-    }
-
-    this.assignAsEval('beforeUpdateFunc', 'requestBeforeUpdate');
-    this.assignAsEval('afterUpdateFunc', 'requestAfterUpdate');
-    this.assignAsEval('successFunc', 'requestSuccess');
-    this.assignAsEval('errorFunc', 'requestError');
-    this.assignAsEval('completeFunc', 'requestComplete');
-    this.assignAsData('progressBar', 'requestProgressBar');
-    this.assignAsData('confirm', 'requestConfirm');
-    this.assignAsData('redirect', 'requestRedirect');
-    this.assignAsData('loading', 'requestLoading');
-    this.assignAsData('form', 'requestForm');
-    this.assignAsData('url', 'requestUrl');
-    this.assignAsData('update', 'requestUpdate', {
-      parseJson: true
-    });
-    this.assignAsData('bulk', 'requestBulk', {
-      emptyAsTrue: true
-    });
-    this.assignAsData('files', 'requestFiles', {
-      emptyAsTrue: true
-    });
-    this.assignAsData('flash', 'requestFlash', {
-      emptyAsTrue: true
-    });
-    this.assignAsData('download', 'requestDownload', {
-      emptyAsTrue: true
-    });
-    this.assignAsData('browserTarget', 'browserTarget');
-    this.assignAsData('browserValidate', 'browserValidate', {
-      emptyAsTrue: true
-    });
-    this.assignRequestData();
-
-    if (!handler) {
-      handler = this.getHandlerName();
-    }
-
-    return _request_namespace__WEBPACK_IMPORTED_MODULE_0__["default"].sendElement(this.element, handler, this.options);
-  }
-
-  _createClass(RequestBuilder, [{
-    key: "findElement",
-    value: // Event target may some random node inside the data-request container
-    // so it should bubble up but also capture the ogElement in case it is
-    // a button that contains data-request-data.
-    function findElement(element) {
-      if (!element || element === document) {
-        return null;
-      }
-
-      if (element.matches('[data-request]')) {
-        return element;
-      }
-
-      var parentEl = element.closest('[data-request]');
-
-      if (parentEl) {
-        return parentEl;
-      }
-
-      return element;
-    }
-  }, {
-    key: "getHandlerName",
-    value: function getHandlerName() {
-      if (this.element.dataset.dataRequest) {
-        return this.element.dataset.dataRequest;
-      }
-
-      return this.element.getAttribute('data-request');
-    }
-  }, {
-    key: "assignAsEval",
-    value: function assignAsEval(optionName, name) {
-      var attrVal;
-
-      if (this.element.dataset[name]) {
-        attrVal = this.element.dataset[name];
-      } else {
-        attrVal = this.element.getAttribute('data-' + normalizeDataKey(name));
-      }
-
-      if (!attrVal) {
-        return;
-      }
-
-      this.options[optionName] = function (element, data) {
-        return new Function('data', attrVal).apply(element, [data]);
-      };
-    }
-  }, {
-    key: "assignAsData",
-    value: function assignAsData(optionName, name) {
-      var _ref = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {},
-          _ref$parseJson = _ref.parseJson,
-          parseJson = _ref$parseJson === void 0 ? false : _ref$parseJson,
-          _ref$emptyAsTrue = _ref.emptyAsTrue,
-          emptyAsTrue = _ref$emptyAsTrue === void 0 ? false : _ref$emptyAsTrue;
-
-      var attrVal;
-
-      if (this.element.dataset[name]) {
-        attrVal = this.element.dataset[name];
-      } else {
-        attrVal = this.element.getAttribute('data-' + normalizeDataKey(name));
-      }
-
-      if (attrVal === null) {
-        return;
-      }
-
-      if (parseJson) {
-        this.options[optionName] = _json_parser__WEBPACK_IMPORTED_MODULE_1__.JsonParser.paramToObj('data-' + normalizeDataKey(name), attrVal);
-      } else {
-        this.options[optionName] = this.castAttrToOption(attrVal, emptyAsTrue);
-      }
-    }
-  }, {
-    key: "castAttrToOption",
-    value: function castAttrToOption(val, emptyAsTrue) {
-      if (emptyAsTrue && val === '') {
-        return true;
-      }
-
-      if (val === 'true' || val === '1') {
-        return true;
-      }
-
-      if (val === 'false' || val === '0') {
-        return false;
-      }
-
-      return val;
-    }
-  }, {
-    key: "assignRequestData",
-    value: function assignRequestData() {
-      var data = {};
-
-      if (this.options.data) {
-        Object.assign(data, this.options.data);
-      }
-
-      var attr = this.ogElement.getAttribute('data-request-data');
-
-      if (attr) {
-        Object.assign(data, _json_parser__WEBPACK_IMPORTED_MODULE_1__.JsonParser.paramToObj('data-request-data', attr));
-      }
-
-      elementParents(this.ogElement, '[data-request-data]').reverse().forEach(function (el) {
-        Object.assign(data, _json_parser__WEBPACK_IMPORTED_MODULE_1__.JsonParser.paramToObj('data-request-data', el.getAttribute('data-request-data')));
-      });
-      this.options.data = data;
-    }
-  }], [{
-    key: "fromElement",
-    value: function fromElement(element, handler, options) {
-      if (typeof element === 'string') {
-        element = document.querySelector(element);
-      }
-
-      return new RequestBuilder(element, handler, options);
-    }
-  }]);
-
-  return RequestBuilder;
-}();
-
-function elementParents(element, selector) {
-  var parents = [];
-
-  if (!element.parentNode) {
-    return parents;
-  }
-
-  var ancestor = element.parentNode.closest(selector);
-
-  while (ancestor) {
-    parents.push(ancestor);
-    ancestor = ancestor.parentNode.closest(selector);
-  }
-
-  return parents;
-}
-
-function normalizeDataKey(key) {
-  return key.replace(/[A-Z]/g, function (chr) {
-    return "-".concat(chr.toLowerCase());
-  });
-}
 
 /***/ }),
 
@@ -4235,9 +4235,9 @@ var __webpack_exports__ = {};
   !*** ./src/framework-extras.js ***!
   \*********************************/
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _request_index__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./request/index */ "./src/request/index.js");
-/* harmony import */ var _framework_index__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./framework/index */ "./src/framework/index.js");
-/* harmony import */ var _extras_index__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./extras/index */ "./src/extras/index.js");
+/* harmony import */ var _request__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./request */ "./src/request/index.js");
+/* harmony import */ var _core__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./core */ "./src/core/index.js");
+/* harmony import */ var _extras__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./extras */ "./src/extras/index.js");
 /**
  * --------------------------------------------------------------------------
  * October CMS: Frontend JavaScript Framework

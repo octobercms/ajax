@@ -7,6 +7,6 @@
  * --------------------------------------------------------------------------
  */
 
-import "./request/index";
-import "./framework/index";
-import "./turbo/index";
+import "./request";
+import "./core";
+import "./turbo";

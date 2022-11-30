@@ -7,6 +7,6 @@
  * --------------------------------------------------------------------------
  */
 
-import "./request/index";
-import "./framework/index";
-import "./extras/index";
+import "./request";
+import "./core";
+import "./extras";

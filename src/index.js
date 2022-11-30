@@ -7,7 +7,7 @@
  * --------------------------------------------------------------------------
  */
 
-import AjaxFramework from "./framework/namespace";
+import AjaxFramework from "./core/namespace";
 import AjaxRequest from "./request/namespace";
 import AjaxExtras from "./extras/namespace";
 import AjaxTurbo from "./turbo/namespace";

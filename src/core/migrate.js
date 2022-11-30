@@ -1,4 +1,4 @@
-import { RequestBuilder } from '../framework/request-builder';
+import { RequestBuilder } from '../core/request-builder';
 import { JsonParser } from "./json-parser";
 
 export class Migrate

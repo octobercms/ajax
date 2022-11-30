@@ -2,200 +2,10 @@
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
-/***/ "./src/extras/progress-bar.js":
-/*!************************************!*\
-  !*** ./src/extras/progress-bar.js ***!
-  \************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "ProgressBar": () => (/* binding */ ProgressBar)
-/* harmony export */ });
-/* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../util */ "./src/util/index.js");
-var _templateObject;
-
-function _taggedTemplateLiteral(strings, raw) { if (!raw) { raw = strings.slice(0); } return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-
-var ProgressBar = /*#__PURE__*/function () {
-  function ProgressBar() {
-    var _this = this;
-
-    _classCallCheck(this, ProgressBar);
-
-    this.htmlElement = document.documentElement;
-    this.stylesheetElement = this.createStylesheetElement();
-    this.progressElement = this.createProgressElement();
-    this.hiding = false;
-    this.value = 0;
-    this.visible = false;
-
-    this.trickle = function () {
-      _this.setValue(_this.value + Math.random() / 100);
-    };
-  }
-
-  _createClass(ProgressBar, [{
-    key: "show",
-    value: function show() {
-      var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-      if (options.cssClass) {
-        this.progressElement.classList.add(options.cssClass);
-      }
-
-      if (!this.visible) {
-        this.visible = true;
-        this.installStylesheetElement();
-        this.installProgressElement();
-        this.startTrickling();
-        this.markAsProgress(true);
-      }
-    }
-  }, {
-    key: "hide",
-    value: function hide() {
-      var _this2 = this;
-
-      if (this.visible && !this.hiding) {
-        this.hiding = true;
-        this.fadeProgressElement(function () {
-          _this2.uninstallProgressElement();
-
-          _this2.stopTrickling();
-
-          _this2.visible = false;
-          _this2.hiding = false;
-
-          _this2.markAsProgress(false);
-        });
-      }
-    }
-  }, {
-    key: "setValue",
-    value: function setValue(value) {
-      this.value = value;
-      this.refresh();
-    } // Private
-
-  }, {
-    key: "installStylesheetElement",
-    value: function installStylesheetElement() {
-      if (!ProgressBar.stylesheetReady) {
-        document.head.insertBefore(this.stylesheetElement, document.head.firstChild);
-        ProgressBar.stylesheetReady = true;
-      }
-    }
-  }, {
-    key: "installProgressElement",
-    value: function installProgressElement() {
-      this.progressElement.style.width = "0";
-      this.progressElement.style.opacity = "1";
-      document.documentElement.insertBefore(this.progressElement, document.body);
-      this.refresh();
-    }
-  }, {
-    key: "fadeProgressElement",
-    value: function fadeProgressElement(callback) {
-      this.progressElement.style.opacity = "0";
-      setTimeout(callback, ProgressBar.animationDuration * 1.5);
-    }
-  }, {
-    key: "uninstallProgressElement",
-    value: function uninstallProgressElement() {
-      if (this.progressElement.parentNode) {
-        document.documentElement.removeChild(this.progressElement);
-      }
-    }
-  }, {
-    key: "startTrickling",
-    value: function startTrickling() {
-      if (!this.trickleInterval) {
-        this.trickleInterval = window.setInterval(this.trickle, ProgressBar.animationDuration);
-      }
-    }
-  }, {
-    key: "stopTrickling",
-    value: function stopTrickling() {
-      window.clearInterval(this.trickleInterval);
-      delete this.trickleInterval;
-    }
-  }, {
-    key: "refresh",
-    value: function refresh() {
-      var _this3 = this;
-
-      requestAnimationFrame(function () {
-        _this3.progressElement.style.width = "".concat(10 + _this3.value * 90, "%");
-      });
-    }
-  }, {
-    key: "createStylesheetElement",
-    value: function createStylesheetElement() {
-      var element = document.createElement('style');
-      element.textContent = ProgressBar.defaultCSS;
-      return element;
-    }
-  }, {
-    key: "createProgressElement",
-    value: function createProgressElement() {
-      var element = document.createElement('div');
-      element.className = 'oc-progress-bar';
-      return element;
-    }
-  }, {
-    key: "markAsProgress",
-    value: function markAsProgress(isProgress) {
-      if (isProgress) {
-        this.htmlElement.setAttribute('data-ajax-progress', '');
-      } else {
-        this.htmlElement.removeAttribute('data-ajax-progress');
-      }
-    }
-  }], [{
-    key: "defaultCSS",
-    get: function get() {
-      return (0,_util__WEBPACK_IMPORTED_MODULE_0__.unindent)(_templateObject || (_templateObject = _taggedTemplateLiteral(["\n        .oc-progress-bar {\n            position: fixed;\n            display: block;\n            top: 0;\n            left: 0;\n            height: 3px;\n            background: #0076ff;\n            z-index: 9999;\n            transition:\n                width ", "ms ease-out,\n                opacity ", "ms ", "ms ease-in;\n            transform: translate3d(0, 0, 0);\n        }\n    "])), ProgressBar.animationDuration, ProgressBar.animationDuration / 2, ProgressBar.animationDuration / 2);
-    }
-  }, {
-    key: "progressBar",
-    value: function progressBar() {
-      var instance = new ProgressBar();
-      return {
-        show: function show() {
-          instance.setValue(0);
-          instance.show();
-        },
-        hide: function hide() {
-          instance.setValue(100);
-          instance.hide();
-        }
-      };
-    }
-  }]);
-
-  return ProgressBar;
-}();
-
-_defineProperty(ProgressBar, "stylesheetReady", false);
-
-_defineProperty(ProgressBar, "animationDuration", 300);
-
-/***/ }),
-
-/***/ "./src/framework/controller.js":
-/*!*************************************!*\
-  !*** ./src/framework/controller.js ***!
-  \*************************************/
+/***/ "./src/core/controller.js":
+/*!********************************!*\
+  !*** ./src/core/controller.js ***!
+  \********************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
@@ -203,7 +13,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "Controller": () => (/* binding */ Controller)
 /* harmony export */ });
 /* harmony import */ var _util_events__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../util/events */ "./src/util/events.js");
-/* harmony import */ var _request_builder__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./request-builder */ "./src/framework/request-builder.js");
+/* harmony import */ var _request_builder__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./request-builder */ "./src/core/request-builder.js");
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -338,10 +148,10 @@ var Controller = /*#__PURE__*/function () {
 
 /***/ }),
 
-/***/ "./src/framework/index.js":
-/*!********************************!*\
-  !*** ./src/framework/index.js ***!
-  \********************************/
+/***/ "./src/core/index.js":
+/*!***************************!*\
+  !*** ./src/core/index.js ***!
+  \***************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
@@ -349,7 +159,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var _util_events__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../util/events */ "./src/util/events.js");
-/* harmony import */ var _namespace__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./namespace */ "./src/framework/namespace.js");
+/* harmony import */ var _namespace__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./namespace */ "./src/core/namespace.js");
 function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
 
 
@@ -385,10 +195,10 @@ function isCommonJS() {
 
 /***/ }),
 
-/***/ "./src/framework/json-parser.js":
-/*!**************************************!*\
-  !*** ./src/framework/json-parser.js ***!
-  \**************************************/
+/***/ "./src/core/json-parser.js":
+/*!*********************************!*\
+  !*** ./src/core/json-parser.js ***!
+  \*********************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
@@ -792,18 +602,18 @@ var JsonParser = /*#__PURE__*/function () {
 
 /***/ }),
 
-/***/ "./src/framework/migrate.js":
-/*!**********************************!*\
-  !*** ./src/framework/migrate.js ***!
-  \**********************************/
+/***/ "./src/core/migrate.js":
+/*!*****************************!*\
+  !*** ./src/core/migrate.js ***!
+  \*****************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "Migrate": () => (/* binding */ Migrate)
 /* harmony export */ });
-/* harmony import */ var _framework_request_builder__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../framework/request-builder */ "./src/framework/request-builder.js");
-/* harmony import */ var _json_parser__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./json-parser */ "./src/framework/json-parser.js");
+/* harmony import */ var _core_request_builder__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../core/request-builder */ "./src/core/request-builder.js");
+/* harmony import */ var _json_parser__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./json-parser */ "./src/core/json-parser.js");
 function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -833,10 +643,10 @@ var Migrate = /*#__PURE__*/function () {
 
       $.fn.request = function (handler, option) {
         var options = _typeof(option) === 'object' ? option : {};
-        return new _framework_request_builder__WEBPACK_IMPORTED_MODULE_0__.RequestBuilder(this.get(0), handler, options);
+        return new _core_request_builder__WEBPACK_IMPORTED_MODULE_0__.RequestBuilder(this.get(0), handler, options);
       };
 
-      $.fn.request.Constructor = _framework_request_builder__WEBPACK_IMPORTED_MODULE_0__.RequestBuilder; // Basic function
+      $.fn.request.Constructor = _core_request_builder__WEBPACK_IMPORTED_MODULE_0__.RequestBuilder; // Basic function
 
       $.request = function (handler, option) {
         return $(document).request(handler, option);
@@ -942,20 +752,20 @@ var Migrate = /*#__PURE__*/function () {
 
 /***/ }),
 
-/***/ "./src/framework/namespace.js":
-/*!************************************!*\
-  !*** ./src/framework/namespace.js ***!
-  \************************************/
+/***/ "./src/core/namespace.js":
+/*!*******************************!*\
+  !*** ./src/core/namespace.js ***!
+  \*******************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var _controller__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./controller */ "./src/framework/controller.js");
-/* harmony import */ var _migrate__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./migrate */ "./src/framework/migrate.js");
-/* harmony import */ var _request_builder__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./request-builder */ "./src/framework/request-builder.js");
-/* harmony import */ var _json_parser__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./json-parser */ "./src/framework/json-parser.js");
+/* harmony import */ var _controller__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./controller */ "./src/core/controller.js");
+/* harmony import */ var _migrate__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./migrate */ "./src/core/migrate.js");
+/* harmony import */ var _request_builder__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./request-builder */ "./src/core/request-builder.js");
+/* harmony import */ var _json_parser__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./json-parser */ "./src/core/json-parser.js");
 
 
 
@@ -979,10 +789,10 @@ var controller = new _controller__WEBPACK_IMPORTED_MODULE_0__.Controller();
 
 /***/ }),
 
-/***/ "./src/framework/request-builder.js":
-/*!******************************************!*\
-  !*** ./src/framework/request-builder.js ***!
-  \******************************************/
+/***/ "./src/core/request-builder.js":
+/*!*************************************!*\
+  !*** ./src/core/request-builder.js ***!
+  \*************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
@@ -990,7 +800,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "RequestBuilder": () => (/* binding */ RequestBuilder)
 /* harmony export */ });
 /* harmony import */ var _request_namespace__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../request/namespace */ "./src/request/namespace.js");
-/* harmony import */ var _json_parser__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./json-parser */ "./src/framework/json-parser.js");
+/* harmony import */ var _json_parser__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./json-parser */ "./src/core/json-parser.js");
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -1200,6 +1010,196 @@ function normalizeDataKey(key) {
     return "-".concat(chr.toLowerCase());
   });
 }
+
+/***/ }),
+
+/***/ "./src/extras/progress-bar.js":
+/*!************************************!*\
+  !*** ./src/extras/progress-bar.js ***!
+  \************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "ProgressBar": () => (/* binding */ ProgressBar)
+/* harmony export */ });
+/* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../util */ "./src/util/index.js");
+var _templateObject;
+
+function _taggedTemplateLiteral(strings, raw) { if (!raw) { raw = strings.slice(0); } return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+
+var ProgressBar = /*#__PURE__*/function () {
+  function ProgressBar() {
+    var _this = this;
+
+    _classCallCheck(this, ProgressBar);
+
+    this.htmlElement = document.documentElement;
+    this.stylesheetElement = this.createStylesheetElement();
+    this.progressElement = this.createProgressElement();
+    this.hiding = false;
+    this.value = 0;
+    this.visible = false;
+
+    this.trickle = function () {
+      _this.setValue(_this.value + Math.random() / 100);
+    };
+  }
+
+  _createClass(ProgressBar, [{
+    key: "show",
+    value: function show() {
+      var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+      if (options.cssClass) {
+        this.progressElement.classList.add(options.cssClass);
+      }
+
+      if (!this.visible) {
+        this.visible = true;
+        this.installStylesheetElement();
+        this.installProgressElement();
+        this.startTrickling();
+        this.markAsProgress(true);
+      }
+    }
+  }, {
+    key: "hide",
+    value: function hide() {
+      var _this2 = this;
+
+      if (this.visible && !this.hiding) {
+        this.hiding = true;
+        this.fadeProgressElement(function () {
+          _this2.uninstallProgressElement();
+
+          _this2.stopTrickling();
+
+          _this2.visible = false;
+          _this2.hiding = false;
+
+          _this2.markAsProgress(false);
+        });
+      }
+    }
+  }, {
+    key: "setValue",
+    value: function setValue(value) {
+      this.value = value;
+      this.refresh();
+    } // Private
+
+  }, {
+    key: "installStylesheetElement",
+    value: function installStylesheetElement() {
+      if (!ProgressBar.stylesheetReady) {
+        document.head.insertBefore(this.stylesheetElement, document.head.firstChild);
+        ProgressBar.stylesheetReady = true;
+      }
+    }
+  }, {
+    key: "installProgressElement",
+    value: function installProgressElement() {
+      this.progressElement.style.width = "0";
+      this.progressElement.style.opacity = "1";
+      document.documentElement.insertBefore(this.progressElement, document.body);
+      this.refresh();
+    }
+  }, {
+    key: "fadeProgressElement",
+    value: function fadeProgressElement(callback) {
+      this.progressElement.style.opacity = "0";
+      setTimeout(callback, ProgressBar.animationDuration * 1.5);
+    }
+  }, {
+    key: "uninstallProgressElement",
+    value: function uninstallProgressElement() {
+      if (this.progressElement.parentNode) {
+        document.documentElement.removeChild(this.progressElement);
+      }
+    }
+  }, {
+    key: "startTrickling",
+    value: function startTrickling() {
+      if (!this.trickleInterval) {
+        this.trickleInterval = window.setInterval(this.trickle, ProgressBar.animationDuration);
+      }
+    }
+  }, {
+    key: "stopTrickling",
+    value: function stopTrickling() {
+      window.clearInterval(this.trickleInterval);
+      delete this.trickleInterval;
+    }
+  }, {
+    key: "refresh",
+    value: function refresh() {
+      var _this3 = this;
+
+      requestAnimationFrame(function () {
+        _this3.progressElement.style.width = "".concat(10 + _this3.value * 90, "%");
+      });
+    }
+  }, {
+    key: "createStylesheetElement",
+    value: function createStylesheetElement() {
+      var element = document.createElement('style');
+      element.textContent = ProgressBar.defaultCSS;
+      return element;
+    }
+  }, {
+    key: "createProgressElement",
+    value: function createProgressElement() {
+      var element = document.createElement('div');
+      element.className = 'oc-progress-bar';
+      return element;
+    }
+  }, {
+    key: "markAsProgress",
+    value: function markAsProgress(isProgress) {
+      if (isProgress) {
+        this.htmlElement.setAttribute('data-ajax-progress', '');
+      } else {
+        this.htmlElement.removeAttribute('data-ajax-progress');
+      }
+    }
+  }], [{
+    key: "defaultCSS",
+    get: function get() {
+      return (0,_util__WEBPACK_IMPORTED_MODULE_0__.unindent)(_templateObject || (_templateObject = _taggedTemplateLiteral(["\n        .oc-progress-bar {\n            position: fixed;\n            display: block;\n            top: 0;\n            left: 0;\n            height: 3px;\n            background: #0076ff;\n            z-index: 9999;\n            transition:\n                width ", "ms ease-out,\n                opacity ", "ms ", "ms ease-in;\n            transform: translate3d(0, 0, 0);\n        }\n    "])), ProgressBar.animationDuration, ProgressBar.animationDuration / 2, ProgressBar.animationDuration / 2);
+    }
+  }, {
+    key: "progressBar",
+    value: function progressBar() {
+      var instance = new ProgressBar();
+      return {
+        show: function show() {
+          instance.setValue(0);
+          instance.show();
+        },
+        hide: function hide() {
+          instance.setValue(100);
+          instance.hide();
+        }
+      };
+    }
+  }]);
+
+  return ProgressBar;
+}();
+
+_defineProperty(ProgressBar, "stylesheetReady", false);
+
+_defineProperty(ProgressBar, "animationDuration", 300);
 
 /***/ }),
 
@@ -3587,8 +3587,8 @@ var __webpack_exports__ = {};
   !*** ./src/framework.js ***!
   \**************************/
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _request_index__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./request/index */ "./src/request/index.js");
-/* harmony import */ var _framework_index__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./framework/index */ "./src/framework/index.js");
+/* harmony import */ var _request__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./request */ "./src/request/index.js");
+/* harmony import */ var _core__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./core */ "./src/core/index.js");
 /**
  * --------------------------------------------------------------------------
  * October CMS: Frontend JavaScript Framework
