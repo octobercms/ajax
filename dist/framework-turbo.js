@@ -1590,16 +1590,8 @@ function getSelectorUpdateMode(selector, el) {
   } // Look at element dataset
 
 
-  if (el.dataset.requestUpdateReplace !== undefined) {
-    return ActionsUpdateMode.replaceWith;
-  }
-
-  if (el.dataset.requestUpdateAppend !== undefined) {
-    return ActionsUpdateMode.append;
-  }
-
-  if (el.dataset.requestUpdatePrepend !== undefined) {
-    return ActionsUpdateMode.prepend;
+  if (el.dataset.requestUpdateMode !== undefined) {
+    return el.dataset.requestUpdateMode;
   } // Default mode
 
 
