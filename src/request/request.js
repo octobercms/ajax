@@ -64,7 +64,7 @@ export class Request
         }
 
         // Prepare request
-        const { url, headers, method, responseType } = Options.fetch(this.handler, this.options, this.partialEl);
+        const { url, headers, method, responseType } = Options.fetch(this.handler, this.options);
         this.request = new HttpRequest(this, url, { method, headers, responseType, data, trackAbort: true });
         this.promise = new Deferred({ delegate: this.request });
         this.isRedirect = this.options.redirect && this.options.redirect.length > 0;

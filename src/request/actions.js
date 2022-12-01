@@ -229,13 +229,13 @@ export class Actions
                 let selectedEl = [];
 
                 // If the update options has a _self, values like true and '^' will resolve to the partial element,
-                // these values are also used to make partial ajax handlers available without performing an update
+                // these values are also used to make AJAX partial handlers available without performing an update
                 if (updateOptions['_self'] && partial == self.options.partial && self.delegate.partialEl) {
                     selector = updateOptions['_self'];
                     selectedEl = [self.delegate.partialEl];
                 }
                 else {
-                    selectedEl = resolveSelectorResponse(selector);
+                    selectedEl = resolveSelectorResponse(selector, '[data-request-update-partial="'+partial+'"]');
                 }
 
                 selectedEl.forEach(function(el) {
@@ -327,10 +327,10 @@ export class Actions
     }
 }
 
-function resolveSelectorResponse(selector) {
-    // Request partial without render
+function resolveSelectorResponse(selector, partialSelector) {
+    // Look for AJAX partial selectors
     if (selector === true) {
-        return [];
+        return document.querySelectorAll(partialSelector);
     }
 
     // Selector is DOM element
@@ -350,7 +350,7 @@ function resolveSelectorResponse(selector) {
 
     // Empty selector remains
     if (!selector) {
-        return [];
+        selector = partialSelector;
     }
 
     return document.querySelectorAll(selector);

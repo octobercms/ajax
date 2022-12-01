@@ -1,6 +1,6 @@
 export class Options
 {
-    constructor(handler, options, partialEl) {
+    constructor(handler, options) {
         if (!handler) {
             throw new Error('The request handler name is not specified.')
         }
@@ -15,11 +15,10 @@ export class Options
 
         this.options = options;
         this.handler = handler;
-        this.partialEl = partialEl;
     }
 
-    static fetch(handler, options, partialEl) {
-        return (new this(handler, options, partialEl)).getRequestOptions();
+    static fetch(handler, options) {
+        return (new this(handler, options)).getRequestOptions();
     }
 
     // Public
@@ -34,7 +33,7 @@ export class Options
 
     // Private
     buildHeaders() {
-        const { handler, options, partialEl } = this;
+        const { handler, options } = this;
         const headers = {
             'X-Requested-With': 'XMLHttpRequest',
             'X-OCTOBER-REQUEST-HANDLER': handler
