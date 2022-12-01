@@ -2736,7 +2736,7 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
 
 var Options = /*#__PURE__*/function () {
-  function Options(handler, options) {
+  function Options(handler, options, partialEl) {
     _classCallCheck(this, Options);
 
     if (!handler) {
@@ -2753,6 +2753,7 @@ var Options = /*#__PURE__*/function () {
 
     this.options = options;
     this.handler = handler;
+    this.partialEl = partialEl;
   }
 
   _createClass(Options, [{
@@ -2762,18 +2763,20 @@ var Options = /*#__PURE__*/function () {
       return {
         method: 'POST',
         url: this.options.url ? this.options.url : window.location.href,
-        headers: this.buildHeaders(this.handler, this.options),
+        headers: this.buildHeaders(),
         responseType: this.options.download === false ? '' : 'blob'
       };
     } // Private
 
   }, {
     key: "buildHeaders",
-    value: function buildHeaders(handler, options) {
+    value: function buildHeaders() {
+      var handler = this.handler,
+          options = this.options,
+          partialEl = this.partialEl;
       var headers = {
         'X-Requested-With': 'XMLHttpRequest',
-        'X-OCTOBER-REQUEST-HANDLER': handler,
-        'X-OCTOBER-REQUEST-PARTIALS': this.extractPartials(options.update)
+        'X-OCTOBER-REQUEST-HANDLER': handler
       };
 
       if (!options.files) {
@@ -2782,6 +2785,14 @@ var Options = /*#__PURE__*/function () {
 
       if (options.flash) {
         headers['X-OCTOBER-REQUEST-FLASH'] = 1;
+      }
+
+      if (options.update) {
+        headers['X-OCTOBER-REQUEST-PARTIALS'] = this.extractPartials(options.update);
+      }
+
+      if (options.partial || partialEl) {
+        headers['X-OCTOBER-REQUEST-PARTIAL'] = this.extractPartialFromElement(partialEl, options.partial);
       }
 
       var xsrfToken = this.getXSRFToken();
@@ -2801,6 +2812,15 @@ var Options = /*#__PURE__*/function () {
       }
 
       return headers;
+    }
+  }, {
+    key: "extractPartialFromElement",
+    value: function extractPartialFromElement(partialEl, defaultPartial) {
+      if (partialEl) {
+        return partialEl.dataset.requestUpdatePartial ? partialEl.dataset.requestUpdatePartial : true;
+      }
+
+      return defaultPartial;
     }
   }, {
     key: "extractPartials",
@@ -2847,8 +2867,8 @@ var Options = /*#__PURE__*/function () {
     }
   }], [{
     key: "fetch",
-    value: function fetch(handler, options) {
-      return new this(handler, options).getRequestOptions();
+    value: function fetch(handler, options, partialEl) {
+      return new this(handler, options, partialEl).getRequestOptions();
     }
   }]);
 
@@ -2942,7 +2962,7 @@ var Request = /*#__PURE__*/function () {
       } // Prepare request
 
 
-      var _Options$fetch = _options__WEBPACK_IMPORTED_MODULE_0__.Options.fetch(this.handler, this.options),
+      var _Options$fetch = _options__WEBPACK_IMPORTED_MODULE_0__.Options.fetch(this.handler, this.options, this.partialEl),
           url = _Options$fetch.url,
           headers = _Options$fetch.headers,
           method = _Options$fetch.method,
@@ -3286,6 +3306,7 @@ var Request = /*#__PURE__*/function () {
       }
 
       this.triggerEl = this.formEl ? this.formEl : this.el;
+      this.partialEl = this.el && this.el !== document ? this.el.closest('[data-request-update-partial]') : null;
       this.loadingEl = typeof this.options.loading === 'string' ? document.querySelector(this.options.loading) : this.options.loading;
     }
   }, {
@@ -3338,7 +3359,7 @@ var Request = /*#__PURE__*/function () {
     get: function get() {
       return {
         handler: null,
-        update: {},
+        update: null,
         files: false,
         bulk: false,
         download: false,
