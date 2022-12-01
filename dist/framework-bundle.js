@@ -2113,7 +2113,17 @@ var Actions = /*#__PURE__*/function () {
           // If a partial has been supplied on the client side that matches the server supplied key, look up
           // it's selector and use that. If not, we assume it is an explicit selector reference.
           var selector = updateOptions[partial] || partial;
-          resolveSelectorResponse(selector).forEach(function (el) {
+          var selectedEl = []; // If the update options has a _self, values like true and '^' will resolve to the partial element,
+          // these values are also used to make partial ajax handlers available without performing an update
+
+          if (updateOptions['_self'] && partial == self.options.partial && self.delegate.partialEl) {
+            selector = updateOptions['_self'];
+            selectedEl = [self.delegate.partialEl];
+          } else {
+            selectedEl = resolveSelectorResponse(selector);
+          }
+
+          selectedEl.forEach(function (el) {
             var updateMode = getSelectorUpdateMode(selector, el); // Replace With
 
             if (updateMode === ActionsUpdateMode.replaceWith) {
@@ -2203,7 +2213,12 @@ var Actions = /*#__PURE__*/function () {
 }();
 
 function resolveSelectorResponse(selector) {
-  // Selector is DOM element
+  // Request partial without render
+  if (selector === true) {
+    return [];
+  } // Selector is DOM element
+
+
   if (typeof selector !== 'string') {
     return [selector];
   } // Invalid selector
@@ -2216,6 +2231,11 @@ function resolveSelectorResponse(selector) {
 
   if (['@', '^', '!', '='].indexOf(selector.charAt(0)) !== -1) {
     selector = selector.substring(1);
+  } // Empty selector remains
+
+
+  if (!selector) {
+    return [];
   }
 
   return document.querySelectorAll(selector);
@@ -2787,12 +2807,12 @@ var Options = /*#__PURE__*/function () {
         headers['X-OCTOBER-REQUEST-FLASH'] = 1;
       }
 
-      if (options.update) {
-        headers['X-OCTOBER-REQUEST-PARTIALS'] = this.extractPartials(options.update);
+      if (options.partial) {
+        headers['X-OCTOBER-REQUEST-PARTIAL'] = options.partial;
       }
 
-      if (options.partial || partialEl) {
-        headers['X-OCTOBER-REQUEST-PARTIAL'] = this.extractPartialFromElement(partialEl, options.partial);
+      if (options.update) {
+        headers['X-OCTOBER-REQUEST-PARTIALS'] = this.extractPartials(options.update, options.partial);
       }
 
       var xsrfToken = this.getXSRFToken();
@@ -2814,18 +2834,10 @@ var Options = /*#__PURE__*/function () {
       return headers;
     }
   }, {
-    key: "extractPartialFromElement",
-    value: function extractPartialFromElement(partialEl, defaultPartial) {
-      if (partialEl) {
-        return partialEl.dataset.requestUpdatePartial ? partialEl.dataset.requestUpdatePartial : true;
-      }
-
-      return defaultPartial;
-    }
-  }, {
     key: "extractPartials",
     value: function extractPartials() {
       var update = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var selfPartial = arguments.length > 1 ? arguments[1] : undefined;
 
       if (_typeof(update) !== 'object') {
         throw new Error('Invalid update value. The correct format is an object ({...})');
@@ -2834,7 +2846,11 @@ var Options = /*#__PURE__*/function () {
       var result = [];
 
       for (var partial in update) {
-        result.push(partial);
+        if (partial === '_self' && selfPartial) {
+          result.push(selfPartial);
+        } else {
+          result.push(partial);
+        }
       }
 
       return result.join('&');
@@ -2941,7 +2957,12 @@ var Request = /*#__PURE__*/function () {
     value: function start() {
       // Setup
       this.notifyApplicationAjaxSetup();
-      this.initOtherElements(); // Prepare actions
+      this.initOtherElements(); // Partial mode
+
+      if (!this.options.partial && this.partialEl) {
+        this.options.partial = this.partialEl.dataset.requestUpdatePartial;
+      } // Prepare actions
+
 
       this.actions = new _actions__WEBPACK_IMPORTED_MODULE_1__.Actions(this, this.context, this.options);
 
