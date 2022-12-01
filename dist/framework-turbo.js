@@ -2309,8 +2309,8 @@ var Request = /*#__PURE__*/function () {
       this.notifyApplicationAjaxSetup();
       this.initOtherElements(); // Partial mode
 
-      if (!this.options.partial && this.partialEl) {
-        this.options.partial = this.partialEl.dataset.requestUpdatePartial;
+      if (!this.options.partial && this.partialEl && this.partialEl.dataset.requestUpdatePartial !== undefined) {
+        this.options.partial = this.partialEl.dataset.requestUpdatePartial || true;
       } // Prepare actions
 
 
