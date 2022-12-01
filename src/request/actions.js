@@ -225,9 +225,20 @@ export class Actions
             for (var partial in data) {
                 // If a partial has been supplied on the client side that matches the server supplied key, look up
                 // it's selector and use that. If not, we assume it is an explicit selector reference.
-                const selector = updateOptions[partial] || partial;
+                let selector = updateOptions[partial] || partial;
+                let selectedEl = [];
 
-                resolveSelectorResponse(selector).forEach(function(el) {
+                // If the update options has a _self, values like true and '^' will resolve to the partial element,
+                // these values are also used to make partial ajax handlers available without performing an update
+                if (updateOptions['_self'] && partial == self.options.partial && self.delegate.partialEl) {
+                    selector = updateOptions['_self'];
+                    selectedEl = [self.delegate.partialEl];
+                }
+                else {
+                    selectedEl = resolveSelectorResponse(selector);
+                }
+
+                selectedEl.forEach(function(el) {
                     const updateMode = getSelectorUpdateMode(selector, el);
 
                     // Replace With
@@ -317,6 +328,11 @@ export class Actions
 }
 
 function resolveSelectorResponse(selector) {
+    // Request partial without render
+    if (selector === true) {
+        return [];
+    }
+
     // Selector is DOM element
     if (typeof selector !== 'string') {
         return [selector];
@@ -330,6 +346,11 @@ function resolveSelectorResponse(selector) {
     // Append, prepend, replace with or custom selector
     if (['@', '^', '!', '='].indexOf(selector.charAt(0)) !== -1) {
         selector = selector.substring(1);
+    }
+
+    // Empty selector remains
+    if (!selector) {
+        return [];
     }
 
     return document.querySelectorAll(selector);

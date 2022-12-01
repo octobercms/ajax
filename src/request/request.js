@@ -39,6 +39,11 @@ export class Request
         this.notifyApplicationAjaxSetup();
         this.initOtherElements();
 
+        // Partial mode
+        if (!this.options.partial && this.partialEl) {
+            this.options.partial = this.partialEl.dataset.requestUpdatePartial;
+        }
+
         // Prepare actions
         this.actions = new Actions(this, this.context, this.options);
         if (!this.validateClientSideForm() || !this.applicationAllowsRequest()) {
