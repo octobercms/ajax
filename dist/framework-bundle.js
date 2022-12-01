@@ -2114,13 +2114,13 @@ var Actions = /*#__PURE__*/function () {
           // it's selector and use that. If not, we assume it is an explicit selector reference.
           var selector = updateOptions[partial] || partial;
           var selectedEl = []; // If the update options has a _self, values like true and '^' will resolve to the partial element,
-          // these values are also used to make partial ajax handlers available without performing an update
+          // these values are also used to make AJAX partial handlers available without performing an update
 
           if (updateOptions['_self'] && partial == self.options.partial && self.delegate.partialEl) {
             selector = updateOptions['_self'];
             selectedEl = [self.delegate.partialEl];
           } else {
-            selectedEl = resolveSelectorResponse(selector);
+            selectedEl = resolveSelectorResponse(selector, '[data-request-update-partial="' + partial + '"]');
           }
 
           selectedEl.forEach(function (el) {
@@ -2212,10 +2212,10 @@ var Actions = /*#__PURE__*/function () {
   return Actions;
 }();
 
-function resolveSelectorResponse(selector) {
-  // Request partial without render
+function resolveSelectorResponse(selector, partialSelector) {
+  // Look for AJAX partial selectors
   if (selector === true) {
-    return [];
+    return document.querySelectorAll(partialSelector);
   } // Selector is DOM element
 
 
@@ -2235,7 +2235,7 @@ function resolveSelectorResponse(selector) {
 
 
   if (!selector) {
-    return [];
+    selector = partialSelector;
   }
 
   return document.querySelectorAll(selector);
@@ -2756,7 +2756,7 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
 
 var Options = /*#__PURE__*/function () {
-  function Options(handler, options, partialEl) {
+  function Options(handler, options) {
     _classCallCheck(this, Options);
 
     if (!handler) {
@@ -2773,7 +2773,6 @@ var Options = /*#__PURE__*/function () {
 
     this.options = options;
     this.handler = handler;
-    this.partialEl = partialEl;
   }
 
   _createClass(Options, [{
@@ -2792,8 +2791,7 @@ var Options = /*#__PURE__*/function () {
     key: "buildHeaders",
     value: function buildHeaders() {
       var handler = this.handler,
-          options = this.options,
-          partialEl = this.partialEl;
+          options = this.options;
       var headers = {
         'X-Requested-With': 'XMLHttpRequest',
         'X-OCTOBER-REQUEST-HANDLER': handler
@@ -2883,8 +2881,8 @@ var Options = /*#__PURE__*/function () {
     }
   }], [{
     key: "fetch",
-    value: function fetch(handler, options, partialEl) {
-      return new this(handler, options, partialEl).getRequestOptions();
+    value: function fetch(handler, options) {
+      return new this(handler, options).getRequestOptions();
     }
   }]);
 
@@ -2983,7 +2981,7 @@ var Request = /*#__PURE__*/function () {
       } // Prepare request
 
 
-      var _Options$fetch = _options__WEBPACK_IMPORTED_MODULE_0__.Options.fetch(this.handler, this.options, this.partialEl),
+      var _Options$fetch = _options__WEBPACK_IMPORTED_MODULE_0__.Options.fetch(this.handler, this.options),
           url = _Options$fetch.url,
           headers = _Options$fetch.headers,
           method = _Options$fetch.method,
