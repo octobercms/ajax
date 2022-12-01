@@ -1,6 +1,6 @@
 export class Options
 {
-    constructor(handler, options) {
+    constructor(handler, options, partialEl) {
         if (!handler) {
             throw new Error('The request handler name is not specified.')
         }
@@ -15,10 +15,11 @@ export class Options
 
         this.options = options;
         this.handler = handler;
+        this.partialEl = partialEl;
     }
 
-    static fetch(handler, options) {
-        return (new this(handler, options)).getRequestOptions();
+    static fetch(handler, options, partialEl) {
+        return (new this(handler, options, partialEl)).getRequestOptions();
     }
 
     // Public
@@ -26,17 +27,17 @@ export class Options
         return {
             method: 'POST',
             url: this.options.url ? this.options.url : window.location.href,
-            headers: this.buildHeaders(this.handler, this.options),
+            headers: this.buildHeaders(),
             responseType: this.options.download === false ? '' : 'blob'
         };
     }
 
     // Private
-    buildHeaders(handler, options) {
+    buildHeaders() {
+        const { handler, options, partialEl } = this;
         const headers = {
             'X-Requested-With': 'XMLHttpRequest',
-            'X-OCTOBER-REQUEST-HANDLER': handler,
-            'X-OCTOBER-REQUEST-PARTIALS': this.extractPartials(options.update)
+            'X-OCTOBER-REQUEST-HANDLER': handler
         };
 
         if (!options.files) {
@@ -47,6 +48,14 @@ export class Options
 
         if (options.flash) {
             headers['X-OCTOBER-REQUEST-FLASH'] = 1;
+        }
+
+        if (options.update) {
+            headers['X-OCTOBER-REQUEST-PARTIALS'] = this.extractPartials(options.update);
+        }
+
+        if (options.partial || partialEl) {
+            headers['X-OCTOBER-REQUEST-PARTIAL'] = this.extractPartialFromElement(partialEl, options.partial);
         }
 
         var xsrfToken = this.getXSRFToken();
@@ -64,6 +73,16 @@ export class Options
         }
 
         return headers;
+    }
+
+    extractPartialFromElement(partialEl, defaultPartial) {
+        if (partialEl) {
+            return partialEl.dataset.requestUpdatePartial
+                ? partialEl.dataset.requestUpdatePartial
+                : true;
+        }
+
+        return defaultPartial;
     }
 
     extractPartials(update = {}) {

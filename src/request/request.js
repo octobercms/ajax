@@ -23,7 +23,7 @@ export class Request
     static get DEFAULTS() {
         return {
             handler: null,
-            update: {},
+            update: null,
             files: false,
             bulk: false,
             download: false,
@@ -59,7 +59,7 @@ export class Request
         }
 
         // Prepare request
-        const { url, headers, method, responseType } = Options.fetch(this.handler, this.options);
+        const { url, headers, method, responseType } = Options.fetch(this.handler, this.options, this.partialEl);
         this.request = new HttpRequest(this, url, { method, headers, responseType, data, trackAbort: true });
         this.promise = new Deferred({ delegate: this.request });
         this.isRedirect = this.options.redirect && this.options.redirect.length > 0;
@@ -258,6 +258,8 @@ export class Request
         }
 
         this.triggerEl = this.formEl ? this.formEl : this.el;
+
+        this.partialEl = this.el && this.el !== document ? this.el.closest('[data-request-update-partial]') : null;
 
         this.loadingEl = typeof this.options.loading === 'string'
             ? document.querySelector(this.options.loading)
