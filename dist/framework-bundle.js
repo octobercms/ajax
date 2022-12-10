@@ -5606,7 +5606,7 @@ var Visit = /*#__PURE__*/function () {
 
     this.controller = controller;
     this.location = location;
-    this.isSamePage = this.controller.locationIsSamePageAnchor(this.location);
+    this.isSamePage = action == 'swap' || this.controller.locationIsSamePageAnchor(this.location);
     this.action = action;
     this.adapter = controller.adapter;
     this.restorationIdentifier = restorationIdentifier;
@@ -5882,7 +5882,7 @@ var Visit = /*#__PURE__*/function () {
     value: function shouldIssueRequest() {
       if (this.action == 'restore') {
         return !this.hasCachedSnapshot();
-      } else if (this.action == 'swap' || this.isSamePage) {
+      } else if (this.isSamePage) {
         return false;
       } else {
         return true;

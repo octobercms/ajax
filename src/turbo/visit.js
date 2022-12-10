@@ -45,7 +45,7 @@ export class Visit
 
         this.controller = controller;
         this.location = location;
-        this.isSamePage = this.controller.locationIsSamePageAnchor(this.location);
+        this.isSamePage = action == 'swap' || this.controller.locationIsSamePageAnchor(this.location);
         this.action = action;
         this.adapter = controller.adapter;
         this.restorationIdentifier = restorationIdentifier;
@@ -268,7 +268,7 @@ export class Visit
         if (this.action == 'restore') {
             return !this.hasCachedSnapshot();
         }
-        else if (this.action == 'swap' || this.isSamePage) {
+        else if (this.isSamePage) {
             return false;
         }
         else {
