@@ -4026,7 +4026,7 @@ var Controller = /*#__PURE__*/function () {
   }, {
     key: "isAction",
     value: function isAction(action) {
-      return action == 'advance' || action == 'replace' || action == 'restore';
+      return action == 'advance' || action == 'replace' || action == 'restore' || action == 'swap';
     }
   }, {
     key: "documentIsEnabled",
@@ -5868,6 +5868,7 @@ var Visit = /*#__PURE__*/function () {
     key: "getHistoryMethodForAction",
     value: function getHistoryMethodForAction(action) {
       switch (action) {
+        case 'swap':
         case 'replace':
           return this.controller.replaceHistoryWithLocationAndRestorationIdentifier;
 
@@ -5881,7 +5882,7 @@ var Visit = /*#__PURE__*/function () {
     value: function shouldIssueRequest() {
       if (this.action == 'restore') {
         return !this.hasCachedSnapshot();
-      } else if (this.isSamePage) {
+      } else if (this.action == 'swap' || this.isSamePage) {
         return false;
       } else {
         return true;

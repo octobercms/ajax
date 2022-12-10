@@ -254,6 +254,7 @@ export class Visit
     // Private
     getHistoryMethodForAction(action) {
         switch (action) {
+            case 'swap':
             case 'replace':
                 return this.controller.replaceHistoryWithLocationAndRestorationIdentifier;
 
@@ -267,7 +268,7 @@ export class Visit
         if (this.action == 'restore') {
             return !this.hasCachedSnapshot();
         }
-        else if (this.isSamePage) {
+        else if (this.action == 'swap' || this.isSamePage) {
             return false;
         }
         else {

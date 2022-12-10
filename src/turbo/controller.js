@@ -344,7 +344,7 @@ export class Controller
     }
 
     isAction(action) {
-        return action == 'advance' || action == 'replace' || action == 'restore';
+        return action == 'advance' || action == 'replace' || action == 'restore' || action == 'swap';
     }
 
     documentIsEnabled() {
