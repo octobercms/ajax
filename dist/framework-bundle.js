@@ -3644,13 +3644,13 @@ var Controller = /*#__PURE__*/function () {
   _createClass(Controller, [{
     key: "start",
     value: function start() {
-      if (Controller.supported && !this.started && this.documentIsEnabled()) {
+      if (Controller.supported && !this.started) {
         addEventListener('click', this.clickCaptured, true);
         addEventListener('DOMContentLoaded', this.pageLoaded, false);
         this.scrollManager.start();
         this.startHistory();
         this.started = true;
-        this.enabled = true;
+        this.enabled = this.documentIsEnabled();
       }
     }
   }, {
