@@ -61,8 +61,9 @@ export class AttachLoader
         }
 
         if (el.matches('form')) {
+            var self = this;
             el.querySelectorAll('[data-attach-loading]').forEach(function(otherEl) {
-                this.show(otherEl);
+                self.show(otherEl);
             });
         }
     }
@@ -73,8 +74,9 @@ export class AttachLoader
         }
 
         if (el.matches('form')) {
+            var self = this;
             el.querySelectorAll('[data-attach-loading]').forEach(function(otherEl) {
-                this.hide(otherEl);
+                self.hide(otherEl);
             });
         }
     }
