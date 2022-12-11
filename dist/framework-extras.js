@@ -1049,14 +1049,27 @@ var AttachLoader = /*#__PURE__*/function () {
     value: // Public
     function show(el) {
       this.installStylesheetElement();
-      el.classList.add('oc-attach-loader');
-      el.disabled = true;
+
+      if (isElementInput(el)) {
+        var loadEl = document.createElement('span');
+        loadEl.className = 'oc-attach-loader is-inline';
+        el.parentNode.insertBefore(loadEl, el.nextSibling); // insertAfter
+      } else {
+        el.classList.add('oc-attach-loader');
+        el.disabled = true;
+      }
     }
   }, {
     key: "hide",
     value: function hide(el) {
-      el.classList.remove('oc-attach-loader');
-      el.disabled = false;
+      if (isElementInput(el)) {
+        if (el.nextSibling.classList.contains('oc-attach-loader')) {
+          el.nextSibling.remove();
+        }
+      } else {
+        el.classList.remove('oc-attach-loader');
+        el.disabled = false;
+      }
     }
   }, {
     key: "showForm",
@@ -1068,7 +1081,9 @@ var AttachLoader = /*#__PURE__*/function () {
       if (el.matches('form')) {
         var self = this;
         el.querySelectorAll('[data-attach-loading]').forEach(function (otherEl) {
-          self.show(otherEl);
+          if (!isElementInput(otherEl)) {
+            self.show(otherEl);
+          }
         });
       }
     }
@@ -1082,7 +1097,9 @@ var AttachLoader = /*#__PURE__*/function () {
       if (el.matches('form')) {
         var self = this;
         el.querySelectorAll('[data-attach-loading]').forEach(function (otherEl) {
-          self.hide(otherEl);
+          if (!isElementInput(otherEl)) {
+            self.hide(otherEl);
+          }
         });
       }
     } // Private
@@ -1125,6 +1142,10 @@ var AttachLoader = /*#__PURE__*/function () {
 }();
 
 _defineProperty(AttachLoader, "stylesheetReady", false);
+
+function isElementInput(el) {
+  return ['input', 'select', 'textarea'].includes(el.tagName.toLowerCase());
+}
 
 function resolveElement(el) {
   if (typeof el === 'string') {
