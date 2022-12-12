@@ -220,6 +220,11 @@ export class Actions
             updateOptions = this.options.update || {},
             updatePromise = new Deferred;
 
+        // String flash option adds a self updating partial
+        if (typeof this.options.flash === 'string') {
+            updateOptions[this.options.flash] = true;
+        }
+
         // Update partials and finish request
         updatePromise.done(function() {
             for (var partial in data) {

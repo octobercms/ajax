@@ -136,6 +136,7 @@ export class FlashMessage
         var self = this;
         document.querySelectorAll('[data-control=flash-message]').forEach(function(el) {
             self.show({ ...el.dataset, target: el, message: el.innerHTML });
+            el.remove();
         });
     }
 

@@ -11,7 +11,6 @@ export class Controller
         // Progress bar default value
         this.enableProgressBar = function(event) {
             const { options } = event.detail.context;
-
             if (options.progressBar === null) {
                 options.progressBar = true;
             }
@@ -38,17 +37,15 @@ export class Controller
         // Flash message
         this.flashMessageBind = (function(event) {
             const { options } = event.detail.context;
-            if (!options.flash) {
-                return;
-            }
+            const self = this;
+            if (options.flash === true) {
+                options.handleErrorMessage = function(message) {
+                    self.flashMessage.show({ message, type: 'error' });
+                }
 
-            var self = this;
-            options.handleErrorMessage = function(message) {
-                self.flashMessage.show({ message, type: 'error' });
-            }
-
-            options.handleFlashMessage = function(message, type) {
-                self.flashMessage.show({ message, type });
+                options.handleFlashMessage = function(message, type) {
+                    self.flashMessage.show({ message, type });
+                }
             }
         }).bind(this);
 

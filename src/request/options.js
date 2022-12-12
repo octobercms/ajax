@@ -53,8 +53,9 @@ export class Options
             headers['X-OCTOBER-REQUEST-PARTIAL'] = options.partial;
         }
 
-        if (options.update) {
-            headers['X-OCTOBER-REQUEST-PARTIALS'] = this.extractPartials(options.update, options.partial);
+        var partials = this.extractPartials(options.update, options.partial, options.flash);
+        if (partials) {
+            headers['X-OCTOBER-REQUEST-PARTIALS'] = partials;
         }
 
         var xsrfToken = this.getXSRFToken();
@@ -74,20 +75,28 @@ export class Options
         return headers;
     }
 
-    extractPartials(update = {}, selfPartial) {
-        if (typeof update !== 'object') {
-            throw new Error('Invalid update value. The correct format is an object ({...})');
+    extractPartials(update = {}, selfPartial, flashPartial) {
+        var result = [];
+
+        if (update) {
+            if (typeof update !== 'object') {
+                throw new Error('Invalid update value. The correct format is an object ({...})');
+            }
+
+            for (var partial in update) {
+                if (partial === '_self' && selfPartial) {
+                    result.push(selfPartial);
+                }
+                else {
+                    result.push(partial);
+                }
+            }
         }
 
-        var result = [];
-        for (var partial in update) {
-            if (partial === '_self' && selfPartial) {
-                result.push(selfPartial);
-            }
-            else {
-                result.push(partial);
-            }
+        if (typeof flashPartial === 'string') {
+            result.push(flashPartial);
         }
+
         return result.join('&');
     }
 
