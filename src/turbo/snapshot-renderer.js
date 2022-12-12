@@ -161,14 +161,14 @@ export class SnapshotRenderer extends Renderer
     }
 
     getNewBodyScriptElements() {
-        return array(this.newBody.querySelectorAll("script"));
+        return array(this.newBody.querySelectorAll('script'));
     }
 }
 
 function createPlaceholderForPermanentElement(permanentElement) {
-    const element = document.createElement("meta");
-    element.setAttribute("name", "turbo-permanent-placeholder");
-    element.setAttribute("content", permanentElement.id);
+    const element = document.createElement('meta');
+    element.setAttribute('name', 'turbo-permanent-placeholder');
+    element.setAttribute('content', permanentElement.id);
     return { element, permanentElement };
 }
 
@@ -180,5 +180,5 @@ function replaceElementWithElement(fromElement, toElement) {
 }
 
 function elementIsFocusable(element) {
-    return element && typeof element.focus == "function";
+    return element && typeof element.focus == 'function';
 }

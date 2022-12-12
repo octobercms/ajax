@@ -23,13 +23,12 @@ export class Renderer
         if (element.getAttribute('data-turbo-eval') === 'false') {
             return element;
         }
-        else {
-            const createdScriptElement = document.createElement('script');
-            createdScriptElement.textContent = element.textContent;
-            createdScriptElement.async = false;
-            copyElementAttributes(createdScriptElement, element);
-            return createdScriptElement;
-        }
+
+        const createdScriptElement = document.createElement('script');
+        createdScriptElement.textContent = element.textContent;
+        createdScriptElement.async = false;
+        copyElementAttributes(createdScriptElement, element);
+        return createdScriptElement;
     }
 }
 

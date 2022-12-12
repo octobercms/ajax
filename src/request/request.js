@@ -23,7 +23,7 @@ export class Request
     static get DEFAULTS() {
         return {
             handler: null,
-            update: null,
+            update: {},
             files: false,
             bulk: false,
             download: false,
@@ -40,8 +40,8 @@ export class Request
         this.initOtherElements();
 
         // Partial mode
-        if (!this.options.partial && this.partialEl && this.partialEl.dataset.requestUpdatePartial !== undefined) {
-            this.options.partial = this.partialEl.dataset.requestUpdatePartial || true;
+        if (!this.options.partial && this.partialEl && this.partialEl.dataset.ajaxPartial !== undefined) {
+            this.options.partial = this.partialEl.dataset.ajaxPartial || true;
         }
 
         // Prepare actions
@@ -266,7 +266,7 @@ export class Request
 
         this.triggerEl = this.formEl ? this.formEl : this.el;
 
-        this.partialEl = this.el && this.el !== document ? this.el.closest('[data-request-update-partial]') : null;
+        this.partialEl = this.el && this.el !== document ? this.el.closest('[data-ajax-partial]') : null;
 
         this.loadingEl = typeof this.options.loading === 'string'
             ? document.querySelector(this.options.loading)

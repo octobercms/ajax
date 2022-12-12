@@ -240,7 +240,7 @@ export class Actions
                     selectedEl = [self.delegate.partialEl];
                 }
                 else {
-                    selectedEl = resolveSelectorResponse(selector, '[data-request-update-partial="'+partial+'"]');
+                    selectedEl = resolveSelectorResponse(selector, '[data-ajax-partial="'+partial+'"]');
                 }
 
                 selectedEl.forEach(function(el) {
