@@ -22,12 +22,14 @@ export class Controller
         this.progressBarDelay = 500;
         this.progressBarVisible = true;
         this.started = false;
+        this.uniqueInlineScripts = [];
 
         // Event handlers
         this.pageLoaded = () => {
             this.lastRenderedLocation = this.location;
             this.notifyApplicationAfterPageLoad();
             this.notifyApplicationAfterPageAndScriptsLoad();
+            this.observeInlineScripts();
         };
 
         this.clickCaptured = () => {
@@ -227,6 +229,24 @@ export class Controller
     viewRendered() {
         this.lastRenderedLocation = this.currentVisit.location;
         this.notifyApplicationAfterRender();
+    }
+
+    // Inline script monitoring
+
+    observeInlineScripts() {
+        document.documentElement.querySelectorAll('script[data-turbo-eval-once]')
+            .forEach((el) => this.applicationHasSeenInlineScript(el));
+    }
+
+    applicationHasSeenInlineScript(element) {
+        const uid = element.getAttribute('data-turbo-eval-once');
+        if (!uid) {
+            return false;
+        }
+
+        const hasSeen = !!this.uniqueInlineScripts[uid];
+        this.uniqueInlineScripts[uid] = true;
+        return hasSeen;
     }
 
     // Application events

@@ -20,7 +20,10 @@ export class Renderer
     }
 
     createScriptElement(element) {
-        if (element.getAttribute('data-turbo-eval') === 'false') {
+        if (
+            element.getAttribute('data-turbo-eval') === 'false' ||
+            this.delegate.applicationHasSeenInlineScript(element)
+        ) {
             return element;
         }
 
