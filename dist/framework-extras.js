@@ -1600,7 +1600,6 @@ var ProgressBar = /*#__PURE__*/function () {
 
     _classCallCheck(this, ProgressBar);
 
-    this.htmlElement = document.documentElement;
     this.stylesheetElement = this.createStylesheetElement();
     this.progressElement = this.createProgressElement();
     this.hiding = false;
@@ -1626,7 +1625,6 @@ var ProgressBar = /*#__PURE__*/function () {
         this.installStylesheetElement();
         this.installProgressElement();
         this.startTrickling();
-        this.markAsProgress(true);
       }
     }
   }, {
@@ -1643,8 +1641,6 @@ var ProgressBar = /*#__PURE__*/function () {
 
           _this2.visible = false;
           _this2.hiding = false;
-
-          _this2.markAsProgress(false);
         });
       }
     }
@@ -1719,15 +1715,6 @@ var ProgressBar = /*#__PURE__*/function () {
       var element = document.createElement('div');
       element.className = 'oc-progress-bar';
       return element;
-    }
-  }, {
-    key: "markAsProgress",
-    value: function markAsProgress(isProgress) {
-      if (isProgress) {
-        this.htmlElement.setAttribute('data-ajax-progress', '');
-      } else {
-        this.htmlElement.removeAttribute('data-ajax-progress');
-      }
     }
   }], [{
     key: "defaultCSS",
@@ -3301,7 +3288,8 @@ var Request = /*#__PURE__*/function () {
   }, {
     key: "requestStarted",
     value: function requestStarted() {
-      this.toggleLoaderState(true);
+      this.markAsProgress(true);
+      this.toggleLoadingElement(true);
 
       if (this.options.progressBar) {
         this.showProgressBarAfterDelay();
@@ -3329,7 +3317,8 @@ var Request = /*#__PURE__*/function () {
   }, {
     key: "requestFinished",
     value: function requestFinished() {
-      this.toggleLoaderState(false);
+      this.markAsProgress(false);
+      this.toggleLoadingElement(false);
 
       if (this.options.progressBar) {
         this.hideProgressBar();
@@ -3362,8 +3351,8 @@ var Request = /*#__PURE__*/function () {
       return true;
     }
   }, {
-    key: "toggleLoaderState",
-    value: function toggleLoaderState(isLoading) {
+    key: "toggleLoadingElement",
+    value: function toggleLoadingElement(isLoading) {
       if (!this.loadingEl) {
         return;
       }
@@ -3394,6 +3383,23 @@ var Request = /*#__PURE__*/function () {
       if (this.progressBarTimeout != null) {
         window.clearTimeout(this.progressBarTimeout);
         delete this.progressBarTimeout;
+      }
+    }
+  }, {
+    key: "markAsProgress",
+    value: function markAsProgress(isLoading) {
+      if (isLoading) {
+        document.documentElement.setAttribute('data-ajax-progress', '');
+
+        if (this.formEl) {
+          this.formEl.setAttribute('data-ajax-progress', this.handler);
+        }
+      } else {
+        document.documentElement.removeAttribute('data-ajax-progress');
+
+        if (this.formEl) {
+          this.formEl.removeAttribute('data-ajax-progress');
+        }
       }
     }
   }], [{
