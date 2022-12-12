@@ -38,11 +38,7 @@ export class Request
         // Setup
         this.notifyApplicationAjaxSetup();
         this.initOtherElements();
-
-        // Partial mode
-        if (!this.options.partial && this.partialEl && this.partialEl.dataset.ajaxPartial !== undefined) {
-            this.options.partial = this.partialEl.dataset.ajaxPartial || true;
-        }
+        this.preprocessOptions();
 
         // Prepare actions
         this.actions = new Actions(this, this.context, this.options);
@@ -271,6 +267,13 @@ export class Request
         this.loadingEl = typeof this.options.loading === 'string'
             ? document.querySelector(this.options.loading)
             : this.options.loading;
+    }
+
+    preprocessOptions() {
+        // Partial mode
+        if (this.options.partial === undefined && this.partialEl && this.partialEl.dataset.ajaxPartial !== undefined) {
+            this.options.partial = this.partialEl.dataset.ajaxPartial || true;
+        }
     }
 
     validateClientSideForm() {

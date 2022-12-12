@@ -372,9 +372,8 @@ export class Controller
         if (meta) {
             return meta.getAttribute('content') != 'disable';
         }
-        else {
-            return true;
-        }
+
+        return true;
     }
 
     elementIsVisitable(element) {

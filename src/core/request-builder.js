@@ -33,6 +33,8 @@ export class RequestBuilder
         this.assignAsData('browserTarget', 'browserTarget');
         this.assignAsData('browserValidate', 'browserValidate', { emptyAsTrue: true });
 
+        this.assignAsMetaData('update', 'ajaxRequestUpdate', { parseJson: true, mergeValue: true });
+
         this.assignRequestData();
 
         if (!handler) {
@@ -117,6 +119,32 @@ export class RequestBuilder
         }
         else {
             this.options[optionName] = this.castAttrToOption(attrVal, emptyAsTrue);
+        }
+    }
+
+    assignAsMetaData(optionName, name, { mergeValue = true, parseJson = false, emptyAsTrue = false } = {}) {
+        const meta = document.documentElement.querySelector('head meta[name="'+normalizeDataKey(name)+'"]');
+        if (!meta) {
+            return;
+        }
+
+        var attrVal = meta.getAttribute('content');
+
+        if (parseJson) {
+            attrVal = JsonParser.paramToObj(normalizeDataKey(name), attrVal);
+        }
+        else {
+            attrVal = this.castAttrToOption(attrVal, emptyAsTrue);
+        }
+
+        if (mergeValue) {
+            this.options[optionName] = {
+                ...this.options[optionName],
+                ...attrVal
+            }
+        }
+        else {
+            this.options[optionName] = attrVal;
         }
     }
 
