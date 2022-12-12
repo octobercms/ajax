@@ -159,7 +159,7 @@ declare global {
             flashMsg: typeof flashMsg;
             progressBar?: typeof progressBar; // Optional, only available with extra's
             useTurbo?: typeof useTurbo; // Optional, only available with turbo
-            visit: typeof visit;
+            visit?: typeof visit; // Optional, only available with turbo
         },
     }
 
