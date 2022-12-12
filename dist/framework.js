@@ -801,6 +801,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _request_namespace__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../request/namespace */ "./src/request/namespace.js");
 /* harmony import */ var _json_parser__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./json-parser */ "./src/core/json-parser.js");
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { _defineProperty(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -850,6 +856,10 @@ var RequestBuilder = /*#__PURE__*/function () {
     this.assignAsData('browserTarget', 'browserTarget');
     this.assignAsData('browserValidate', 'browserValidate', {
       emptyAsTrue: true
+    });
+    this.assignAsMetaData('update', 'ajaxRequestUpdate', {
+      parseJson: true,
+      mergeValue: true
     });
     this.assignRequestData();
 
@@ -935,6 +945,37 @@ var RequestBuilder = /*#__PURE__*/function () {
         this.options[optionName] = _json_parser__WEBPACK_IMPORTED_MODULE_1__.JsonParser.paramToObj('data-' + normalizeDataKey(name), attrVal);
       } else {
         this.options[optionName] = this.castAttrToOption(attrVal, emptyAsTrue);
+      }
+    }
+  }, {
+    key: "assignAsMetaData",
+    value: function assignAsMetaData(optionName, name) {
+      var _ref2 = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {},
+          _ref2$mergeValue = _ref2.mergeValue,
+          mergeValue = _ref2$mergeValue === void 0 ? true : _ref2$mergeValue,
+          _ref2$parseJson = _ref2.parseJson,
+          parseJson = _ref2$parseJson === void 0 ? false : _ref2$parseJson,
+          _ref2$emptyAsTrue = _ref2.emptyAsTrue,
+          emptyAsTrue = _ref2$emptyAsTrue === void 0 ? false : _ref2$emptyAsTrue;
+
+      var meta = document.documentElement.querySelector('head meta[name="' + normalizeDataKey(name) + '"]');
+
+      if (!meta) {
+        return;
+      }
+
+      var attrVal = meta.getAttribute('content');
+
+      if (parseJson) {
+        attrVal = _json_parser__WEBPACK_IMPORTED_MODULE_1__.JsonParser.paramToObj(normalizeDataKey(name), attrVal);
+      } else {
+        attrVal = this.castAttrToOption(attrVal, emptyAsTrue);
+      }
+
+      if (mergeValue) {
+        this.options[optionName] = _objectSpread(_objectSpread({}, this.options[optionName]), attrVal);
+      } else {
+        this.options[optionName] = attrVal;
       }
     }
   }, {
@@ -1445,7 +1486,12 @@ var Actions = /*#__PURE__*/function () {
     value: function handleUpdateResponse(data, responseCode, xhr) {
       var self = this,
           updateOptions = this.options.update || {},
-          updatePromise = new _util_deferred__WEBPACK_IMPORTED_MODULE_2__.Deferred(); // Update partials and finish request
+          updatePromise = new _util_deferred__WEBPACK_IMPORTED_MODULE_2__.Deferred(); // String flash option adds a self updating partial
+
+      if (typeof this.options.flash === 'string') {
+        updateOptions[this.options.flash] = true;
+      } // Update partials and finish request
+
 
       updatePromise.done(function () {
         var _loop = function _loop() {
@@ -1459,7 +1505,7 @@ var Actions = /*#__PURE__*/function () {
             selector = updateOptions['_self'];
             selectedEl = [self.delegate.partialEl];
           } else {
-            selectedEl = resolveSelectorResponse(selector, '[data-request-update-partial="' + partial + '"]');
+            selectedEl = resolveSelectorResponse(selector, '[data-ajax-partial="' + partial + '"]');
           }
 
           selectedEl.forEach(function (el) {
@@ -2148,8 +2194,10 @@ var Options = /*#__PURE__*/function () {
         headers['X-OCTOBER-REQUEST-PARTIAL'] = options.partial;
       }
 
-      if (options.update) {
-        headers['X-OCTOBER-REQUEST-PARTIALS'] = this.extractPartials(options.update, options.partial);
+      var partials = this.extractPartials(options.update, options.partial, options.flash);
+
+      if (partials) {
+        headers['X-OCTOBER-REQUEST-PARTIALS'] = partials;
       }
 
       var xsrfToken = this.getXSRFToken();
@@ -2175,19 +2223,25 @@ var Options = /*#__PURE__*/function () {
     value: function extractPartials() {
       var update = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
       var selfPartial = arguments.length > 1 ? arguments[1] : undefined;
-
-      if (_typeof(update) !== 'object') {
-        throw new Error('Invalid update value. The correct format is an object ({...})');
-      }
-
+      var flashPartial = arguments.length > 2 ? arguments[2] : undefined;
       var result = [];
 
-      for (var partial in update) {
-        if (partial === '_self' && selfPartial) {
-          result.push(selfPartial);
-        } else {
-          result.push(partial);
+      if (update) {
+        if (_typeof(update) !== 'object') {
+          throw new Error('Invalid update value. The correct format is an object ({...})');
         }
+
+        for (var partial in update) {
+          if (partial === '_self' && selfPartial) {
+            result.push(selfPartial);
+          } else {
+            result.push(partial);
+          }
+        }
+      }
+
+      if (typeof flashPartial === 'string') {
+        result.push(flashPartial);
       }
 
       return result.join('&');
@@ -2294,12 +2348,8 @@ var Request = /*#__PURE__*/function () {
     value: function start() {
       // Setup
       this.notifyApplicationAjaxSetup();
-      this.initOtherElements(); // Partial mode
-
-      if (!this.options.partial && this.partialEl && this.partialEl.dataset.requestUpdatePartial !== undefined) {
-        this.options.partial = this.partialEl.dataset.requestUpdatePartial || true;
-      } // Prepare actions
-
+      this.initOtherElements();
+      this.preprocessOptions(); // Prepare actions
 
       this.actions = new _actions__WEBPACK_IMPORTED_MODULE_1__.Actions(this, this.context, this.options);
 
@@ -2666,8 +2716,16 @@ var Request = /*#__PURE__*/function () {
       }
 
       this.triggerEl = this.formEl ? this.formEl : this.el;
-      this.partialEl = this.el && this.el !== document ? this.el.closest('[data-request-update-partial]') : null;
+      this.partialEl = this.el && this.el !== document ? this.el.closest('[data-ajax-partial]') : null;
       this.loadingEl = typeof this.options.loading === 'string' ? document.querySelector(this.options.loading) : this.options.loading;
+    }
+  }, {
+    key: "preprocessOptions",
+    value: function preprocessOptions() {
+      // Partial mode
+      if (this.options.partial === undefined && this.partialEl && this.partialEl.dataset.ajaxPartial !== undefined) {
+        this.options.partial = this.partialEl.dataset.ajaxPartial || true;
+      }
     }
   }, {
     key: "validateClientSideForm",
@@ -2736,7 +2794,7 @@ var Request = /*#__PURE__*/function () {
     get: function get() {
       return {
         handler: null,
-        update: null,
+        update: {},
         files: false,
         bulk: false,
         download: false,
