@@ -6,7 +6,6 @@ export class ProgressBar
     static animationDuration = 300;
 
     constructor() {
-        this.htmlElement = document.documentElement;
         this.stylesheetElement = this.createStylesheetElement();
         this.progressElement = this.createProgressElement();
         this.hiding = false;
@@ -59,7 +58,6 @@ export class ProgressBar
             this.installStylesheetElement();
             this.installProgressElement();
             this.startTrickling();
-            this.markAsProgress(true);
         }
     }
 
@@ -71,7 +69,6 @@ export class ProgressBar
                 this.stopTrickling();
                 this.visible = false;
                 this.hiding = false;
-                this.markAsProgress(false);
             });
         }
     }
@@ -134,14 +131,5 @@ export class ProgressBar
         const element = document.createElement('div');
         element.className = 'oc-progress-bar';
         return element;
-    }
-
-    markAsProgress(isProgress) {
-        if (isProgress) {
-            this.htmlElement.setAttribute('data-ajax-progress', '');
-        }
-        else {
-            this.htmlElement.removeAttribute('data-ajax-progress');
-        }
     }
 }

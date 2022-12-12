@@ -219,7 +219,8 @@ export class Request
 
     // HTTP request delegate
     requestStarted() {
-        this.toggleLoaderState(true);
+        this.markAsProgress(true);
+        this.toggleLoadingElement(true);
 
         if (this.options.progressBar) {
             this.showProgressBarAfterDelay();
@@ -243,7 +244,8 @@ export class Request
     }
 
     requestFinished() {
-        this.toggleLoaderState(false);
+        this.markAsProgress(false);
+        this.toggleLoadingElement(false);
 
         if (this.options.progressBar) {
             this.hideProgressBar();
@@ -285,7 +287,7 @@ export class Request
         return true;
     }
 
-    toggleLoaderState(isLoading) {
+    toggleLoadingElement(isLoading) {
         if (!this.loadingEl) {
             return;
         }
@@ -317,6 +319,21 @@ export class Request
         if (this.progressBarTimeout != null) {
             window.clearTimeout(this.progressBarTimeout);
             delete this.progressBarTimeout;
+        }
+    }
+
+    markAsProgress(isLoading) {
+        if (isLoading) {
+            document.documentElement.setAttribute('data-ajax-progress', '');
+            if (this.formEl) {
+                this.formEl.setAttribute('data-ajax-progress', this.handler);
+            }
+        }
+        else {
+            document.documentElement.removeAttribute('data-ajax-progress');
+            if (this.formEl) {
+                this.formEl.removeAttribute('data-ajax-progress');
+            }
         }
     }
 }
