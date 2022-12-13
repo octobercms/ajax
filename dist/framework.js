@@ -1417,7 +1417,11 @@ var Actions = /*#__PURE__*/function () {
       if (message) {
         return confirm(message);
       }
-    } // Custom function, display an error message to the user
+    } // Custom function, display a flash message to the user
+
+  }, {
+    key: "handleFlashMessage",
+    value: function handleFlashMessage(message, type) {} // Custom function, display an error message to the user
 
   }, {
     key: "handleErrorMessage",
@@ -1462,11 +1466,7 @@ var Actions = /*#__PURE__*/function () {
           }
         }
       }
-    } // Custom function, display a flash message to the user
-
-  }, {
-    key: "handleFlashMessage",
-    value: function handleFlashMessage(message, type) {} // Custom function, redirect the browser to another location
+    } // Custom function, redirect the browser to another location
 
   }, {
     key: "handleRedirectResponse",
@@ -1486,12 +1486,7 @@ var Actions = /*#__PURE__*/function () {
     value: function handleUpdateResponse(data, responseCode, xhr) {
       var self = this,
           updateOptions = this.options.update || {},
-          updatePromise = new _util_deferred__WEBPACK_IMPORTED_MODULE_2__.Deferred(); // String flash option adds a self updating partial
-
-      if (typeof this.options.flash === 'string') {
-        updateOptions[this.options.flash] = true;
-      } // Update partials and finish request
-
+          updatePromise = new _util_deferred__WEBPACK_IMPORTED_MODULE_2__.Deferred(); // Update partials and finish request
 
       updatePromise.done(function () {
         var _loop = function _loop() {
@@ -2194,7 +2189,7 @@ var Options = /*#__PURE__*/function () {
         headers['X-OCTOBER-REQUEST-PARTIAL'] = options.partial;
       }
 
-      var partials = this.extractPartials(options.update, options.partial, options.flash);
+      var partials = this.extractPartials(options.update, options.partial);
 
       if (partials) {
         headers['X-OCTOBER-REQUEST-PARTIALS'] = partials;
@@ -2223,7 +2218,6 @@ var Options = /*#__PURE__*/function () {
     value: function extractPartials() {
       var update = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
       var selfPartial = arguments.length > 1 ? arguments[1] : undefined;
-      var flashPartial = arguments.length > 2 ? arguments[2] : undefined;
       var result = [];
 
       if (update) {
@@ -2238,10 +2232,6 @@ var Options = /*#__PURE__*/function () {
             result.push(partial);
           }
         }
-      }
-
-      if (typeof flashPartial === 'string') {
-        result.push(flashPartial);
       }
 
       return result.join('&');
