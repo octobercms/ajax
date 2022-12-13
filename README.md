@@ -15,7 +15,7 @@ npm install --save octobercms
 2. Require and start the Framework in your JavaScript bundle.
 
 ```js
-var oc = require('octobercms');
+import oc from 'octobercms';
 
 // Make an AJAX request
 oc.ajax('onSomething', { data: someVar });

@@ -1,6 +1,6 @@
 {
     "name": "octobercms",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "description": "AJAX Framework for October CMS",
     "main": "src/index.js",
     "types": "types/index.d.ts",
@@ -26,7 +26,7 @@
         "ajax",
         "framework"
     ],
-    "author": "Responsiv Pty Ltd",
+    "author": "October CMS (Responsiv Pty Ltd)",
     "license": "SEE LICENSE IN LICENSE.md",
     "bugs": {
         "url": "https://github.com/octobercms/ajax/issues"

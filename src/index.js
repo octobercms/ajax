@@ -14,26 +14,6 @@ import AjaxTurbo from "./turbo/namespace";
 import { AssetManager } from "./request/asset-manager";
 import { Events } from "./util/events";
 
-export {
-    AjaxFramework,
-    AjaxRequest,
-    AjaxExtras,
-    AjaxTurbo,
-    AssetManager,
-    Events
-}
-
-export const
-    ajax = AjaxRequest.send,
-    request = AjaxFramework.requestElement,
-    parseJSON = AjaxFramework.parseJSON,
-    flashMsg = AjaxExtras.flashMsg,
-    progressBar = AjaxExtras.progressBar,
-    attachLoader = AjaxExtras.attachLoader,
-    useTurbo = AjaxTurbo.isEnabled,
-    visit = AjaxTurbo.visit
-;
-
 export default {
     AjaxFramework,
     AjaxRequest,
@@ -41,12 +21,12 @@ export default {
     AjaxTurbo,
     AssetManager,
     Events,
-    ajax,
-    request,
-    parseJSON,
-    flashMsg,
-    progressBar,
-    attachLoader,
-    useTurbo,
-    visit
+    ajax: AjaxRequest.send,
+    request: AjaxFramework.requestElement,
+    parseJSON: AjaxFramework.parseJSON,
+    flashMsg: AjaxExtras.flashMsg,
+    progressBar: AjaxExtras.progressBar,
+    attachLoader: AjaxExtras.attachLoader,
+    useTurbo: AjaxTurbo.isEnabled,
+    visit: AjaxTurbo.visit
 };
