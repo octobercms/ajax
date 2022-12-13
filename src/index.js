@@ -24,14 +24,14 @@ export {
 }
 
 export const
-    ajax = (handler, options) => AjaxRequest.send(handler, options),
-    request = (element, handler, options) => AjaxFramework.requestElement(element, handler, options),
-    parseJSON = (json) => AjaxFramework.parseJSON(json),
-    flashMsg = (options) => AjaxExtras.flashMsg(options),
-    progressBar = () => AjaxExtras.progressBar(),
-    attachLoader = () => AjaxExtras.attachLoader(),
-    useTurbo = () => AjaxTurbo.isEnabled(),
-    visit = (location, options) => AjaxTurbo.visit(location, options)
+    ajax = AjaxRequest.send,
+    request = AjaxFramework.requestElement,
+    parseJSON = AjaxFramework.parseJSON,
+    flashMsg = AjaxExtras.flashMsg,
+    progressBar = AjaxExtras.progressBar,
+    attachLoader = AjaxExtras.attachLoader,
+    useTurbo = AjaxTurbo.isEnabled,
+    visit = AjaxTurbo.visit
 ;
 
 export default {
