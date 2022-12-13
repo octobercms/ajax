@@ -1167,7 +1167,7 @@ var AttachLoader = /*#__PURE__*/function () {
     }
   }, {
     key: "attachLoader",
-    value: function attachLoader() {
+    get: function get() {
       return {
         show: function show(el) {
           new AttachLoader().show(resolveElement(el));
@@ -1534,9 +1534,9 @@ if (!window.oc.AjaxExtras) {
 
   window.oc.flashMsg = _namespace__WEBPACK_IMPORTED_MODULE_0__["default"].flashMsg; // Progress bar
 
-  window.oc.progressBar = _namespace__WEBPACK_IMPORTED_MODULE_0__["default"].progressBar(); // Attach loader
+  window.oc.progressBar = _namespace__WEBPACK_IMPORTED_MODULE_0__["default"].progressBar; // Attach loader
 
-  window.oc.attachLoader = _namespace__WEBPACK_IMPORTED_MODULE_0__["default"].attachLoader(); // Boot controller
+  window.oc.attachLoader = _namespace__WEBPACK_IMPORTED_MODULE_0__["default"].attachLoader; // Boot controller
 
   if (!isAMD() && !isCommonJS()) {
     _namespace__WEBPACK_IMPORTED_MODULE_0__["default"].start();
@@ -1784,14 +1784,15 @@ var ProgressBar = /*#__PURE__*/function () {
     }
   }, {
     key: "progressBar",
-    value: function progressBar() {
-      var instance = new ProgressBar();
+    get: function get() {
       return {
         show: function show() {
+          var instance = getOrCreateInstance();
           instance.setValue(0);
           instance.show();
         },
         hide: function hide() {
+          var instance = getOrCreateInstance();
           instance.setValue(100);
           instance.hide();
         }
@@ -1802,9 +1803,19 @@ var ProgressBar = /*#__PURE__*/function () {
   return ProgressBar;
 }();
 
+_defineProperty(ProgressBar, "instance", null);
+
 _defineProperty(ProgressBar, "stylesheetReady", false);
 
 _defineProperty(ProgressBar, "animationDuration", 300);
+
+function getOrCreateInstance() {
+  if (!ProgressBar.instance) {
+    ProgressBar.instance = new ProgressBar();
+  }
+
+  return ProgressBar.instance;
+}
 
 /***/ }),
 

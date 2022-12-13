@@ -1207,14 +1207,15 @@ var ProgressBar = /*#__PURE__*/function () {
     }
   }, {
     key: "progressBar",
-    value: function progressBar() {
-      var instance = new ProgressBar();
+    get: function get() {
       return {
         show: function show() {
+          var instance = getOrCreateInstance();
           instance.setValue(0);
           instance.show();
         },
         hide: function hide() {
+          var instance = getOrCreateInstance();
           instance.setValue(100);
           instance.hide();
         }
@@ -1225,9 +1226,19 @@ var ProgressBar = /*#__PURE__*/function () {
   return ProgressBar;
 }();
 
+_defineProperty(ProgressBar, "instance", null);
+
 _defineProperty(ProgressBar, "stylesheetReady", false);
 
 _defineProperty(ProgressBar, "animationDuration", 300);
+
+function getOrCreateInstance() {
+  if (!ProgressBar.instance) {
+    ProgressBar.instance = new ProgressBar();
+  }
+
+  return ProgressBar.instance;
+}
 
 /***/ }),
 
