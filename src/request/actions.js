@@ -154,6 +154,9 @@ export class Actions
         }
     }
 
+    // Custom function, display a flash message to the user
+    handleFlashMessage(message, type) {}
+
     // Custom function, display an error message to the user
     handleErrorMessage(message) {
         const event = this.delegate.notifyApplicationErrorMessage(message);
@@ -198,9 +201,6 @@ export class Actions
         }
     }
 
-    // Custom function, display a flash message to the user
-    handleFlashMessage(message, type) {}
-
     // Custom function, redirect the browser to another location
     handleRedirectResponse(href) {
         this.delegate.notifyApplicationBeforeRedirect();
@@ -219,11 +219,6 @@ export class Actions
         var self = this,
             updateOptions = this.options.update || {},
             updatePromise = new Deferred;
-
-        // String flash option adds a self updating partial
-        if (typeof this.options.flash === 'string') {
-            updateOptions[this.options.flash] = true;
-        }
 
         // Update partials and finish request
         updatePromise.done(function() {

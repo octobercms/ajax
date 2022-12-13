@@ -53,7 +53,7 @@ export class Options
             headers['X-OCTOBER-REQUEST-PARTIAL'] = options.partial;
         }
 
-        var partials = this.extractPartials(options.update, options.partial, options.flash);
+        var partials = this.extractPartials(options.update, options.partial);
         if (partials) {
             headers['X-OCTOBER-REQUEST-PARTIALS'] = partials;
         }
@@ -75,7 +75,7 @@ export class Options
         return headers;
     }
 
-    extractPartials(update = {}, selfPartial, flashPartial) {
+    extractPartials(update = {}, selfPartial) {
         var result = [];
 
         if (update) {
@@ -91,10 +91,6 @@ export class Options
                     result.push(partial);
                 }
             }
-        }
-
-        if (typeof flashPartial === 'string') {
-            result.push(flashPartial);
         }
 
         return result.join('&');

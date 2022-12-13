@@ -38,13 +38,17 @@ export class Controller
         this.flashMessageBind = (function(event) {
             const { options } = event.detail.context;
             const self = this;
-            if (options.flash === true) {
+            if (options.flash) {
                 options.handleErrorMessage = function(message) {
-                    self.flashMessage.show({ message, type: 'error' });
+                    if (shouldShowFlashMessage(options.flash, 'error')) {
+                        self.flashMessage.show({ message, type: 'error' });
+                    }
                 }
 
                 options.handleFlashMessage = function(message, type) {
-                    self.flashMessage.show({ message, type });
+                    if (shouldShowFlashMessage(options.flash, type)) {
+                        self.flashMessage.show({ message, type });
+                    }
                 }
             }
         }).bind(this);
@@ -103,4 +107,20 @@ export class Controller
             this.started = false;
         }
     }
+}
+
+function shouldShowFlashMessage(value, type) {
+    if (value === true) {
+        return true;
+    }
+
+    let result = false;
+    if (typeof value === 'string') {
+        value.split(',').forEach(function(validType) {
+            if (validType.trim() === type) {
+                result = true;
+            }
+        });
+    }
+    return result;
 }
