@@ -2,6 +2,7 @@ import { unindent } from "../util";
 
 export class ProgressBar
 {
+    static instance = null;
     static stylesheetReady = false;
     static animationDuration = 300;
 
@@ -34,14 +35,15 @@ export class ProgressBar
     `;
     }
 
-    static progressBar() {
-        const instance = new ProgressBar;
+    static get progressBar() {
         return {
             show: function() {
+                const instance = getOrCreateInstance();
                 instance.setValue(0);
                 instance.show();
             },
             hide: function() {
+                const instance = getOrCreateInstance();
                 instance.setValue(100);
                 instance.hide();
             }
@@ -132,4 +134,12 @@ export class ProgressBar
         element.className = 'oc-progress-bar';
         return element;
     }
+}
+
+function getOrCreateInstance() {
+    if (!ProgressBar.instance) {
+        ProgressBar.instance = new ProgressBar;
+    }
+
+    return ProgressBar.instance;
 }

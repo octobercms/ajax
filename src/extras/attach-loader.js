@@ -31,7 +31,7 @@ export class AttachLoader
     `;
     }
 
-    static attachLoader() {
+    static get attachLoader() {
         return {
             show: function(el) {
                 (new AttachLoader).show(resolveElement(el));

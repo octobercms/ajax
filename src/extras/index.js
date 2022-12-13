@@ -13,10 +13,10 @@ if (!window.oc.AjaxExtras) {
     window.oc.flashMsg = namespace.flashMsg;
 
     // Progress bar
-    window.oc.progressBar = namespace.progressBar();
+    window.oc.progressBar = namespace.progressBar;
 
     // Attach loader
-    window.oc.attachLoader = namespace.attachLoader();
+    window.oc.attachLoader = namespace.attachLoader;
 
     // Boot controller
     if (!isAMD() && !isCommonJS()) {
