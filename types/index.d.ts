@@ -21,11 +21,12 @@ export interface RequestOptions<T = unknown> {
     error?: ResponseCallback<T>;
     complete?: () => void;
     form?: HTMLElement | string;
-    flash?: boolean;
+    flash?: boolean | string;
     files?: FormData;
     download?: boolean;
     bulk?: boolean;
     browserValidate?: boolean;
+    browserTarget?: string;
     loading?: string;
     progressBar?: boolean;
     handleConfirmMessage?: (message: string, promise: Promise<void>) => void;
