@@ -2340,8 +2340,8 @@ function getSelectorUpdateMode(selector, el) {
   } // Look at element dataset
 
 
-  if (el.dataset.requestUpdateMode !== undefined) {
-    return el.dataset.requestUpdateMode;
+  if (el.dataset.ajaxUpdateMode !== undefined) {
+    return el.dataset.ajaxUpdateMode;
   } // Default mode
 
 
