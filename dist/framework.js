@@ -27,20 +27,33 @@ var Controller = /*#__PURE__*/function () {
     _classCallCheck(this, Controller);
 
     this.started = false;
+    this.documentVisible = true;
   }
 
   _createClass(Controller, [{
     key: "start",
     value: function start() {
+      var _this = this;
+
       if (!this.started) {
         // Track unload event for request lib
         window.onbeforeunload = this.documentOnBeforeUnload; // First page load
 
-        addEventListener('DOMContentLoaded', this.render); // Again, after new scripts load
+        addEventListener('DOMContentLoaded', function () {
+          return _this.render();
+        }); // Again, after new scripts load
 
-        addEventListener('page:updated', this.render); // Again after AJAX request
+        addEventListener('page:updated', function () {
+          return _this.render();
+        }); // Again after AJAX request
 
-        addEventListener('ajax:update-complete', this.render); // Submit form
+        addEventListener('ajax:update-complete', function () {
+          return _this.render();
+        }); // Watching document visibility
+
+        addEventListener('visibilitychange', function () {
+          return _this.documentOnVisibilityChange();
+        }); // Submit form
 
         _util_events__WEBPACK_IMPORTED_MODULE_0__.Events.on(document, 'submit', '[data-request]', this.documentOnSubmit); // Track input
 
@@ -70,6 +83,31 @@ var Controller = /*#__PURE__*/function () {
       _util_events__WEBPACK_IMPORTED_MODULE_0__.Events.dispatch('render'); // Resize event to adjust all measurements
 
       window.dispatchEvent(new Event('resize'));
+      this.documentOnRender(event);
+    }
+  }, {
+    key: "documentOnVisibilityChange",
+    value: function documentOnVisibilityChange(event) {
+      this.documentVisible = !document.hidden;
+
+      if (this.documentVisible) {
+        this.documentOnRender();
+      }
+    }
+  }, {
+    key: "documentOnRender",
+    value: function documentOnRender(event) {
+      if (!this.documentVisible) {
+        return;
+      }
+
+      document.querySelectorAll('[data-auto-submit]').forEach(function (el) {
+        var interval = el.dataset.autoSubmit || 0;
+        el.removeAttribute('data-auto-submit');
+        setTimeout(function () {
+          _request_builder__WEBPACK_IMPORTED_MODULE_1__.RequestBuilder.fromElement(el);
+        }, interval);
+      });
     }
   }, {
     key: "documentOnSubmit",
@@ -1292,6 +1330,7 @@ var Actions = /*#__PURE__*/function () {
     this.context = context;
     this.options = options; // Allow override to call parent logic
 
+    this.context.start = this.start.bind(this);
     this.context.success = this.success.bind(this);
     this.context.error = this.error.bind(this);
     this.context.complete = this.complete.bind(this);
@@ -1321,6 +1360,11 @@ var Actions = /*#__PURE__*/function () {
       }
     } // Public
 
+  }, {
+    key: "start",
+    value: function start(xhr) {
+      this.invoke('markAsUpdating', [true]);
+    }
   }, {
     key: "success",
     value: function success(data, responseCode, xhr) {
@@ -1409,6 +1453,7 @@ var Actions = /*#__PURE__*/function () {
     value: function complete(data, responseCode, xhr) {
       this.delegate.notifyApplicationRequestComplete(data, responseCode, xhr);
       this.invokeFunc('completeFunc', data);
+      this.invoke('markAsUpdating', [false]);
     } // Custom function, requests confirmation from the user
 
   }, {
@@ -1488,6 +1533,32 @@ var Actions = /*#__PURE__*/function () {
         oc.visit(href);
       } else {
         location.assign(href);
+      }
+    } // Mark known elements as being updated
+
+  }, {
+    key: "markAsUpdating",
+    value: function markAsUpdating(isUpdating) {
+      var updateOptions = this.options.update || {};
+
+      for (var partial in updateOptions) {
+        var selector = updateOptions[partial];
+        var selectedEl = [];
+
+        if (updateOptions['_self'] && partial == this.options.partial && this.delegate.partialEl) {
+          selector = updateOptions['_self'];
+          selectedEl = [this.delegate.partialEl];
+        } else {
+          selectedEl = resolveSelectorResponse(selector, '[data-ajax-partial="' + partial + '"]');
+        }
+
+        selectedEl.forEach(function (el) {
+          if (isUpdating) {
+            el.setAttribute('data-ajax-updating', '');
+          } else {
+            el.removeAttribute('data-ajax-updating');
+          }
+        });
       }
     } // Custom function, handle any application specific response values
     // Using a promisary object here in case injected assets need time to load
@@ -2674,6 +2745,8 @@ var Request = /*#__PURE__*/function () {
       if (this.options.progressBar) {
         this.showProgressBarAfterDelay();
       }
+
+      this.actions.invoke('start', [this.request.xhr]);
     }
   }, {
     key: "requestProgressed",
