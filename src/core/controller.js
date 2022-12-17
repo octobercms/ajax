@@ -5,6 +5,7 @@ export class Controller
 {
     constructor() {
         this.started = false;
+        this.documentVisible = true;
     }
 
     start() {
@@ -13,13 +14,16 @@ export class Controller
             window.onbeforeunload = this.documentOnBeforeUnload;
 
             // First page load
-            addEventListener('DOMContentLoaded', this.render);
+            addEventListener('DOMContentLoaded', () => this.render());
 
             // Again, after new scripts load
-            addEventListener('page:updated', this.render);
+            addEventListener('page:updated', () => this.render());
 
             // Again after AJAX request
-            addEventListener('ajax:update-complete', this.render);
+            addEventListener('ajax:update-complete', () => this.render());
+
+            // Watching document visibility
+            addEventListener('visibilitychange', () => this.documentOnVisibilityChange());
 
             // Submit form
             Events.on(document, 'submit', '[data-request]', this.documentOnSubmit);
@@ -55,6 +59,29 @@ export class Controller
 
         // Resize event to adjust all measurements
         window.dispatchEvent(new Event('resize'));
+
+        this.documentOnRender(event);
+    }
+
+    documentOnVisibilityChange(event) {
+        this.documentVisible = !document.hidden;
+        if (this.documentVisible) {
+            this.documentOnRender();
+        }
+    }
+
+    documentOnRender(event) {
+        if (!this.documentVisible) {
+            return;
+        }
+
+        document.querySelectorAll('[data-auto-submit]').forEach(function(el) {
+            const interval = el.dataset.autoSubmit || 0;
+            el.removeAttribute('data-auto-submit');
+            setTimeout(function() {
+                RequestBuilder.fromElement(el);
+            }, interval);
+        });
     }
 
     documentOnSubmit(event) {
