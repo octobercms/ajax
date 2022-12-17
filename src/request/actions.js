@@ -18,6 +18,7 @@ export class Actions
         this.options = options;
 
         // Allow override to call parent logic
+        this.context.start = this.start.bind(this);
         this.context.success = this.success.bind(this);
         this.context.error = this.error.bind(this);
         this.context.complete = this.complete.bind(this);
@@ -45,6 +46,10 @@ export class Actions
     }
 
     // Public
+    start(xhr) {
+        this.invoke('markAsUpdating', [true]);
+    }
+
     success(data, responseCode, xhr) {
         // Halt here if beforeUpdate() or data-request-before-update returns false
         if (this.invoke('beforeUpdate', [data, responseCode, xhr]) === false) {
@@ -134,6 +139,7 @@ export class Actions
     complete(data, responseCode, xhr) {
         this.delegate.notifyApplicationRequestComplete(data, responseCode, xhr);
         this.invokeFunc('completeFunc', data);
+        this.invoke('markAsUpdating', [false]);
     }
 
     // Custom function, requests confirmation from the user
@@ -210,6 +216,33 @@ export class Actions
         }
         else {
             location.assign(href);
+        }
+    }
+
+    // Mark known elements as being updated
+    markAsUpdating(isUpdating) {
+        var updateOptions = this.options.update || {};
+
+        for (var partial in updateOptions) {
+            let selector = updateOptions[partial];
+            let selectedEl = [];
+
+            if (updateOptions['_self'] && partial == this.options.partial && this.delegate.partialEl) {
+                selector = updateOptions['_self'];
+                selectedEl = [this.delegate.partialEl];
+            }
+            else {
+                selectedEl = resolveSelectorResponse(selector, '[data-ajax-partial="'+partial+'"]');
+            }
+
+            selectedEl.forEach(function(el) {
+                if (isUpdating) {
+                    el.setAttribute('data-ajax-updating', '');
+                }
+                else {
+                    el.removeAttribute('data-ajax-updating');
+                }
+            });
         }
     }
 

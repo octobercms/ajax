@@ -221,6 +221,8 @@ export class Request
         if (this.options.progressBar) {
             this.showProgressBarAfterDelay();
         }
+
+        this.actions.invoke('start', [this.request.xhr]);
     }
 
     requestProgressed(progress) {
