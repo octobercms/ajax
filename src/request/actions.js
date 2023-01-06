@@ -358,6 +358,22 @@ export class Actions
             return true;
         }
     }
+
+    // Custom function, adds query data to the current URL
+    applyQueryToUrl(queryData) {
+        const searchParams = new URLSearchParams(window.location.search)
+        for (const key of Object.keys(queryData)) {
+            searchParams.set(key, queryData[key]);
+        }
+
+        const newUrl = window.location.pathname + '?' + searchParams.toString();
+        if (oc.AjaxTurbo) {
+            oc.visit(newUrl, { action: 'swap', scroll: false });
+        }
+        else {
+            history.replaceState(null, '', newUrl);
+        }
+    }
 }
 
 function resolveSelectorResponse(selector, partialSelector) {

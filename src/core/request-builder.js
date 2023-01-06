@@ -24,11 +24,12 @@ export class RequestBuilder
         this.assignAsData('loading', 'requestLoading');
         this.assignAsData('form', 'requestForm');
         this.assignAsData('url', 'requestUrl');
-        this.assignAsData('update', 'requestUpdate', { parseJson: true });
         this.assignAsData('bulk', 'requestBulk', { emptyAsTrue: true });
         this.assignAsData('files', 'requestFiles', { emptyAsTrue: true });
         this.assignAsData('flash', 'requestFlash', { emptyAsTrue: true });
         this.assignAsData('download', 'requestDownload', { emptyAsTrue: true });
+        this.assignAsData('update', 'requestUpdate', { parseJson: true });
+        this.assignAsData('query', 'requestQuery', { parseJson: true });
 
         this.assignAsData('browserTarget', 'browserTarget');
         this.assignAsData('browserValidate', 'browserValidate', { emptyAsTrue: true });

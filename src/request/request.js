@@ -59,6 +59,11 @@ export class Request
             data = dataObj.getAsQueryString();
         }
 
+        // Prepare query
+        if (this.options.query) {
+            this.actions.invoke('applyQueryToUrl', [this.options.query]);
+        }
+
         // Prepare request
         const { url, headers, method, responseType } = Options.fetch(this.handler, this.options);
         this.request = new HttpRequest(this, url, { method, headers, responseType, data, trackAbort: true });
