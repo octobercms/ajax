@@ -726,7 +726,7 @@ var Migrate = /*#__PURE__*/function () {
 
       this.migratejQueryEvent(window, 'ajax:before-send', 'ajaxBeforeSend', ['context']);
       this.migratejQueryEvent(window, 'ajax:update-complete', 'ajaxUpdateComplete', ['context', 'data', 'responseCode', 'xhr']);
-      this.migratejQueryEvent(window, 'ajax:invalid-field', 'ajaxInvalidField', ['element', 'fieldName', 'fieldMessages', 'isFirst']);
+      this.migratejQueryEvent(window, 'ajax:invalid-field', 'ajaxInvalidField', ['element', 'fieldName', 'errorMsg', 'isFirst']);
       this.migratejQueryEvent(window, 'ajax:confirm-message', 'ajaxConfirmMessage', ['message', 'promise']);
       this.migratejQueryEvent(window, 'ajax:error-message', 'ajaxErrorMessage', ['message']); // Data adapter
 
@@ -876,9 +876,6 @@ var RequestBuilder = /*#__PURE__*/function () {
     this.assignAsData('loading', 'requestLoading');
     this.assignAsData('form', 'requestForm');
     this.assignAsData('url', 'requestUrl');
-    this.assignAsData('update', 'requestUpdate', {
-      parseJson: true
-    });
     this.assignAsData('bulk', 'requestBulk', {
       emptyAsTrue: true
     });
@@ -890,6 +887,12 @@ var RequestBuilder = /*#__PURE__*/function () {
     });
     this.assignAsData('download', 'requestDownload', {
       emptyAsTrue: true
+    });
+    this.assignAsData('update', 'requestUpdate', {
+      parseJson: true
+    });
+    this.assignAsData('query', 'requestQuery', {
+      parseJson: true
     });
     this.assignAsData('browserTarget', 'browserTarget');
     this.assignAsData('browserValidate', 'browserValidate', {
@@ -1668,6 +1671,28 @@ var Actions = /*#__PURE__*/function () {
         window.URL.revokeObjectURL(anchor.href);
         return true;
       }
+    } // Custom function, adds query data to the current URL
+
+  }, {
+    key: "applyQueryToUrl",
+    value: function applyQueryToUrl(queryData) {
+      var searchParams = new URLSearchParams(window.location.search);
+
+      for (var _i = 0, _Object$keys = Object.keys(queryData); _i < _Object$keys.length; _i++) {
+        var key = _Object$keys[_i];
+        searchParams.set(key, queryData[key]);
+      }
+
+      var newUrl = window.location.pathname + '?' + searchParams.toString();
+
+      if (oc.AjaxTurbo) {
+        oc.visit(newUrl, {
+          action: 'swap',
+          scroll: false
+        });
+      } else {
+        history.replaceState(null, '', newUrl);
+      }
     }
   }]);
 
@@ -2439,6 +2464,11 @@ var Request = /*#__PURE__*/function () {
         data = dataObj.getAsJsonData();
       } else {
         data = dataObj.getAsQueryString();
+      } // Prepare query
+
+
+      if (this.options.query) {
+        this.actions.invoke('applyQueryToUrl', [this.options.query]);
       } // Prepare request
 
 
@@ -2703,13 +2733,13 @@ var Request = /*#__PURE__*/function () {
     }
   }, {
     key: "notifyApplicationFieldInvalid",
-    value: function notifyApplicationFieldInvalid(element, fieldName, fieldMessages, isFirst) {
+    value: function notifyApplicationFieldInvalid(element, fieldName, errorMsg, isFirst) {
       return (0,_util__WEBPACK_IMPORTED_MODULE_6__.dispatch)('ajax:invalid-field', {
         target: window,
         detail: {
           element: element,
           fieldName: fieldName,
-          fieldMessages: fieldMessages,
+          errorMsg: errorMsg,
           isFirst: isFirst
         }
       });
