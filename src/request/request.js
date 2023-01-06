@@ -201,8 +201,8 @@ export class Request
         return dispatch('ajax:update-complete', { target: window, detail: { context: this.context, data, responseCode, xhr } });
     }
 
-    notifyApplicationFieldInvalid(element, fieldName, fieldMessages, isFirst) {
-        return dispatch('ajax:invalid-field', { target: window, detail: { element, fieldName, fieldMessages, isFirst } });
+    notifyApplicationFieldInvalid(element, fieldName, errorMsg, isFirst) {
+        return dispatch('ajax:invalid-field', { target: window, detail: { element, fieldName, errorMsg, isFirst } });
     }
 
     notifyApplicationConfirmMessage(message, promise) {

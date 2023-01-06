@@ -61,7 +61,7 @@ export class Migrate
         // Window
         this.migratejQueryEvent(window, 'ajax:before-send', 'ajaxBeforeSend', ['context']);
         this.migratejQueryEvent(window, 'ajax:update-complete', 'ajaxUpdateComplete', ['context', 'data', 'responseCode', 'xhr']);
-        this.migratejQueryEvent(window, 'ajax:invalid-field', 'ajaxInvalidField', ['element', 'fieldName', 'fieldMessages', 'isFirst']);
+        this.migratejQueryEvent(window, 'ajax:invalid-field', 'ajaxInvalidField', ['element', 'fieldName', 'errorMsg', 'isFirst']);
         this.migratejQueryEvent(window, 'ajax:confirm-message', 'ajaxConfirmMessage', ['message', 'promise']);
         this.migratejQueryEvent(window, 'ajax:error-message', 'ajaxErrorMessage', ['message']);
 
