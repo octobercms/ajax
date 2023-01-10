@@ -53,8 +53,8 @@ export class FlashMessage
             opacity: .5;
             text-decoration: none;
             position: absolute;
-            right: 10px;
-            top: 10px;
+            right: .7rem;
+            top: .7rem;
             cursor: pointer;
         }
         .oc-flash-message a.flash-close:hover,
@@ -66,9 +66,9 @@ export class FlashMessage
         }
         @media (max-width: 768px) {
             .oc-flash-message {
-                left: 10px;
-                right: 10px;
-                top: 10px;
+                left: 1rem;
+                right: 1rem;
+                top: 1rem;
                 margin-left: 0;
                 width: auto;
             }
@@ -110,25 +110,32 @@ export class FlashMessage
         setTimeout(function() { flashElement.classList.add('flash-show'); }, 100);
 
         // Events
-        flashElement.querySelector('.flash-close').addEventListener('click', remove);
+        flashElement.addEventListener('click', pause);
         flashElement.addEventListener('extras:flash-remove', remove);
+        flashElement.querySelector('.flash-close').addEventListener('click', remove);
 
         // Timeout
         var timer;
-        if (type !== 'error') {
+        if (interval && interval !== 0) {
             timer = window.setTimeout(remove, interval * 1000);
         }
 
         // Remove logic
         function remove() {
             window.clearInterval(timer);
-            flashElement.removeEventListener('click', remove);
+            flashElement.removeEventListener('click', pause);
             flashElement.removeEventListener('extras:flash-remove', remove);
+            flashElement.querySelector('.flash-close').removeEventListener('click', remove);
             flashElement.classList.remove('flash-show');
 
             setTimeout(function() {
                 flashElement.remove();
             }, 1000);
+        }
+
+        // Pause logic
+        function pause() {
+            window.clearInterval(timer);
         }
     }
 
