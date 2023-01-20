@@ -59,26 +59,21 @@ export class Controller
 
         // Browser redirect
         this.handleBrowserRedirect = function(event) {
-            if (
-                !event.defaultPrevented &&
-                oc.AjaxTurbo.controller.historyVisit &&
-                oc.AjaxTurbo.controller.historyVisit.referrer.absoluteURL
-            ) {
-                event.preventDefault();
+            if (event.defaultPrevented) {
+                return;
+            }
+            event.preventDefault();
 
-                const goBack = event.target.dataset.browserRedirect === 'back';
-                if (goBack) {
-                    window.history.go(-1);
-                    return;
-                }
+            const href = oc.AjaxTurbo.controller.getLastVisitUrl();
+            if (!href) {
+                return;
+            }
 
-                const href = oc.AjaxTurbo.controller.historyVisit.referrer.absoluteURL;
-                if (oc.useTurbo()) {
-                    oc.visit(href);
-                }
-                else {
-                    location.assign(href);
-                }
+            if (oc.useTurbo()) {
+                oc.visit(href);
+            }
+            else {
+                location.assign(href);
             }
         };
     }
@@ -105,8 +100,8 @@ export class Controller
             addEventListener('ajax:setup', this.flashMessageBind);
 
             // Browser redirect
-            Events.on(document, 'click', '[data-browser-redirect]', this.handleBrowserRedirect);
-            Events.on(document, 'ajax:before-redirect', '[data-browser-redirect]', this.handleBrowserRedirect);
+            Events.on(document, 'click', '[data-browser-redirect-back]', this.handleBrowserRedirect);
+            Events.on(document, 'ajax:before-redirect', '[data-browser-redirect-back]', this.handleBrowserRedirect);
 
             this.started = true;
         }
@@ -134,8 +129,8 @@ export class Controller
             removeEventListener('ajax:setup', this.flashMessageBind);
 
             // Browser redirect
-            Events.on(document, 'click', '[data-browser-redirect]', this.handleBrowserRedirect);
-            Events.on(document, 'ajax:before-redirect', '[data-browser-redirect]', this.handleBrowserRedirect);
+            Events.off(document, 'click', '[data-browser-redirect-back]', this.handleBrowserRedirect);
+            Events.off(document, 'ajax:before-redirect', '[data-browser-redirect-back]', this.handleBrowserRedirect);
 
             this.started = false;
         }

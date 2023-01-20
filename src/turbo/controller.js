@@ -131,6 +131,12 @@ export class Controller
         this.history.stop();
     }
 
+    getLastVisitUrl() {
+        if (this.historyVisit) {
+            return this.historyVisit.referrer.absoluteURL;
+        }
+    }
+
     pushHistoryWithLocationAndRestorationIdentifier(locatable, restorationIdentifier) {
         this.historyVisit = this.currentVisit;
         this.location = Location.wrap(locatable);
