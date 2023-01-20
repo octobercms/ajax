@@ -1327,7 +1327,30 @@ var Controller = /*#__PURE__*/function () {
 
     this.flashMessageRender = function (event) {
       this.flashMessage.render();
-    }.bind(this);
+    }.bind(this); // Browser redirect
+
+
+    this.handleBrowserRedirect = function (event) {
+      if (!event.defaultPrevented && oc.AjaxTurbo.controller.historyVisit && oc.AjaxTurbo.controller.historyVisit.referrer.absoluteURL) {
+        event.preventDefault();
+        var goBack = event.target.dataset.browserRedirect === 'back';
+
+        if (goBack) {
+          console.log('back button');
+          window.history.go(-1);
+          return;
+        }
+
+        console.log('referrer button');
+        var href = oc.AjaxTurbo.controller.historyVisit.referrer.absoluteURL;
+
+        if (oc.useTurbo()) {
+          oc.visit(href);
+        } else {
+          location.assign(href);
+        }
+      }
+    };
   }
 
   _createClass(Controller, [{
@@ -1348,7 +1371,10 @@ var Controller = /*#__PURE__*/function () {
 
         this.flashMessage = new _flash_message__WEBPACK_IMPORTED_MODULE_2__.FlashMessage();
         addEventListener('render', this.flashMessageRender);
-        addEventListener('ajax:setup', this.flashMessageBind);
+        addEventListener('ajax:setup', this.flashMessageBind); // Browser redirect
+
+        _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.on(document, 'click', '[data-browser-redirect]', this.handleBrowserRedirect);
+        _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.on(document, 'ajax:before-redirect', '[data-browser-redirect]', this.handleBrowserRedirect);
         this.started = true;
       }
     }
@@ -1370,7 +1396,10 @@ var Controller = /*#__PURE__*/function () {
 
         this.flashMessage = null;
         removeEventListener('render', this.flashMessageRender);
-        removeEventListener('ajax:setup', this.flashMessageBind);
+        removeEventListener('ajax:setup', this.flashMessageBind); // Browser redirect
+
+        _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.on(document, 'click', '[data-browser-redirect]', this.handleBrowserRedirect);
+        _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.on(document, 'ajax:before-redirect', '[data-browser-redirect]', this.handleBrowserRedirect);
         this.started = false;
       }
     }
@@ -2228,7 +2257,11 @@ var Actions = /*#__PURE__*/function () {
   }, {
     key: "handleRedirectResponse",
     value: function handleRedirectResponse(href) {
-      this.delegate.notifyApplicationBeforeRedirect();
+      var event = this.delegate.notifyApplicationBeforeRedirect();
+
+      if (event.defaultPrevented) {
+        return;
+      }
 
       if (oc.useTurbo && oc.useTurbo()) {
         oc.visit(href);

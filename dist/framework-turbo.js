@@ -1530,7 +1530,11 @@ var Actions = /*#__PURE__*/function () {
   }, {
     key: "handleRedirectResponse",
     value: function handleRedirectResponse(href) {
-      this.delegate.notifyApplicationBeforeRedirect();
+      var event = this.delegate.notifyApplicationBeforeRedirect();
+
+      if (event.defaultPrevented) {
+        return;
+      }
 
       if (oc.useTurbo && oc.useTurbo()) {
         oc.visit(href);
@@ -3126,7 +3130,9 @@ var Controller = /*#__PURE__*/function () {
     this.progressBarDelay = 500;
     this.progressBarVisible = true;
     this.started = false;
-    this.uniqueInlineScripts = []; // Event handlers
+    this.uniqueInlineScripts = [];
+    this.currentVisit = null;
+    this.historyVisit = null; // Event handlers
 
     this.pageLoaded = function () {
       _this.lastRenderedLocation = _this.location;
@@ -3257,6 +3263,7 @@ var Controller = /*#__PURE__*/function () {
   }, {
     key: "pushHistoryWithLocationAndRestorationIdentifier",
     value: function pushHistoryWithLocationAndRestorationIdentifier(locatable, restorationIdentifier) {
+      this.historyVisit = this.currentVisit;
       this.location = _location__WEBPACK_IMPORTED_MODULE_2__.Location.wrap(locatable);
       this.restorationIdentifier = restorationIdentifier;
       this.history.push(this.location, this.restorationIdentifier);

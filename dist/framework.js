@@ -1530,7 +1530,11 @@ var Actions = /*#__PURE__*/function () {
   }, {
     key: "handleRedirectResponse",
     value: function handleRedirectResponse(href) {
-      this.delegate.notifyApplicationBeforeRedirect();
+      var event = this.delegate.notifyApplicationBeforeRedirect();
+
+      if (event.defaultPrevented) {
+        return;
+      }
 
       if (oc.useTurbo && oc.useTurbo()) {
         oc.visit(href);
