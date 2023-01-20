@@ -23,6 +23,8 @@ export class Controller
         this.progressBarVisible = true;
         this.started = false;
         this.uniqueInlineScripts = [];
+        this.currentVisit = null;
+        this.historyVisit = null;
 
         // Event handlers
         this.pageLoaded = () => {
@@ -130,6 +132,7 @@ export class Controller
     }
 
     pushHistoryWithLocationAndRestorationIdentifier(locatable, restorationIdentifier) {
+        this.historyVisit = this.currentVisit;
         this.location = Location.wrap(locatable);
         this.restorationIdentifier = restorationIdentifier;
         this.history.push(this.location, this.restorationIdentifier);

@@ -56,6 +56,33 @@ export class Controller
         this.flashMessageRender = (function(event) {
             this.flashMessage.render();
         }).bind(this);
+
+        // Browser redirect
+        this.handleBrowserRedirect = function(event) {
+            if (
+                !event.defaultPrevented &&
+                oc.AjaxTurbo.controller.historyVisit &&
+                oc.AjaxTurbo.controller.historyVisit.referrer.absoluteURL
+            ) {
+                event.preventDefault();
+
+                const goBack = event.target.dataset.browserRedirect === 'back';
+                if (goBack) {
+                    console.log('back button');
+                    window.history.go(-1);
+                    return;
+                }
+
+                    console.log('referrer button');
+                const href = oc.AjaxTurbo.controller.historyVisit.referrer.absoluteURL;
+                if (oc.useTurbo()) {
+                    oc.visit(href);
+                }
+                else {
+                    location.assign(href);
+                }
+            }
+        };
     }
 
     start() {
@@ -78,6 +105,10 @@ export class Controller
             this.flashMessage = new FlashMessage;
             addEventListener('render', this.flashMessageRender);
             addEventListener('ajax:setup', this.flashMessageBind);
+
+            // Browser redirect
+            Events.on(document, 'click', '[data-browser-redirect]', this.handleBrowserRedirect);
+            Events.on(document, 'ajax:before-redirect', '[data-browser-redirect]', this.handleBrowserRedirect);
 
             this.started = true;
         }
@@ -103,6 +134,10 @@ export class Controller
             this.flashMessage = null;
             removeEventListener('render', this.flashMessageRender);
             removeEventListener('ajax:setup', this.flashMessageBind);
+
+            // Browser redirect
+            Events.on(document, 'click', '[data-browser-redirect]', this.handleBrowserRedirect);
+            Events.on(document, 'ajax:before-redirect', '[data-browser-redirect]', this.handleBrowserRedirect);
 
             this.started = false;
         }

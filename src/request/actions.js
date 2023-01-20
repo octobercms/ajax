@@ -209,7 +209,10 @@ export class Actions
 
     // Custom function, redirect the browser to another location
     handleRedirectResponse(href) {
-        this.delegate.notifyApplicationBeforeRedirect();
+        const event = this.delegate.notifyApplicationBeforeRedirect();
+        if (event.defaultPrevented) {
+            return;
+        }
 
         if (oc.useTurbo && oc.useTurbo()) {
             oc.visit(href);
