@@ -68,12 +68,10 @@ export class Controller
 
                 const goBack = event.target.dataset.browserRedirect === 'back';
                 if (goBack) {
-                    console.log('back button');
                     window.history.go(-1);
                     return;
                 }
 
-                    console.log('referrer button');
                 const href = oc.AjaxTurbo.controller.historyVisit.referrer.absoluteURL;
                 if (oc.useTurbo()) {
                     oc.visit(href);

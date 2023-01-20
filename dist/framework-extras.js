@@ -1336,12 +1336,10 @@ var Controller = /*#__PURE__*/function () {
         var goBack = event.target.dataset.browserRedirect === 'back';
 
         if (goBack) {
-          console.log('back button');
           window.history.go(-1);
           return;
         }
 
-        console.log('referrer button');
         var href = oc.AjaxTurbo.controller.historyVisit.referrer.absoluteURL;
 
         if (oc.useTurbo()) {
