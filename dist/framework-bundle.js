@@ -1331,22 +1331,21 @@ var Controller = /*#__PURE__*/function () {
 
 
     this.handleBrowserRedirect = function (event) {
-      if (!event.defaultPrevented && oc.AjaxTurbo.controller.historyVisit && oc.AjaxTurbo.controller.historyVisit.referrer.absoluteURL) {
-        event.preventDefault();
-        var goBack = event.target.dataset.browserRedirect === 'back';
+      if (event.defaultPrevented) {
+        return;
+      }
 
-        if (goBack) {
-          window.history.go(-1);
-          return;
-        }
+      event.preventDefault();
+      var href = oc.AjaxTurbo.controller.getLastVisitUrl();
 
-        var href = oc.AjaxTurbo.controller.historyVisit.referrer.absoluteURL;
+      if (!href) {
+        return;
+      }
 
-        if (oc.useTurbo()) {
-          oc.visit(href);
-        } else {
-          location.assign(href);
-        }
+      if (oc.useTurbo()) {
+        oc.visit(href);
+      } else {
+        location.assign(href);
       }
     };
   }
@@ -1371,8 +1370,8 @@ var Controller = /*#__PURE__*/function () {
         addEventListener('render', this.flashMessageRender);
         addEventListener('ajax:setup', this.flashMessageBind); // Browser redirect
 
-        _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.on(document, 'click', '[data-browser-redirect]', this.handleBrowserRedirect);
-        _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.on(document, 'ajax:before-redirect', '[data-browser-redirect]', this.handleBrowserRedirect);
+        _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.on(document, 'click', '[data-browser-redirect-back]', this.handleBrowserRedirect);
+        _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.on(document, 'ajax:before-redirect', '[data-browser-redirect-back]', this.handleBrowserRedirect);
         this.started = true;
       }
     }
@@ -1396,8 +1395,8 @@ var Controller = /*#__PURE__*/function () {
         removeEventListener('render', this.flashMessageRender);
         removeEventListener('ajax:setup', this.flashMessageBind); // Browser redirect
 
-        _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.on(document, 'click', '[data-browser-redirect]', this.handleBrowserRedirect);
-        _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.on(document, 'ajax:before-redirect', '[data-browser-redirect]', this.handleBrowserRedirect);
+        _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.off(document, 'click', '[data-browser-redirect-back]', this.handleBrowserRedirect);
+        _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.off(document, 'ajax:before-redirect', '[data-browser-redirect-back]', this.handleBrowserRedirect);
         this.started = false;
       }
     }
@@ -3984,6 +3983,13 @@ var Controller = /*#__PURE__*/function () {
     key: "stopHistory",
     value: function stopHistory() {
       this.history.stop();
+    }
+  }, {
+    key: "getLastVisitUrl",
+    value: function getLastVisitUrl() {
+      if (this.historyVisit) {
+        return this.historyVisit.referrer.absoluteURL;
+      }
     }
   }, {
     key: "pushHistoryWithLocationAndRestorationIdentifier",

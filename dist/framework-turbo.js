@@ -3261,6 +3261,13 @@ var Controller = /*#__PURE__*/function () {
       this.history.stop();
     }
   }, {
+    key: "getLastVisitUrl",
+    value: function getLastVisitUrl() {
+      if (this.historyVisit) {
+        return this.historyVisit.referrer.absoluteURL;
+      }
+    }
+  }, {
     key: "pushHistoryWithLocationAndRestorationIdentifier",
     value: function pushHistoryWithLocationAndRestorationIdentifier(locatable, restorationIdentifier) {
       this.historyVisit = this.currentVisit;
