@@ -49,9 +49,9 @@ export class Snapshot
 
     getElementForAnchor(anchor) {
         try {
-            return this.bodyElement.querySelector(`[id='${anchor}'], a[name='${anchor}']`);
+            return this.bodyElement.querySelector(`[id='${anchor}'], a[name='${anchor}'], a[href='#${anchor}']`);
         }
-        catch (_a) {
+        catch (e) {
             return null;
         }
     }
