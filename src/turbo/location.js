@@ -1,18 +1,17 @@
 export class Location
 {
     constructor(url) {
-        const link = document.createElement('a');
-        link.href = url;
-        this.absoluteURL = link.href;
-
-        const anchorMatch = this.absoluteURL.match(/#(.*)$/);
-        if (anchorMatch) {
-            this.anchor = anchorMatch[1];
+        const linkWithAnchor = document.createElement('a');
+        linkWithAnchor.href = url;
+        this.absoluteURL = linkWithAnchor.href;
+        const anchorLength = linkWithAnchor.hash.length;
+        if (anchorLength < 2) {
+            this.requestURL = this.absoluteURL;
         }
-
-        this.requestURL = typeof this.anchor == 'undefined'
-            ? this.absoluteURL
-            : this.absoluteURL.slice(0, -(this.anchor.length + 1));
+        else {
+            this.requestURL = this.absoluteURL.slice(0, -anchorLength);
+            this.anchor = linkWithAnchor.hash.slice(1);
+        }
     }
 
     static get currentLocation() {
@@ -20,7 +19,7 @@ export class Location
     }
 
     static wrap(locatable) {
-        if (typeof locatable == "string") {
+        if (typeof locatable == 'string') {
             return new Location(locatable);
         }
         else if (locatable != null) {
