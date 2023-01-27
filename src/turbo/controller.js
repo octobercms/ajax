@@ -89,10 +89,10 @@ export class Controller
 
     visit(location, options = {}) {
         location = Location.wrap(location);
-        if (this.applicationAllowsVisitingLocation(location)) {
+        const action = options.action || 'advance';
+        if (this.applicationAllowsVisitingLocation(location, action)) {
             if (this.locationIsVisitable(location)) {
                 this.useScroll = options.scroll !== false;
-                const action = options.action || 'advance';
                 this.adapter.visitProposedToLocationWithAction(location, action);
             }
             else {
@@ -264,8 +264,8 @@ export class Controller
         return !event.defaultPrevented;
     }
 
-    applicationAllowsVisitingLocation(location) {
-        const event = this.notifyApplicationBeforeVisitingLocation(location);
+    applicationAllowsVisitingLocation(location, action) {
+        const event = this.notifyApplicationBeforeVisitingLocation(location, action);
         return !event.defaultPrevented;
     }
 
@@ -273,8 +273,8 @@ export class Controller
         return dispatch('page:click', { target: link, detail: { url: location.absoluteURL } });
     }
 
-    notifyApplicationBeforeVisitingLocation(location) {
-        return dispatch('page:before-visit', { detail: { url: location.absoluteURL } });
+    notifyApplicationBeforeVisitingLocation(location, action) {
+        return dispatch('page:before-visit', { detail: { url: location.absoluteURL, action } });
     }
 
     notifyApplicationAfterVisitingLocation(location) {
@@ -338,13 +338,15 @@ export class Controller
     }
 
     clickEventIsSignificant(event) {
-        return !((event.target && event.target.isContentEditable)
-            || event.defaultPrevented
-            || event.which > 1
-            || event.altKey
-            || event.ctrlKey
-            || event.metaKey
-            || event.shiftKey);
+        return !(
+            (event.target && event.target.isContentEditable) ||
+            event.defaultPrevented ||
+            event.which > 1 ||
+            event.altKey ||
+            event.ctrlKey ||
+            event.metaKey ||
+            event.shiftKey
+        );
     }
 
     getVisitableLinkForTarget(target) {
