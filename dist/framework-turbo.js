@@ -3213,11 +3213,11 @@ var Controller = /*#__PURE__*/function () {
     value: function visit(location) {
       var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
       location = _location__WEBPACK_IMPORTED_MODULE_2__.Location.wrap(location);
+      var action = options.action || 'advance';
 
-      if (this.applicationAllowsVisitingLocation(location)) {
+      if (this.applicationAllowsVisitingLocation(location, action)) {
         if (this.locationIsVisitable(location)) {
           this.useScroll = options.scroll !== false;
-          var action = options.action || 'advance';
           this.adapter.visitProposedToLocationWithAction(location, action);
         } else {
           window.location.href = location.toString();
@@ -3429,8 +3429,8 @@ var Controller = /*#__PURE__*/function () {
     }
   }, {
     key: "applicationAllowsVisitingLocation",
-    value: function applicationAllowsVisitingLocation(location) {
-      var event = this.notifyApplicationBeforeVisitingLocation(location);
+    value: function applicationAllowsVisitingLocation(location, action) {
+      var event = this.notifyApplicationBeforeVisitingLocation(location, action);
       return !event.defaultPrevented;
     }
   }, {
@@ -3445,10 +3445,11 @@ var Controller = /*#__PURE__*/function () {
     }
   }, {
     key: "notifyApplicationBeforeVisitingLocation",
-    value: function notifyApplicationBeforeVisitingLocation(location) {
+    value: function notifyApplicationBeforeVisitingLocation(location, action) {
       return (0,_util__WEBPACK_IMPORTED_MODULE_5__.dispatch)('page:before-visit', {
         detail: {
-          url: location.absoluteURL
+          url: location.absoluteURL,
+          action: action
         }
       });
     }
@@ -4117,16 +4118,17 @@ var Location = /*#__PURE__*/function () {
   function Location(url) {
     _classCallCheck(this, Location);
 
-    var link = document.createElement('a');
-    link.href = url;
-    this.absoluteURL = link.href;
-    var anchorMatch = this.absoluteURL.match(/#(.*)$/);
+    var linkWithAnchor = document.createElement("a");
+    linkWithAnchor.href = url;
+    this.absoluteURL = linkWithAnchor.href;
+    var anchorLength = linkWithAnchor.hash.length;
 
-    if (anchorMatch) {
-      this.anchor = anchorMatch[1];
+    if (anchorLength < 2) {
+      this.requestURL = this.absoluteURL;
+    } else {
+      this.requestURL = this.absoluteURL.slice(0, -anchorLength);
+      this.anchor = linkWithAnchor.hash.slice(1);
     }
-
-    this.requestURL = typeof this.anchor == 'undefined' ? this.absoluteURL : this.absoluteURL.slice(0, -(this.anchor.length + 1));
   }
 
   _createClass(Location, [{
@@ -4198,7 +4200,7 @@ var Location = /*#__PURE__*/function () {
   }, {
     key: "wrap",
     value: function wrap(locatable) {
-      if (typeof locatable == "string") {
+      if (typeof locatable == 'string') {
         return new Location(locatable);
       } else if (locatable != null) {
         return locatable;
@@ -4918,8 +4920,8 @@ var Snapshot = /*#__PURE__*/function () {
     key: "getElementForAnchor",
     value: function getElementForAnchor(anchor) {
       try {
-        return this.bodyElement.querySelector("[id='".concat(anchor, "'], a[name='").concat(anchor, "']"));
-      } catch (_a) {
+        return this.bodyElement.querySelector("[id='".concat(anchor, "'], a[name='").concat(anchor, "'], a[href='#").concat(anchor, "']"));
+      } catch (e) {
         return null;
       }
     }
