@@ -108,12 +108,12 @@ export class ProgressBar
 
     startTrickling() {
         if (!this.trickleInterval) {
-            this.trickleInterval = window.setInterval(this.trickle, ProgressBar.animationDuration);
+            this.trickleInterval = setInterval(this.trickle, ProgressBar.animationDuration);
         }
     }
 
     stopTrickling() {
-        window.clearInterval(this.trickleInterval);
+        clearInterval(this.trickleInterval);
         delete this.trickleInterval;
     }
 

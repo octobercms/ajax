@@ -117,12 +117,12 @@ export class FlashMessage
         // Timeout
         var timer;
         if (interval && interval !== 0) {
-            timer = window.setTimeout(remove, interval * 1000);
+            timer = setTimeout(remove, interval * 1000);
         }
 
         // Remove logic
         function remove() {
-            window.clearInterval(timer);
+            clearInterval(timer);
             flashElement.removeEventListener('click', pause);
             flashElement.removeEventListener('extras:flash-remove', remove);
             flashElement.querySelector('.flash-close').removeEventListener('click', remove);
@@ -135,7 +135,7 @@ export class FlashMessage
 
         // Pause logic
         function pause() {
-            window.clearInterval(timer);
+            clearInterval(timer);
         }
     }
 

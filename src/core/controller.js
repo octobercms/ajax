@@ -58,7 +58,7 @@ export class Controller
         Events.dispatch('render');
 
         // Resize event to adjust all measurements
-        window.dispatchEvent(new Event('resize'));
+        dispatchEvent(new Event('resize'));
 
         this.documentOnRender(event);
     }
@@ -113,7 +113,7 @@ export class Controller
         el.dataset.ocLastValue = el.value;
 
         if (this.dataTrackInputTimer !== undefined) {
-            window.clearTimeout(this.dataTrackInputTimer);
+            clearTimeout(this.dataTrackInputTimer);
         }
 
         var interval = el.getAttribute('data-track-input');
@@ -122,7 +122,7 @@ export class Controller
         }
 
         var self = this;
-        this.dataTrackInputTimer = window.setTimeout(function() {
+        this.dataTrackInputTimer = setTimeout(function() {
             if (self.lastDataTrackInputRequest) {
                 self.lastDataTrackInputRequest.abort();
             }
@@ -136,7 +136,7 @@ export class Controller
             event.preventDefault();
 
             if (this.dataTrackInputTimer !== undefined) {
-                window.clearTimeout(this.dataTrackInputTimer);
+                clearTimeout(this.dataTrackInputTimer);
             }
 
             RequestBuilder.fromElement(event.target);
