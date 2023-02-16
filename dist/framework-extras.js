@@ -82,7 +82,7 @@ var Controller = /*#__PURE__*/function () {
 
       _util_events__WEBPACK_IMPORTED_MODULE_0__.Events.dispatch('render'); // Resize event to adjust all measurements
 
-      window.dispatchEvent(new Event('resize'));
+      dispatchEvent(new Event('resize'));
       this.documentOnRender(event);
     }
   }, {
@@ -143,7 +143,7 @@ var Controller = /*#__PURE__*/function () {
       el.dataset.ocLastValue = el.value;
 
       if (this.dataTrackInputTimer !== undefined) {
-        window.clearTimeout(this.dataTrackInputTimer);
+        clearTimeout(this.dataTrackInputTimer);
       }
 
       var interval = el.getAttribute('data-track-input');
@@ -153,7 +153,7 @@ var Controller = /*#__PURE__*/function () {
       }
 
       var self = this;
-      this.dataTrackInputTimer = window.setTimeout(function () {
+      this.dataTrackInputTimer = setTimeout(function () {
         if (self.lastDataTrackInputRequest) {
           self.lastDataTrackInputRequest.abort();
         }
@@ -168,7 +168,7 @@ var Controller = /*#__PURE__*/function () {
         event.preventDefault();
 
         if (this.dataTrackInputTimer !== undefined) {
-          window.clearTimeout(this.dataTrackInputTimer);
+          clearTimeout(this.dataTrackInputTimer);
         }
 
         _request_builder__WEBPACK_IMPORTED_MODULE_1__.RequestBuilder.fromElement(event.target);
@@ -214,7 +214,9 @@ if (!window.oc.AjaxFramework) {
 
   window.oc.request = _namespace__WEBPACK_IMPORTED_MODULE_1__["default"].requestElement; // JSON parser
 
-  window.oc.parseJSON = _namespace__WEBPACK_IMPORTED_MODULE_1__["default"].parseJSON; // Selector events
+  window.oc.parseJSON = _namespace__WEBPACK_IMPORTED_MODULE_1__["default"].parseJSON; // Form serializer
+
+  window.oc.serializeJSON = _namespace__WEBPACK_IMPORTED_MODULE_1__["default"].serializeJSON; // Selector events
 
   window.oc.Events = _util_events__WEBPACK_IMPORTED_MODULE_0__.Events; // Boot controller
 
@@ -233,413 +235,6 @@ function isCommonJS() {
 
 /***/ }),
 
-/***/ "./src/core/json-parser.js":
-/*!*********************************!*\
-  !*** ./src/core/json-parser.js ***!
-  \*********************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "JsonParser": () => (/* binding */ JsonParser)
-/* harmony export */ });
-function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
-
-var JsonParser = /*#__PURE__*/function () {
-  function JsonParser() {
-    _classCallCheck(this, JsonParser);
-  }
-
-  _createClass(JsonParser, [{
-    key: "parseString",
-    value: // Private
-    function parseString(str) {
-      str = str.trim();
-
-      if (!str.length) {
-        throw new Error("Broken JSON object.");
-      }
-
-      var result = "";
-      /*
-       * the mistake ','
-       */
-
-      while (str && str[0] === ",") {
-        str = str.substr(1);
-      }
-      /*
-       * string
-       */
-
-
-      if (str[0] === "\"" || str[0] === "'") {
-        if (str[str.length - 1] !== str[0]) {
-          throw new Error("Invalid string JSON object.");
-        }
-
-        var body = "\"";
-
-        for (var i = 1; i < str.length; i++) {
-          if (str[i] === "\\") {
-            if (str[i + 1] === "'") {
-              body += str[i + 1];
-            } else {
-              body += str[i];
-              body += str[i + 1];
-            }
-
-            i++;
-          } else if (str[i] === str[0]) {
-            body += "\"";
-            return body;
-          } else if (str[i] === "\"") {
-            body += "\\\"";
-          } else body += str[i];
-        }
-
-        throw new Error("Invalid string JSON object.");
-      }
-      /*
-       * boolean
-       */
-
-
-      if (str === "true" || str === "false") {
-        return str;
-      }
-      /*
-       * null
-       */
-
-
-      if (str === "null") {
-        return "null";
-      }
-      /*
-       * number
-       */
-
-
-      var num = parseFloat(str);
-
-      if (!isNaN(num)) {
-        return num.toString();
-      }
-      /*
-       * object
-       */
-
-
-      if (str[0] === "{") {
-        var type = "needKey";
-        var result = "{";
-
-        for (var i = 1; i < str.length; i++) {
-          if (this.isBlankChar(str[i])) {
-            continue;
-          } else if (type === "needKey" && (str[i] === "\"" || str[i] === "'")) {
-            var key = this.parseKey(str, i + 1, str[i]);
-            result += "\"" + key + "\"";
-            i += key.length;
-            i += 1;
-            type = "afterKey";
-          } else if (type === "needKey" && this.canBeKeyHead(str[i])) {
-            var key = this.parseKey(str, i);
-            result += "\"";
-            result += key;
-            result += "\"";
-            i += key.length - 1;
-            type = "afterKey";
-          } else if (type === "afterKey" && str[i] === ":") {
-            result += ":";
-            type = ":";
-          } else if (type === ":") {
-            var body = this.getBody(str, i);
-            i = i + body.originLength - 1;
-            result += this.parseString(body.body);
-            type = "afterBody";
-          } else if (type === "afterBody" || type === "needKey") {
-            var last = i;
-
-            while (str[last] === "," || this.isBlankChar(str[last])) {
-              last++;
-            }
-
-            if (str[last] === "}" && last === str.length - 1) {
-              while (result[result.length - 1] === ",") {
-                result = result.substr(0, result.length - 1);
-              }
-
-              result += "}";
-              return result;
-            } else if (last !== i && result !== "{") {
-              result += ",";
-              type = "needKey";
-              i = last - 1;
-            }
-          }
-        }
-
-        throw new Error("Broken JSON object near " + result);
-      }
-      /*
-       * array
-       */
-
-
-      if (str[0] === "[") {
-        var result = "[";
-        var type = "needBody";
-
-        for (var i = 1; i < str.length; i++) {
-          if (" " === str[i] || "\n" === str[i] || "\t" === str[i]) {
-            continue;
-          } else if (type === "needBody") {
-            if (str[i] === ",") {
-              result += "null,";
-              continue;
-            }
-
-            if (str[i] === "]" && i === str.length - 1) {
-              if (result[result.length - 1] === ",") result = result.substr(0, result.length - 1);
-              result += "]";
-              return result;
-            }
-
-            var body = this.getBody(str, i);
-            i = i + body.originLength - 1;
-            result += this.parseString(body.body);
-            type = "afterBody";
-          } else if (type === "afterBody") {
-            if (str[i] === ",") {
-              result += ",";
-              type = "needBody"; // deal with mistake ","
-
-              while (str[i + 1] === "," || this.isBlankChar(str[i + 1])) {
-                if (str[i + 1] === ",") result += "null,";
-                i++;
-              }
-            } else if (str[i] === "]" && i === str.length - 1) {
-              result += "]";
-              return result;
-            }
-          }
-        }
-
-        throw new Error("Broken JSON array near " + result);
-      }
-    }
-  }, {
-    key: "parseKey",
-    value: function parseKey(str, pos, quote) {
-      var key = "";
-
-      for (var i = pos; i < str.length; i++) {
-        if (quote && quote === str[i]) {
-          return key;
-        } else if (!quote && (str[i] === " " || str[i] === ":")) {
-          return key;
-        }
-
-        key += str[i];
-
-        if (str[i] === "\\" && i + 1 < str.length) {
-          key += str[i + 1];
-          i++;
-        }
-      }
-
-      throw new Error("Broken JSON syntax near " + key);
-    }
-  }, {
-    key: "getBody",
-    value: function getBody(str, pos) {
-      // parse string body
-      if (str[pos] === "\"" || str[pos] === "'") {
-        var body = str[pos];
-
-        for (var i = pos + 1; i < str.length; i++) {
-          if (str[i] === "\\") {
-            body += str[i];
-            if (i + 1 < str.length) body += str[i + 1];
-            i++;
-          } else if (str[i] === str[pos]) {
-            body += str[pos];
-            return {
-              originLength: body.length,
-              body: body
-            };
-          } else body += str[i];
-        }
-
-        throw new Error("Broken JSON string body near " + body);
-      } // parse true / false
-
-
-      if (str[pos] === "t") {
-        if (str.indexOf("true", pos) === pos) {
-          return {
-            originLength: "true".length,
-            body: "true"
-          };
-        }
-
-        throw new Error("Broken JSON boolean body near " + str.substr(0, pos + 10));
-      }
-
-      if (str[pos] === "f") {
-        if (str.indexOf("f", pos) === pos) {
-          return {
-            originLength: "false".length,
-            body: "false"
-          };
-        }
-
-        throw new Error("Broken JSON boolean body near " + str.substr(0, pos + 10));
-      } // parse null
-
-
-      if (str[pos] === "n") {
-        if (str.indexOf("null", pos) === pos) {
-          return {
-            originLength: "null".length,
-            body: "null"
-          };
-        }
-
-        throw new Error("Broken JSON boolean body near " + str.substr(0, pos + 10));
-      } // parse number
-
-
-      if (str[pos] === "-" || str[pos] === "+" || str[pos] === "." || str[pos] >= "0" && str[pos] <= "9") {
-        var body = "";
-
-        for (var i = pos; i < str.length; i++) {
-          if (str[i] === "-" || str[i] === "+" || str[i] === "." || str[i] >= "0" && str[i] <= "9") {
-            body += str[i];
-          } else {
-            return {
-              originLength: body.length,
-              body: body
-            };
-          }
-        }
-
-        throw new Error("Broken JSON number body near " + body);
-      } // parse object
-
-
-      if (str[pos] === "{" || str[pos] === "[") {
-        var stack = [str[pos]];
-        var body = str[pos];
-
-        for (var i = pos + 1; i < str.length; i++) {
-          body += str[i];
-
-          if (str[i] === "\\") {
-            if (i + 1 < str.length) body += str[i + 1];
-            i++;
-          } else if (str[i] === "\"") {
-            if (stack[stack.length - 1] === "\"") {
-              stack.pop();
-            } else if (stack[stack.length - 1] !== "'") {
-              stack.push(str[i]);
-            }
-          } else if (str[i] === "'") {
-            if (stack[stack.length - 1] === "'") {
-              stack.pop();
-            } else if (stack[stack.length - 1] !== "\"") {
-              stack.push(str[i]);
-            }
-          } else if (stack[stack.length - 1] !== "\"" && stack[stack.length - 1] !== "'") {
-            if (str[i] === "{") {
-              stack.push("{");
-            } else if (str[i] === "}") {
-              if (stack[stack.length - 1] === "{") {
-                stack.pop();
-              } else {
-                throw new Error("Broken JSON " + (str[pos] === "{" ? "object" : "array") + " body near " + body);
-              }
-            } else if (str[i] === "[") {
-              stack.push("[");
-            } else if (str[i] === "]") {
-              if (stack[stack.length - 1] === "[") {
-                stack.pop();
-              } else {
-                throw new Error("Broken JSON " + (str[pos] === "{" ? "object" : "array") + " body near " + body);
-              }
-            }
-          }
-
-          if (!stack.length) {
-            return {
-              originLength: i - pos,
-              body: body
-            };
-          }
-        }
-
-        throw new Error("Broken JSON " + (str[pos] === "{" ? "object" : "array") + " body near " + body);
-      }
-
-      throw new Error("Broken JSON body near " + str.substr(pos - 5 >= 0 ? pos - 5 : 0, 50));
-    }
-  }, {
-    key: "canBeKeyHead",
-    value: function canBeKeyHead(ch) {
-      if (ch[0] === "\\") return false;
-      if (ch[0] >= 'a' && ch[0] <= 'z' || ch[0] >= 'A' && ch[0] <= 'Z' || ch[0] === '_') return true;
-      if (ch[0] >= '0' && ch[0] <= '9') return true;
-      if (ch[0] === '$') return true;
-      if (ch.charCodeAt(0) > 255) return true;
-      return false;
-    }
-  }, {
-    key: "isBlankChar",
-    value: function isBlankChar(ch) {
-      return ch === " " || ch === "\n" || ch === "\t";
-    }
-  }], [{
-    key: "paramToObj",
-    value: // Public
-    function paramToObj(name, value) {
-      if (value === undefined) {
-        value = '';
-      }
-
-      if (_typeof(value) === 'object') {
-        return value;
-      }
-
-      if (value.charAt(0) !== '{') {
-        value = "{" + value + "}";
-      }
-
-      try {
-        return this.parseJSON(value);
-      } catch (e) {
-        throw new Error('Error parsing the ' + name + ' attribute value. ' + e);
-      }
-    }
-  }, {
-    key: "parseJSON",
-    value: function parseJSON(json) {
-      return JSON.parse(new JsonParser().parseString(json));
-    }
-  }]);
-
-  return JsonParser;
-}();
-
-/***/ }),
-
 /***/ "./src/core/migrate.js":
 /*!*****************************!*\
   !*** ./src/core/migrate.js ***!
@@ -651,7 +246,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "Migrate": () => (/* binding */ Migrate)
 /* harmony export */ });
 /* harmony import */ var _core_request_builder__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../core/request-builder */ "./src/core/request-builder.js");
-/* harmony import */ var _json_parser__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./json-parser */ "./src/core/json-parser.js");
+/* harmony import */ var _util_json_parser__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../util/json-parser */ "./src/util/json-parser.js");
 function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -779,7 +374,7 @@ var Migrate = /*#__PURE__*/function () {
         if (dataObj.constructor === {}.constructor) {
           Object.assign(options.data, dataObj);
         } else if (typeof dataObj === 'string') {
-          Object.assign(options.data, _json_parser__WEBPACK_IMPORTED_MODULE_1__.JsonParser.paramToObj('request-data', dataObj));
+          Object.assign(options.data, _util_json_parser__WEBPACK_IMPORTED_MODULE_1__.JsonParser.paramToObj('request-data', dataObj));
         }
       });
     }
@@ -803,7 +398,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _controller__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./controller */ "./src/core/controller.js");
 /* harmony import */ var _migrate__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./migrate */ "./src/core/migrate.js");
 /* harmony import */ var _request_builder__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./request-builder */ "./src/core/request-builder.js");
-/* harmony import */ var _json_parser__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./json-parser */ "./src/core/json-parser.js");
+/* harmony import */ var _util_json_parser__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../util/json-parser */ "./src/util/json-parser.js");
+/* harmony import */ var _util_form_serializer__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../util/form-serializer */ "./src/util/form-serializer.js");
+
 
 
 
@@ -811,7 +408,8 @@ __webpack_require__.r(__webpack_exports__);
 var controller = new _controller__WEBPACK_IMPORTED_MODULE_0__.Controller();
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   controller: controller,
-  parseJSON: _json_parser__WEBPACK_IMPORTED_MODULE_3__.JsonParser.parseJSON,
+  parseJSON: _util_json_parser__WEBPACK_IMPORTED_MODULE_3__.JsonParser.parseJSON,
+  serializeJSON: _util_form_serializer__WEBPACK_IMPORTED_MODULE_4__.FormSerializer.serializeJSON,
   requestElement: _request_builder__WEBPACK_IMPORTED_MODULE_2__.RequestBuilder.fromElement,
   start: function start() {
     controller.start();
@@ -838,7 +436,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "RequestBuilder": () => (/* binding */ RequestBuilder)
 /* harmony export */ });
 /* harmony import */ var _request_namespace__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../request/namespace */ "./src/request/namespace.js");
-/* harmony import */ var _json_parser__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./json-parser */ "./src/core/json-parser.js");
+/* harmony import */ var _util_json_parser__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../util/json-parser */ "./src/util/json-parser.js");
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { _defineProperty(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
@@ -983,7 +581,7 @@ var RequestBuilder = /*#__PURE__*/function () {
       }
 
       if (parseJson) {
-        this.options[optionName] = _json_parser__WEBPACK_IMPORTED_MODULE_1__.JsonParser.paramToObj('data-' + normalizeDataKey(name), attrVal);
+        this.options[optionName] = _util_json_parser__WEBPACK_IMPORTED_MODULE_1__.JsonParser.paramToObj('data-' + normalizeDataKey(name), attrVal);
       } else {
         this.options[optionName] = this.castAttrToOption(attrVal, emptyAsTrue);
       }
@@ -1008,7 +606,7 @@ var RequestBuilder = /*#__PURE__*/function () {
       var attrVal = meta.getAttribute('content');
 
       if (parseJson) {
-        attrVal = _json_parser__WEBPACK_IMPORTED_MODULE_1__.JsonParser.paramToObj(normalizeDataKey(name), attrVal);
+        attrVal = _util_json_parser__WEBPACK_IMPORTED_MODULE_1__.JsonParser.paramToObj(normalizeDataKey(name), attrVal);
       } else {
         attrVal = this.castAttrToOption(attrVal, emptyAsTrue);
       }
@@ -1048,11 +646,11 @@ var RequestBuilder = /*#__PURE__*/function () {
       var attr = this.ogElement.getAttribute('data-request-data');
 
       if (attr) {
-        Object.assign(data, _json_parser__WEBPACK_IMPORTED_MODULE_1__.JsonParser.paramToObj('data-request-data', attr));
+        Object.assign(data, _util_json_parser__WEBPACK_IMPORTED_MODULE_1__.JsonParser.paramToObj('data-request-data', attr));
       }
 
       elementParents(this.ogElement, '[data-request-data]').reverse().forEach(function (el) {
-        Object.assign(data, _json_parser__WEBPACK_IMPORTED_MODULE_1__.JsonParser.paramToObj('data-request-data', el.getAttribute('data-request-data')));
+        Object.assign(data, _util_json_parser__WEBPACK_IMPORTED_MODULE_1__.JsonParser.paramToObj('data-request-data', el.getAttribute('data-request-data')));
       });
       this.options.data = data;
     }
@@ -1500,12 +1098,12 @@ var FlashMessage = /*#__PURE__*/function () {
       var timer;
 
       if (interval && interval !== 0) {
-        timer = window.setTimeout(remove, interval * 1000);
+        timer = setTimeout(remove, interval * 1000);
       } // Remove logic
 
 
       function remove() {
-        window.clearInterval(timer);
+        clearInterval(timer);
         flashElement.removeEventListener('click', pause);
         flashElement.removeEventListener('extras:flash-remove', remove);
         flashElement.querySelector('.flash-close').removeEventListener('click', remove);
@@ -1517,7 +1115,7 @@ var FlashMessage = /*#__PURE__*/function () {
 
 
       function pause() {
-        window.clearInterval(timer);
+        clearInterval(timer);
       }
     }
   }, {
@@ -1819,13 +1417,13 @@ var ProgressBar = /*#__PURE__*/function () {
     key: "startTrickling",
     value: function startTrickling() {
       if (!this.trickleInterval) {
-        this.trickleInterval = window.setInterval(this.trickle, ProgressBar.animationDuration);
+        this.trickleInterval = setInterval(this.trickle, ProgressBar.animationDuration);
       }
     }
   }, {
     key: "stopTrickling",
     value: function stopTrickling() {
-      window.clearInterval(this.trickleInterval);
+      clearInterval(this.trickleInterval);
       delete this.trickleInterval;
     }
   }, {
@@ -2701,11 +2299,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "Data": () => (/* binding */ Data)
 /* harmony export */ });
+/* harmony import */ var _util_form_serializer__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../util/form-serializer */ "./src/util/form-serializer.js");
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+
 
 var Data = /*#__PURE__*/function () {
   function Data(userData, targetEl, formEl) {
@@ -2835,7 +2435,7 @@ var Data = /*#__PURE__*/function () {
       var jsonData = {};
 
       for (var key in flatData) {
-        this.assignObjectNested(jsonData, this.nameToArray(key), flatData[key]);
+        _util_form_serializer__WEBPACK_IMPORTED_MODULE_0__.FormSerializer.assignToObj(jsonData, key, flatData[key]);
       }
 
       return jsonData;
@@ -2846,36 +2446,6 @@ var Data = /*#__PURE__*/function () {
       return Object.fromEntries(Array.from(formData.keys()).map(function (key) {
         return [key, key.endsWith('[]') ? formData.getAll(key) : formData.getAll(key).pop()];
       }));
-    }
-  }, {
-    key: "nameToArray",
-    value: function nameToArray(fieldName) {
-      var expression = /([^\]\[]+)/g,
-          elements = [],
-          searchResult;
-
-      while (searchResult = expression.exec(fieldName)) {
-        elements.push(searchResult[0]);
-      }
-
-      return elements;
-    }
-  }, {
-    key: "assignObjectNested",
-    value: function assignObjectNested(obj, fieldArr, value) {
-      var currentTarget = obj,
-          lastIndex = fieldArr.length - 1;
-      fieldArr.forEach(function (prop, index) {
-        if (currentTarget[prop] === undefined) {
-          currentTarget[prop] = {};
-        }
-
-        if (index === lastIndex) {
-          currentTarget[prop] = value;
-        }
-
-        currentTarget = currentTarget[prop];
-      });
     }
   }, {
     key: "castJsonToFormData",
@@ -4130,6 +3700,93 @@ function getTypeEvent(event) {
 
 /***/ }),
 
+/***/ "./src/util/form-serializer.js":
+/*!*************************************!*\
+  !*** ./src/util/form-serializer.js ***!
+  \*************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "FormSerializer": () => (/* binding */ FormSerializer)
+/* harmony export */ });
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+
+// FormSerializer serializes input elements to JSON
+var FormSerializer = /*#__PURE__*/function () {
+  function FormSerializer() {
+    _classCallCheck(this, FormSerializer);
+  }
+
+  _createClass(FormSerializer, [{
+    key: "parseContainer",
+    value: // Private
+    function parseContainer(element) {
+      var _this = this;
+
+      var jsonData = {};
+      element.querySelectorAll('input, select').forEach(function (el) {
+        _this.assignObjectInternal(jsonData, el.name, el.value);
+      });
+      return jsonData;
+    }
+  }, {
+    key: "assignObjectInternal",
+    value: function assignObjectInternal(obj, fieldName, fieldValue) {
+      this.assignObjectNested(obj, this.nameToArray(fieldName), fieldValue);
+    }
+  }, {
+    key: "assignObjectNested",
+    value: function assignObjectNested(obj, fieldArr, fieldValue) {
+      var currentTarget = obj,
+          lastIndex = fieldArr.length - 1;
+      fieldArr.forEach(function (prop, index) {
+        if (currentTarget[prop] === undefined) {
+          currentTarget[prop] = {};
+        }
+
+        if (index === lastIndex) {
+          currentTarget[prop] = fieldValue;
+        }
+
+        currentTarget = currentTarget[prop];
+      });
+    }
+  }, {
+    key: "nameToArray",
+    value: function nameToArray(fieldName) {
+      var expression = /([^\]\[]+)/g,
+          elements = [],
+          searchResult;
+
+      while (searchResult = expression.exec(fieldName)) {
+        elements.push(searchResult[0]);
+      }
+
+      return elements;
+    }
+  }], [{
+    key: "assignToObj",
+    value: // Public
+    function assignToObj(obj, name, value) {
+      new FormSerializer().assignObjectInternal(obj, name, value);
+    }
+  }, {
+    key: "serializeJSON",
+    value: function serializeJSON(element) {
+      return new FormSerializer().parseContainer(element);
+    }
+  }]);
+
+  return FormSerializer;
+}();
+
+/***/ }),
+
 /***/ "./src/util/http-request.js":
 /*!**********************************!*\
   !*** ./src/util/http-request.js ***!
@@ -4445,6 +4102,414 @@ function uuid() {
   }).join("");
 }
 
+/***/ }),
+
+/***/ "./src/util/json-parser.js":
+/*!*********************************!*\
+  !*** ./src/util/json-parser.js ***!
+  \*********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "JsonParser": () => (/* binding */ JsonParser)
+/* harmony export */ });
+function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+
+// JsonParser serializes JS-syntax to JSON without using eval
+var JsonParser = /*#__PURE__*/function () {
+  function JsonParser() {
+    _classCallCheck(this, JsonParser);
+  }
+
+  _createClass(JsonParser, [{
+    key: "parseString",
+    value: // Private
+    function parseString(str) {
+      str = str.trim();
+
+      if (!str.length) {
+        throw new Error("Broken JSON object.");
+      }
+
+      var result = "";
+      /*
+       * the mistake ','
+       */
+
+      while (str && str[0] === ",") {
+        str = str.substr(1);
+      }
+      /*
+       * string
+       */
+
+
+      if (str[0] === "\"" || str[0] === "'") {
+        if (str[str.length - 1] !== str[0]) {
+          throw new Error("Invalid string JSON object.");
+        }
+
+        var body = "\"";
+
+        for (var i = 1; i < str.length; i++) {
+          if (str[i] === "\\") {
+            if (str[i + 1] === "'") {
+              body += str[i + 1];
+            } else {
+              body += str[i];
+              body += str[i + 1];
+            }
+
+            i++;
+          } else if (str[i] === str[0]) {
+            body += "\"";
+            return body;
+          } else if (str[i] === "\"") {
+            body += "\\\"";
+          } else body += str[i];
+        }
+
+        throw new Error("Invalid string JSON object.");
+      }
+      /*
+       * boolean
+       */
+
+
+      if (str === "true" || str === "false") {
+        return str;
+      }
+      /*
+       * null
+       */
+
+
+      if (str === "null") {
+        return "null";
+      }
+      /*
+       * number
+       */
+
+
+      var num = parseFloat(str);
+
+      if (!isNaN(num)) {
+        return num.toString();
+      }
+      /*
+       * object
+       */
+
+
+      if (str[0] === "{") {
+        var type = "needKey";
+        var result = "{";
+
+        for (var i = 1; i < str.length; i++) {
+          if (this.isBlankChar(str[i])) {
+            continue;
+          } else if (type === "needKey" && (str[i] === "\"" || str[i] === "'")) {
+            var key = this.parseKey(str, i + 1, str[i]);
+            result += "\"" + key + "\"";
+            i += key.length;
+            i += 1;
+            type = "afterKey";
+          } else if (type === "needKey" && this.canBeKeyHead(str[i])) {
+            var key = this.parseKey(str, i);
+            result += "\"";
+            result += key;
+            result += "\"";
+            i += key.length - 1;
+            type = "afterKey";
+          } else if (type === "afterKey" && str[i] === ":") {
+            result += ":";
+            type = ":";
+          } else if (type === ":") {
+            var body = this.getBody(str, i);
+            i = i + body.originLength - 1;
+            result += this.parseString(body.body);
+            type = "afterBody";
+          } else if (type === "afterBody" || type === "needKey") {
+            var last = i;
+
+            while (str[last] === "," || this.isBlankChar(str[last])) {
+              last++;
+            }
+
+            if (str[last] === "}" && last === str.length - 1) {
+              while (result[result.length - 1] === ",") {
+                result = result.substr(0, result.length - 1);
+              }
+
+              result += "}";
+              return result;
+            } else if (last !== i && result !== "{") {
+              result += ",";
+              type = "needKey";
+              i = last - 1;
+            }
+          }
+        }
+
+        throw new Error("Broken JSON object near " + result);
+      }
+      /*
+       * array
+       */
+
+
+      if (str[0] === "[") {
+        var result = "[";
+        var type = "needBody";
+
+        for (var i = 1; i < str.length; i++) {
+          if (" " === str[i] || "\n" === str[i] || "\t" === str[i]) {
+            continue;
+          } else if (type === "needBody") {
+            if (str[i] === ",") {
+              result += "null,";
+              continue;
+            }
+
+            if (str[i] === "]" && i === str.length - 1) {
+              if (result[result.length - 1] === ",") result = result.substr(0, result.length - 1);
+              result += "]";
+              return result;
+            }
+
+            var body = this.getBody(str, i);
+            i = i + body.originLength - 1;
+            result += this.parseString(body.body);
+            type = "afterBody";
+          } else if (type === "afterBody") {
+            if (str[i] === ",") {
+              result += ",";
+              type = "needBody"; // deal with mistake ","
+
+              while (str[i + 1] === "," || this.isBlankChar(str[i + 1])) {
+                if (str[i + 1] === ",") result += "null,";
+                i++;
+              }
+            } else if (str[i] === "]" && i === str.length - 1) {
+              result += "]";
+              return result;
+            }
+          }
+        }
+
+        throw new Error("Broken JSON array near " + result);
+      }
+    }
+  }, {
+    key: "parseKey",
+    value: function parseKey(str, pos, quote) {
+      var key = "";
+
+      for (var i = pos; i < str.length; i++) {
+        if (quote && quote === str[i]) {
+          return key;
+        } else if (!quote && (str[i] === " " || str[i] === ":")) {
+          return key;
+        }
+
+        key += str[i];
+
+        if (str[i] === "\\" && i + 1 < str.length) {
+          key += str[i + 1];
+          i++;
+        }
+      }
+
+      throw new Error("Broken JSON syntax near " + key);
+    }
+  }, {
+    key: "getBody",
+    value: function getBody(str, pos) {
+      // parse string body
+      if (str[pos] === "\"" || str[pos] === "'") {
+        var body = str[pos];
+
+        for (var i = pos + 1; i < str.length; i++) {
+          if (str[i] === "\\") {
+            body += str[i];
+            if (i + 1 < str.length) body += str[i + 1];
+            i++;
+          } else if (str[i] === str[pos]) {
+            body += str[pos];
+            return {
+              originLength: body.length,
+              body: body
+            };
+          } else body += str[i];
+        }
+
+        throw new Error("Broken JSON string body near " + body);
+      } // parse true / false
+
+
+      if (str[pos] === "t") {
+        if (str.indexOf("true", pos) === pos) {
+          return {
+            originLength: "true".length,
+            body: "true"
+          };
+        }
+
+        throw new Error("Broken JSON boolean body near " + str.substr(0, pos + 10));
+      }
+
+      if (str[pos] === "f") {
+        if (str.indexOf("f", pos) === pos) {
+          return {
+            originLength: "false".length,
+            body: "false"
+          };
+        }
+
+        throw new Error("Broken JSON boolean body near " + str.substr(0, pos + 10));
+      } // parse null
+
+
+      if (str[pos] === "n") {
+        if (str.indexOf("null", pos) === pos) {
+          return {
+            originLength: "null".length,
+            body: "null"
+          };
+        }
+
+        throw new Error("Broken JSON boolean body near " + str.substr(0, pos + 10));
+      } // parse number
+
+
+      if (str[pos] === "-" || str[pos] === "+" || str[pos] === "." || str[pos] >= "0" && str[pos] <= "9") {
+        var body = "";
+
+        for (var i = pos; i < str.length; i++) {
+          if (str[i] === "-" || str[i] === "+" || str[i] === "." || str[i] >= "0" && str[i] <= "9") {
+            body += str[i];
+          } else {
+            return {
+              originLength: body.length,
+              body: body
+            };
+          }
+        }
+
+        throw new Error("Broken JSON number body near " + body);
+      } // parse object
+
+
+      if (str[pos] === "{" || str[pos] === "[") {
+        var stack = [str[pos]];
+        var body = str[pos];
+
+        for (var i = pos + 1; i < str.length; i++) {
+          body += str[i];
+
+          if (str[i] === "\\") {
+            if (i + 1 < str.length) body += str[i + 1];
+            i++;
+          } else if (str[i] === "\"") {
+            if (stack[stack.length - 1] === "\"") {
+              stack.pop();
+            } else if (stack[stack.length - 1] !== "'") {
+              stack.push(str[i]);
+            }
+          } else if (str[i] === "'") {
+            if (stack[stack.length - 1] === "'") {
+              stack.pop();
+            } else if (stack[stack.length - 1] !== "\"") {
+              stack.push(str[i]);
+            }
+          } else if (stack[stack.length - 1] !== "\"" && stack[stack.length - 1] !== "'") {
+            if (str[i] === "{") {
+              stack.push("{");
+            } else if (str[i] === "}") {
+              if (stack[stack.length - 1] === "{") {
+                stack.pop();
+              } else {
+                throw new Error("Broken JSON " + (str[pos] === "{" ? "object" : "array") + " body near " + body);
+              }
+            } else if (str[i] === "[") {
+              stack.push("[");
+            } else if (str[i] === "]") {
+              if (stack[stack.length - 1] === "[") {
+                stack.pop();
+              } else {
+                throw new Error("Broken JSON " + (str[pos] === "{" ? "object" : "array") + " body near " + body);
+              }
+            }
+          }
+
+          if (!stack.length) {
+            return {
+              originLength: i - pos,
+              body: body
+            };
+          }
+        }
+
+        throw new Error("Broken JSON " + (str[pos] === "{" ? "object" : "array") + " body near " + body);
+      }
+
+      throw new Error("Broken JSON body near " + str.substr(pos - 5 >= 0 ? pos - 5 : 0, 50));
+    }
+  }, {
+    key: "canBeKeyHead",
+    value: function canBeKeyHead(ch) {
+      if (ch[0] === "\\") return false;
+      if (ch[0] >= 'a' && ch[0] <= 'z' || ch[0] >= 'A' && ch[0] <= 'Z' || ch[0] === '_') return true;
+      if (ch[0] >= '0' && ch[0] <= '9') return true;
+      if (ch[0] === '$') return true;
+      if (ch.charCodeAt(0) > 255) return true;
+      return false;
+    }
+  }, {
+    key: "isBlankChar",
+    value: function isBlankChar(ch) {
+      return ch === " " || ch === "\n" || ch === "\t";
+    }
+  }], [{
+    key: "paramToObj",
+    value: // Public
+    function paramToObj(name, value) {
+      if (value === undefined) {
+        value = '';
+      }
+
+      if (_typeof(value) === 'object') {
+        return value;
+      }
+
+      if (value.charAt(0) !== '{') {
+        value = "{" + value + "}";
+      }
+
+      try {
+        return this.parseJSON(value);
+      } catch (e) {
+        throw new Error('Error parsing the ' + name + ' attribute value. ' + e);
+      }
+    }
+  }, {
+    key: "parseJSON",
+    value: function parseJSON(json) {
+      return JSON.parse(new JsonParser().parseString(json));
+    }
+  }]);
+
+  return JsonParser;
+}();
+
 /***/ })
 
 /******/ 	});
@@ -4523,7 +4588,7 @@ __webpack_require__.r(__webpack_exports__);
  * October CMS: Frontend JavaScript Framework
  * https://octobercms.com
  * --------------------------------------------------------------------------
- * Copyright 2013-2022 Alexey Bobkov, Samuel Georges
+ * Copyright 2013-2023 Alexey Bobkov, Samuel Georges
  * --------------------------------------------------------------------------
  */
 
