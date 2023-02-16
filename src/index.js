@@ -3,7 +3,7 @@
  * October CMS: Frontend JavaScript Framework
  * https://octobercms.com
  * --------------------------------------------------------------------------
- * Copyright 2013-2022 Alexey Bobkov, Samuel Georges
+ * Copyright 2013-2023 Alexey Bobkov, Samuel Georges
  * --------------------------------------------------------------------------
  */
 
@@ -24,6 +24,7 @@ export default {
     ajax: AjaxRequest.send,
     request: AjaxFramework.requestElement,
     parseJSON: AjaxFramework.parseJSON,
+    serializeJSON: AjaxFramework.serializeJSON,
     flashMsg: AjaxExtras.flashMsg,
     progressBar: AjaxExtras.progressBar,
     attachLoader: AjaxExtras.attachLoader,

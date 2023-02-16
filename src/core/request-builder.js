@@ -1,5 +1,5 @@
 import Request from "../request/namespace";
-import { JsonParser } from "./json-parser";
+import { JsonParser } from "../util/json-parser";
 
 export class RequestBuilder
 {

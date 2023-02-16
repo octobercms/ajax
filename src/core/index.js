@@ -16,6 +16,9 @@ if (!window.oc.AjaxFramework) {
     // JSON parser
     window.oc.parseJSON = namespace.parseJSON;
 
+    // Form serializer
+    window.oc.serializeJSON = namespace.serializeJSON;
+
     // Selector events
     window.oc.Events = Events;
 

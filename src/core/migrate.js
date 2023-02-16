@@ -1,5 +1,5 @@
 import { RequestBuilder } from '../core/request-builder';
-import { JsonParser } from "./json-parser";
+import { JsonParser } from "../util/json-parser";
 
 export class Migrate
 {

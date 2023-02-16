@@ -1,3 +1,5 @@
+import { FormSerializer } from "../util/form-serializer";
+
 export class Data
 {
     constructor(userData, targetEl, formEl) {
@@ -137,11 +139,7 @@ export class Data
         // Process HTML names to a nested object
         let jsonData = {};
         for (var key in flatData) {
-            this.assignObjectNested(
-                jsonData,
-                this.nameToArray(key),
-                flatData[key]
-            );
+            FormSerializer.assignToObj(jsonData, key, flatData[key]);
         }
 
         return jsonData;
@@ -156,35 +154,6 @@ export class Data
                     : formData.getAll(key).pop()
             ])
         );
-    }
-
-    nameToArray(fieldName) {
-        var expression = /([^\]\[]+)/g,
-            elements = [],
-            searchResult;
-
-        while ((searchResult = expression.exec(fieldName))) {
-            elements.push(searchResult[0]);
-        }
-
-        return elements;
-    }
-
-    assignObjectNested(obj, fieldArr, value)  {
-        var currentTarget = obj,
-            lastIndex = fieldArr.length - 1;
-
-        fieldArr.forEach(function(prop, index) {
-            if (currentTarget[prop] === undefined) {
-                currentTarget[prop] = {};
-            }
-
-            if (index === lastIndex) {
-                currentTarget[prop] = value;
-            }
-
-            currentTarget = currentTarget[prop];
-        });
     }
 
     castJsonToFormData(val) {

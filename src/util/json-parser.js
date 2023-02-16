@@ -1,3 +1,4 @@
+// JsonParser serializes JS-syntax to JSON without using eval
 export class JsonParser
 {
     // Public
