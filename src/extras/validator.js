@@ -67,7 +67,7 @@ export class Validator
         }
 
         // Prevent default error behavior
-        Events.one(window, 'ajax:error-message', function(event) {
+        Events.one(form, 'ajax:request-error', function(event) {
             event.preventDefault();
         });
     }
