@@ -1594,7 +1594,7 @@ var Validator = /*#__PURE__*/function () {
       } // Prevent default error behavior
 
 
-      _util_events__WEBPACK_IMPORTED_MODULE_0__.Events.one(window, 'ajax:error-message', function (event) {
+      _util_events__WEBPACK_IMPORTED_MODULE_0__.Events.one(form, 'ajax:request-error', function (event) {
         event.preventDefault();
       });
     }
