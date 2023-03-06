@@ -65,15 +65,15 @@ export class Controller
             event.preventDefault();
 
             const href = oc.AjaxTurbo.controller.getLastVisitUrl();
-            if (!href) {
-                return;
-            }
 
-            if (oc.useTurbo()) {
-                oc.visit(href);
-            }
-            else {
-                location.assign(href);
+            if (href) {
+                if (oc.useTurbo()) {
+                    oc.visit(href);
+                } else {
+                    location.assign(href);
+                }
+            } else {
+                window.location.reload(history.back()); // Fallback when turbo router isnt activated
             }
         };
     }
