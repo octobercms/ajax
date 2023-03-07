@@ -73,7 +73,7 @@ export class Controller
                     location.assign(href);
                 }
             } else if (document.referrer == location.origin) {
-                window.location.reload(history.back()); // Fallback when turbo router isnt activated
+                location.assign(document.referrer); // Fallback when turbo router isnt activated
             }
         };
     }
