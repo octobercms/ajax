@@ -72,7 +72,7 @@ export class Controller
                 } else {
                     location.assign(href);
                 }
-            } else {
+            } else if (document.referrer == location.origin) {
                 window.location.reload(history.back()); // Fallback when turbo router isnt activated
             }
         };
