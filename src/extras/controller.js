@@ -31,7 +31,12 @@ export class Controller
         }).bind(this);
 
         this.validatorValidate = (function(event) {
-            this.validator.validate(event.target, event.detail.fields, event.detail.message);
+            this.validator.validate(
+                event.target,
+                event.detail.fields,
+                event.detail.message,
+                shouldShowFlashMessage(event.detail.context.options.flash, 'validate')
+            );
         }).bind(this);
 
         // Flash message
@@ -40,7 +45,10 @@ export class Controller
             const self = this;
             if (options.flash) {
                 options.handleErrorMessage = function(message) {
-                    if (shouldShowFlashMessage(options.flash, 'error')) {
+                    if (
+                        shouldShowFlashMessage(options.flash, 'error') ||
+                        shouldShowFlashMessage(options.flash, 'validate')
+                    ) {
                         self.flashMessage.show({ message, type: 'error' });
                     }
                 }
@@ -138,17 +146,25 @@ export class Controller
 }
 
 function shouldShowFlashMessage(value, type) {
-    if (value === true) {
+    // Valdiation messages are not included by default
+    if (value === true && type !== 'validate') {
+        return true;
+    }
+
+    if (typeof value !== 'string') {
+        return false;
+    }
+
+    if (value === '*') {
         return true;
     }
 
     let result = false;
-    if (typeof value === 'string') {
-        value.split(',').forEach(function(validType) {
-            if (validType.trim() === type) {
-                result = true;
-            }
-        });
-    }
+    value.split(',').forEach(function(validType) {
+        if (validType.trim() === type) {
+            result = true;
+        }
+    });
+
     return result;
 }

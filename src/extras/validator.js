@@ -17,7 +17,7 @@ export class Validator
         });
     }
 
-    validate(el, fields, errorMsg) {
+    validate(el, fields, errorMsg, allowDefault) {
         var form = el.closest('form'),
             messages = [];
 
@@ -64,6 +64,11 @@ export class Validator
             else {
                 container.innerHTML = errorMsg;
             }
+        }
+
+        // Flash messages want a pass here
+        if (allowDefault) {
+            return;
         }
 
         // Prevent default error behavior
