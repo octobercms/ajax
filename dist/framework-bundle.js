@@ -894,7 +894,7 @@ var Controller = /*#__PURE__*/function () {
     }.bind(this);
 
     this.validatorValidate = function (event) {
-      this.validator.validate(event.target, event.detail.fields, event.detail.message);
+      this.validator.validate(event.target, event.detail.fields, event.detail.message, shouldShowFlashMessage(event.detail.context.options.flash, 'validate'));
     }.bind(this); // Flash message
 
 
@@ -904,7 +904,7 @@ var Controller = /*#__PURE__*/function () {
 
       if (options.flash) {
         options.handleErrorMessage = function (message) {
-          if (shouldShowFlashMessage(options.flash, 'error')) {
+          if (shouldShowFlashMessage(options.flash, 'error') || shouldShowFlashMessage(options.flash, 'validate')) {
             self.flashMessage.show({
               message: message,
               type: 'error'
@@ -1004,20 +1004,25 @@ var Controller = /*#__PURE__*/function () {
 }();
 
 function shouldShowFlashMessage(value, type) {
-  if (value === true) {
+  // Valdiation messages are not included by default
+  if (value === true && type !== 'validate') {
+    return true;
+  }
+
+  if (typeof value !== 'string') {
+    return false;
+  }
+
+  if (value === '*') {
     return true;
   }
 
   var result = false;
-
-  if (typeof value === 'string') {
-    value.split(',').forEach(function (validType) {
-      if (validType.trim() === type) {
-        result = true;
-      }
-    });
-  }
-
+  value.split(',').forEach(function (validType) {
+    if (validType.trim() === type) {
+      result = true;
+    }
+  });
   return result;
 }
 
@@ -1544,7 +1549,7 @@ var Validator = /*#__PURE__*/function () {
     }
   }, {
     key: "validate",
-    value: function validate(el, fields, errorMsg) {
+    value: function validate(el, fields, errorMsg, allowDefault) {
       var form = el.closest('form'),
           messages = [];
 
@@ -1591,6 +1596,11 @@ var Validator = /*#__PURE__*/function () {
         else {
           container.innerHTML = errorMsg;
         }
+      } // Flash messages want a pass here
+
+
+      if (allowDefault) {
+        return;
       } // Prevent default error behavior
 
 
@@ -3455,8 +3465,11 @@ var Controller = /*#__PURE__*/function () {
 
             var action = _this.getActionForLink(link);
 
+            var scroll = _this.useScrollForLink(link);
+
             _this.visit(location, {
-              action: action
+              action: action,
+              scroll: scroll
             });
           }
         }
@@ -3877,6 +3890,11 @@ var Controller = /*#__PURE__*/function () {
     value: function getActionForLink(link) {
       var action = link.getAttribute('data-turbo-action');
       return this.isAction(action) ? action : 'advance';
+    }
+  }, {
+    key: "useScrollForLink",
+    value: function useScrollForLink(link) {
+      return link.getAttribute('data-turbo-no-scroll') === null;
     }
   }, {
     key: "isAction",
@@ -4694,7 +4712,7 @@ var ScrollManager = /*#__PURE__*/function () {
     key: "start",
     value: function start() {
       if (!this.started) {
-        addEventListener("scroll", this.onScroll, false);
+        addEventListener('scroll', this.onScroll, false);
         this.onScroll();
         this.started = true;
       }
@@ -4703,7 +4721,7 @@ var ScrollManager = /*#__PURE__*/function () {
     key: "stop",
     value: function stop() {
       if (this.started) {
-        removeEventListener("scroll", this.onScroll, false);
+        removeEventListener('scroll', this.onScroll, false);
         this.started = false;
       }
     }

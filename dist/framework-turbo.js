@@ -2731,8 +2731,11 @@ var Controller = /*#__PURE__*/function () {
 
             var action = _this.getActionForLink(link);
 
+            var scroll = _this.useScrollForLink(link);
+
             _this.visit(location, {
-              action: action
+              action: action,
+              scroll: scroll
             });
           }
         }
@@ -3153,6 +3156,11 @@ var Controller = /*#__PURE__*/function () {
     value: function getActionForLink(link) {
       var action = link.getAttribute('data-turbo-action');
       return this.isAction(action) ? action : 'advance';
+    }
+  }, {
+    key: "useScrollForLink",
+    value: function useScrollForLink(link) {
+      return link.getAttribute('data-turbo-no-scroll') === null;
     }
   }, {
     key: "isAction",
@@ -3970,7 +3978,7 @@ var ScrollManager = /*#__PURE__*/function () {
     key: "start",
     value: function start() {
       if (!this.started) {
-        addEventListener("scroll", this.onScroll, false);
+        addEventListener('scroll', this.onScroll, false);
         this.onScroll();
         this.started = true;
       }
@@ -3979,7 +3987,7 @@ var ScrollManager = /*#__PURE__*/function () {
     key: "stop",
     value: function stop() {
       if (this.started) {
-        removeEventListener("scroll", this.onScroll, false);
+        removeEventListener('scroll', this.onScroll, false);
         this.started = false;
       }
     }
