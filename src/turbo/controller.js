@@ -47,7 +47,8 @@ export class Controller
                     if (location && this.applicationAllowsFollowingLinkToLocation(link, location)) {
                         event.preventDefault();
                         const action = this.getActionForLink(link);
-                        this.visit(location, { action });
+                        const scroll = this.useScrollForLink(link);
+                        this.visit(location, { action, scroll });
                     }
                 }
             }
@@ -372,6 +373,10 @@ export class Controller
     getActionForLink(link) {
         const action = link.getAttribute('data-turbo-action');
         return this.isAction(action) ? action : 'advance';
+    }
+
+    useScrollForLink(link) {
+        return link.getAttribute('data-turbo-no-scroll') === null;
     }
 
     isAction(action) {

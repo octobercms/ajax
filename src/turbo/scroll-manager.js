@@ -10,7 +10,7 @@ export class ScrollManager
 
     start() {
         if (!this.started) {
-            addEventListener("scroll", this.onScroll, false);
+            addEventListener('scroll', this.onScroll, false);
             this.onScroll();
             this.started = true;
         }
@@ -18,7 +18,7 @@ export class ScrollManager
 
     stop() {
         if (this.started) {
-            removeEventListener("scroll", this.onScroll, false);
+            removeEventListener('scroll', this.onScroll, false);
             this.started = false;
         }
     }
