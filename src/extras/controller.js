@@ -70,18 +70,17 @@ export class Controller
             if (event.defaultPrevented) {
                 return;
             }
-            event.preventDefault();
 
-            const href = oc.AjaxTurbo.controller.getLastVisitUrl();
-
+            const href = getReferrerFromSameOrigin();
             if (href) {
+                event.preventDefault();
+
                 if (oc.useTurbo()) {
                     oc.visit(href);
-                } else {
+                }
+                else {
                     location.assign(href);
                 }
-            } else if (document.referrer == location.origin) {
-                location.assign(document.referrer); // Fallback when turbo router isnt activated
             }
         };
     }
@@ -167,4 +166,25 @@ function shouldShowFlashMessage(value, type) {
     });
 
     return result;
+}
+
+function getReferrerFromSameOrigin() {
+    // Turbo router will only supply same origin
+    const href = oc.AjaxTurbo.controller.getLastVisitUrl();
+    if (href) {
+        return href;
+    }
+
+    // Fallback when turbo router isnt activated
+    const lastHref = document.referrer;
+    if (referrer) {
+        try {
+            const referrer = new URL(lastHref);
+            if (referrer.origin === location.origin) {
+                return lastHref;
+            }
+        }
+        catch (e) {
+        }
+    }
 }
