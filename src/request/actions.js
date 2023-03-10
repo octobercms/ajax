@@ -370,11 +370,14 @@ export class Actions
         }
 
         const newUrl = window.location.pathname + '?' + searchParams.toString();
-        if (oc.AjaxTurbo) {
+        if (oc.useTurbo && oc.useTurbo()) {
             oc.visit(newUrl, { action: 'swap', scroll: false });
         }
         else {
             history.replaceState(null, '', newUrl);
+
+            // Tracking referrer since document.referrer will not update
+            localStorage.setItem('ocPushStateReferrer', newUrl);
         }
     }
 }

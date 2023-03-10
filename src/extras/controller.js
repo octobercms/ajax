@@ -71,14 +71,17 @@ export class Controller
                 return;
             }
 
-            const href = getReferrerFromSameOrigin();
-            if (href) {
-                event.preventDefault();
-
-                if (oc.useTurbo()) {
+            if (oc.useTurbo && oc.useTurbo()) {
+                const href = oc.AjaxTurbo.controller.getLastVisitUrl();
+                if (href) {
+                    event.preventDefault();
                     oc.visit(href);
                 }
-                else {
+            }
+            else {
+                const href = getReferrerFromSameOrigin();
+                if (href) {
+                    event.preventDefault();
                     location.assign(href);
                 }
             }
@@ -169,22 +172,24 @@ function shouldShowFlashMessage(value, type) {
 }
 
 function getReferrerFromSameOrigin() {
-    // Turbo router will only supply same origin
-    const href = oc.AjaxTurbo.controller.getLastVisitUrl();
-    if (href) {
-        return href;
+    if (!document.referrer) {
+        return null;
     }
 
     // Fallback when turbo router isnt activated
-    const lastHref = document.referrer;
-    if (referrer) {
-        try {
-            const referrer = new URL(lastHref);
-            if (referrer.origin === location.origin) {
-                return lastHref;
-            }
+    try {
+        const referrer = new URL(document.referrer);
+        if (referrer.origin !== location.origin) {
+            return null;
         }
-        catch (e) {
+
+        const pushReferrer = localStorage.getItem('ocPushStateReferrer');
+        if (pushReferrer && pushReferrer.indexOf(referrer.pathname) === 0) {
+            return pushReferrer;
         }
+
+        return document.referrer;
+    }
+    catch (e) {
     }
 }
