@@ -933,17 +933,20 @@ var Controller = /*#__PURE__*/function () {
         return;
       }
 
-      event.preventDefault();
-      var href = oc.AjaxTurbo.controller.getLastVisitUrl();
+      if (oc.useTurbo && oc.useTurbo()) {
+        var href = oc.AjaxTurbo.controller.getLastVisitUrl();
 
-      if (!href) {
-        return;
-      }
-
-      if (oc.useTurbo()) {
-        oc.visit(href);
+        if (href) {
+          event.preventDefault();
+          oc.visit(href);
+        }
       } else {
-        location.assign(href);
+        var _href = getReferrerFromSameOrigin();
+
+        if (_href) {
+          event.preventDefault();
+          location.assign(_href);
+        }
       }
     };
   }
@@ -1024,6 +1027,29 @@ function shouldShowFlashMessage(value, type) {
     }
   });
   return result;
+}
+
+function getReferrerFromSameOrigin() {
+  if (!document.referrer) {
+    return null;
+  } // Fallback when turbo router isnt activated
+
+
+  try {
+    var referrer = new URL(document.referrer);
+
+    if (referrer.origin !== location.origin) {
+      return null;
+    }
+
+    var pushReferrer = localStorage.getItem('ocPushStateReferrer');
+
+    if (pushReferrer && pushReferrer.indexOf(referrer.pathname) === 0) {
+      return pushReferrer;
+    }
+
+    return document.referrer;
+  } catch (e) {}
 }
 
 /***/ }),
@@ -2021,13 +2047,15 @@ var Actions = /*#__PURE__*/function () {
 
       var newUrl = window.location.pathname + '?' + searchParams.toString();
 
-      if (oc.AjaxTurbo) {
+      if (oc.useTurbo && oc.useTurbo()) {
         oc.visit(newUrl, {
           action: 'swap',
           scroll: false
         });
       } else {
-        history.replaceState(null, '', newUrl);
+        history.replaceState(null, '', newUrl); // Tracking referrer since document.referrer will not update
+
+        localStorage.setItem('ocPushStateReferrer', newUrl);
       }
     }
   }]);
