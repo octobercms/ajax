@@ -45,10 +45,10 @@ export class Visit
 
         this.controller = controller;
         this.location = location;
-        this.isSamePage = action == 'swap' || this.controller.locationIsSamePageAnchor(this.location);
         this.action = action;
         this.adapter = controller.adapter;
         this.restorationIdentifier = restorationIdentifier;
+        this.isSamePage = this.locationChangeIsSamePage();
     }
 
     start() {
@@ -274,6 +274,15 @@ export class Visit
         else {
             return true;
         }
+    }
+
+    locationChangeIsSamePage() {
+        if (this.action == 'swap') {
+            return true;
+        }
+
+        const lastLocation = this.action == 'restore' && this.controller.lastRenderedLocation;
+        return this.controller.locationIsSamePageAnchor(lastLocation || this.location);
     }
 
     cacheSnapshot() {
