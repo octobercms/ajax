@@ -113,7 +113,7 @@ export class Visit
             }
 
             if (this.referrer) {
-                options.headers['X-OCTOBER-REFERRER'] = Location.wrap(this.referrer).absoluteURL;
+                options.headers['X-PJAX-REFERRER'] = Location.wrap(this.referrer).absoluteURL;
             }
 
             this.progress = 0;
@@ -161,14 +161,16 @@ export class Visit
         const { request, response } = this;
         if (request && response) {
             this.render(() => {
+                const snapshot = Snapshot.fromHTMLString(response);
+
                 this.cacheSnapshot();
-                if (request.failed) {
-                    this.controller.render({ error: this.response }, this.performScroll);
+                if (request.failed && !snapshot.isNativeError()) {
+                    this.controller.render({ error: response }, this.performScroll);
                     this.adapter.visitRendered(this);
                     this.fail();
                 }
                 else {
-                    this.controller.render({ snapshot: Snapshot.fromHTMLString(response) }, this.performScroll);
+                    this.controller.render({ snapshot }, this.performScroll);
                     this.adapter.visitRendered(this);
                     this.complete();
                 }

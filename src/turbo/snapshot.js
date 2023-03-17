@@ -84,6 +84,10 @@ export class Snapshot
         return this.getCacheControlValue() != 'no-cache';
     }
 
+    isNativeError() {
+        return this.getSetting('visit-control', false) != false;
+    }
+
     isEnabled() {
         return this.getSetting('visit-control') != 'disable';
     }
