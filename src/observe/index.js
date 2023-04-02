@@ -6,9 +6,9 @@ if (!window.oc) {
     window.oc = {};
 }
 
-if (!window.oc.AjaxControl) {
+if (!window.oc.AjaxObserve) {
     // Namespace
-    window.oc.AjaxControl = namespace;
+    window.oc.AjaxObserve = namespace;
 
     // Control registration
     window.oc.registerControl = namespace.registerControl;
