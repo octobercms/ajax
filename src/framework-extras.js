@@ -10,3 +10,4 @@
 import "./request";
 import "./core";
 import "./extras";
+import "./control";
