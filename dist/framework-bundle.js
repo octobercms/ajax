@@ -5260,7 +5260,7 @@ var Snapshot = /*#__PURE__*/function () {
     key: "getElementForAnchor",
     value: function getElementForAnchor(anchor) {
       try {
-        return this.bodyElement.querySelector("[id='".concat(anchor, "'], a[name='").concat(anchor, "'], a[href='#").concat(anchor, "']"));
+        return this.bodyElement.querySelector("[id='".concat(anchor, "'], a[name='").concat(anchor, "']"));
       } catch (e) {
         return null;
       }
@@ -5302,6 +5302,11 @@ var Snapshot = /*#__PURE__*/function () {
     key: "isCacheable",
     value: function isCacheable() {
       return this.getCacheControlValue() != 'no-cache';
+    }
+  }, {
+    key: "isNativeError",
+    value: function isNativeError() {
+      return this.getSetting('visit-control', false) != false;
     }
   }, {
     key: "isEnabled",
@@ -5508,10 +5513,10 @@ var Visit = /*#__PURE__*/function () {
 
     this.controller = controller;
     this.location = location;
-    this.isSamePage = action == 'swap' || this.controller.locationIsSamePageAnchor(this.location);
     this.action = action;
     this.adapter = controller.adapter;
     this.restorationIdentifier = restorationIdentifier;
+    this.isSamePage = this.locationChangeIsSamePage();
   }
 
   _createClass(Visit, [{
@@ -5582,7 +5587,7 @@ var Visit = /*#__PURE__*/function () {
         }
 
         if (this.referrer) {
-          options.headers['X-OCTOBER-REFERRER'] = _location__WEBPACK_IMPORTED_MODULE_1__.Location.wrap(this.referrer).absoluteURL;
+          options.headers['X-PJAX-REFERRER'] = _location__WEBPACK_IMPORTED_MODULE_1__.Location.wrap(this.referrer).absoluteURL;
         }
 
         this.progress = 0;
@@ -5647,11 +5652,13 @@ var Visit = /*#__PURE__*/function () {
 
       if (request && response) {
         this.render(function () {
+          var snapshot = _snapshot__WEBPACK_IMPORTED_MODULE_2__.Snapshot.fromHTMLString(response);
+
           _this3.cacheSnapshot();
 
-          if (request.failed) {
+          if (request.failed && !snapshot.isNativeError()) {
             _this3.controller.render({
-              error: _this3.response
+              error: response
             }, _this3.performScroll);
 
             _this3.adapter.visitRendered(_this3);
@@ -5659,7 +5666,7 @@ var Visit = /*#__PURE__*/function () {
             _this3.fail();
           } else {
             _this3.controller.render({
-              snapshot: _snapshot__WEBPACK_IMPORTED_MODULE_2__.Snapshot.fromHTMLString(response)
+              snapshot: snapshot
             }, _this3.performScroll);
 
             _this3.adapter.visitRendered(_this3);
@@ -5789,6 +5796,16 @@ var Visit = /*#__PURE__*/function () {
       } else {
         return true;
       }
+    }
+  }, {
+    key: "locationChangeIsSamePage",
+    value: function locationChangeIsSamePage() {
+      if (this.action == 'swap') {
+        return true;
+      }
+
+      var lastLocation = this.action == 'restore' && this.controller.lastRenderedLocation;
+      return this.controller.locationIsSamePageAnchor(lastLocation || this.location);
     }
   }, {
     key: "cacheSnapshot",
