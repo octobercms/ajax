@@ -1,4 +1,4 @@
-import { ValueListObserver } from "./mutation-observers";
+import { ValueListObserver } from "./mutation";
 
 export class ScopeObserver
 {
