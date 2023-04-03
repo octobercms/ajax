@@ -6,19 +6,21 @@ export class Context
         this.controller = new module.controllerConstructor(this);
 
         try {
+            this.controller.initInternal();
             this.controller.init();
         }
         catch (error) {
-            this.handleError(error, "initializing controller");
+            this.handleError(error, 'initializing controller');
         }
     }
 
     connect() {
         try {
+            this.controller.connectInternal();
             this.controller.connect();
         }
         catch (error) {
-            this.handleError(error, "connecting controller");
+            this.handleError(error, 'connecting controller');
         }
     }
 
@@ -28,9 +30,10 @@ export class Context
     disconnect() {
         try {
             this.controller.disconnect();
+            this.controller.disconnectInternal();
         }
         catch (error) {
-            this.handleError(error, "disconnecting controller");
+            this.handleError(error, 'disconnecting controller');
         }
     }
 

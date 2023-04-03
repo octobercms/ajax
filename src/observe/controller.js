@@ -1,6 +1,8 @@
 
 class Controller
 {
+    static proxyCounter = 0;
+
     static get shouldLoad() {
         return true;
     }
@@ -41,8 +43,50 @@ class Controller
         // Controller is disconnected from the DOM
     }
 
-    listen(element, event, action) {
-        // @todo event listener within context of element
+    // Internal events avoid the need to call parent logic
+    initInternal() {
+        this.proxiedEvents = {};
+        this.proxiedMethods = {};
+        this.config = this.element.dataset;
+    }
+
+    connectInternal() {
+    }
+
+    disconnectInternal() {
+        for (const key in this.proxiedEvents) {
+            this.forget(...this.proxiedEvents[key])
+        }
+
+        for (const key in this.proxiedMethods) {
+            this.proxiedMethods[key] = null;
+        }
+
+        for (const propertyName of Object.getOwnPropertyNames(this)) {
+            this[propertyName] = null;
+        }
+    }
+
+    // Events
+    listen(eventName, targetOrHandler, handler) {
+        if (typeof targetOrHandler === 'string') {
+            oc.Events.on(this.element, eventName, targetOrHandler, this.proxy(handler));
+        }
+        else {
+            oc.Events.on(this.element, eventName, this.proxy(targetOrHandler));
+        }
+
+        Controller.proxyCounter++;
+        this.proxiedEvents[Controller.proxyCounter] = arguments;
+    }
+
+    forget(eventName, targetOrHandler, handler) {
+        if (typeof targetOrHandler === 'string') {
+            oc.Events.off(this.element, eventName, targetOrHandler, this.proxy(handler));
+        }
+        else {
+            oc.Events.off(this.element, eventName, this.proxy(targetOrHandler));
+        }
     }
 
     dispatch(eventName, { target = this.element, detail = {}, prefix = this.identifier, bubbles = true, cancelable = true, } = {}) {
@@ -50,6 +94,21 @@ class Controller
         const event = new CustomEvent(type, { detail, bubbles, cancelable });
         target.dispatchEvent(event);
         return event;
+    }
+
+    proxy(method) {
+        if (method.ocProxyId === undefined) {
+            Controller.proxyCounter++;
+            method.ocProxyId = Controller.proxyCounter;
+        }
+
+        if (this.proxiedMethods[method.ocProxyId] !== undefined) {
+            return this.proxiedMethods[method.ocProxyId];
+        }
+
+        this.proxiedMethods[method.ocProxyId] = method.bind(this);
+
+        return this.proxiedMethods[method.ocProxyId];
     }
 }
 
