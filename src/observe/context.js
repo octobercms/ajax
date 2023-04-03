@@ -6,7 +6,7 @@ export class Context
         this.controller = new module.controllerConstructor(this);
 
         try {
-            this.controller.initialize();
+            this.controller.init();
         }
         catch (error) {
             this.handleError(error, "initializing controller");

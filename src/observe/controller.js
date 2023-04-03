@@ -29,7 +29,7 @@ class Controller
         return this.scope.identifier;
     }
 
-    initialize() {
+    init() {
         // Set up initial control state
     }
 
