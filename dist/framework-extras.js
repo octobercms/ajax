@@ -1641,6 +1641,2255 @@ var Validator = /*#__PURE__*/function () {
 
 /***/ }),
 
+/***/ "./src/observe/application.js":
+/*!************************************!*\
+  !*** ./src/observe/application.js ***!
+  \************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Application": () => (/* binding */ Application)
+/* harmony export */ });
+/* harmony import */ var _dispatcher__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./dispatcher */ "./src/observe/dispatcher.js");
+/* harmony import */ var _container__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./container */ "./src/observe/container.js");
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+
+
+
+var Application = /*#__PURE__*/function () {
+  function Application() {
+    _classCallCheck(this, Application);
+
+    this.started = false;
+    this.element = document.documentElement;
+    this.dispatcher = new _dispatcher__WEBPACK_IMPORTED_MODULE_0__.Dispatcher(this);
+    this.container = new _container__WEBPACK_IMPORTED_MODULE_1__.Container(this);
+  }
+
+  _createClass(Application, [{
+    key: "startAsync",
+    value: function startAsync() {
+      var _this = this;
+
+      domReady().then(function () {
+        _this.start();
+      });
+    }
+  }, {
+    key: "start",
+    value: function start() {
+      if (!this.started) {
+        this.started = true;
+        this.dispatcher.start();
+        this.container.start();
+      }
+    }
+  }, {
+    key: "stop",
+    value: function stop() {
+      if (this.started) {
+        this.dispatcher.stop();
+        this.container.stop();
+        this.started = false;
+      }
+    }
+  }, {
+    key: "register",
+    value: function register(identifier, controllerConstructor) {
+      this.load({
+        identifier: identifier,
+        controllerConstructor: controllerConstructor
+      });
+    }
+  }, {
+    key: "fetch",
+    value: function fetch(element) {
+      if (typeof element === 'string') {
+        element = document.querySelector(element);
+      }
+
+      return element ? this.getControlForElementAndIdentifier(element, element.dataset.control) : null;
+    }
+  }, {
+    key: "fetchAll",
+    value: function fetchAll(elements) {
+      var _this2 = this;
+
+      if (typeof elements === 'string') {
+        elements = document.querySelectorAll(elements);
+      }
+
+      var result = [];
+      elements.forEach(function (element) {
+        var control = _this2.fetch(element);
+
+        if (control) {
+          result.push(control);
+        }
+      });
+      return result;
+    }
+  }, {
+    key: "load",
+    value: function load(head) {
+      var _this3 = this;
+
+      for (var _len = arguments.length, rest = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+        rest[_key - 1] = arguments[_key];
+      }
+
+      var definitions = Array.isArray(head) ? head : [head].concat(rest);
+      definitions.forEach(function (definition) {
+        if (definition.controllerConstructor.shouldLoad) {
+          _this3.container.loadDefinition(definition);
+        }
+      });
+    }
+  }, {
+    key: "unload",
+    value: function unload(head) {
+      var _this4 = this;
+
+      for (var _len2 = arguments.length, rest = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
+        rest[_key2 - 1] = arguments[_key2];
+      }
+
+      var identifiers = Array.isArray(head) ? head : [head].concat(rest);
+      identifiers.forEach(function (identifier) {
+        return _this4.container.unloadIdentifier(identifier);
+      });
+    } // Controllers
+
+  }, {
+    key: "controllers",
+    get: function get() {
+      return this.container.contexts.map(function (context) {
+        return context.controller;
+      });
+    }
+  }, {
+    key: "getControlForElementAndIdentifier",
+    value: function getControlForElementAndIdentifier(element, identifier) {
+      var context = this.container.getContextForElementAndIdentifier(element, identifier);
+      return context ? context.controller : null;
+    } // Error handling
+
+  }, {
+    key: "handleError",
+    value: function handleError(error, message, detail) {
+      var _a;
+
+      console.error("%s\n\n%o\n\n%o", message, error, detail);
+      (_a = window.onerror) === null || _a === void 0 ? void 0 : _a.call(window, message, "", 0, 0, error);
+    }
+  }]);
+
+  return Application;
+}();
+
+function domReady() {
+  return new Promise(function (resolve) {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function () {
+        return resolve();
+      });
+    } else {
+      resolve();
+    }
+  });
+}
+
+/***/ }),
+
+/***/ "./src/observe/container.js":
+/*!**********************************!*\
+  !*** ./src/observe/container.js ***!
+  \**********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Container": () => (/* binding */ Container)
+/* harmony export */ });
+/* harmony import */ var _module__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./module */ "./src/observe/module.js");
+/* harmony import */ var _scope__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./scope */ "./src/observe/scope.js");
+/* harmony import */ var _scope_observer__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./scope-observer */ "./src/observe/scope-observer.js");
+/* harmony import */ var _util_multimap__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./util/multimap */ "./src/observe/util/multimap.js");
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+
+
+
+
+
+var Container = /*#__PURE__*/function () {
+  function Container(application) {
+    _classCallCheck(this, Container);
+
+    this.application = application;
+    this.scopeObserver = new _scope_observer__WEBPACK_IMPORTED_MODULE_2__.ScopeObserver(this.element, this);
+    this.scopesByIdentifier = new _util_multimap__WEBPACK_IMPORTED_MODULE_3__.Multimap();
+    this.modulesByIdentifier = new Map();
+  }
+
+  _createClass(Container, [{
+    key: "element",
+    get: function get() {
+      return this.application.element;
+    }
+  }, {
+    key: "modules",
+    get: function get() {
+      return Array.from(this.modulesByIdentifier.values());
+    }
+  }, {
+    key: "contexts",
+    get: function get() {
+      return this.modules.reduce(function (contexts, module) {
+        return contexts.concat(module.contexts);
+      }, []);
+    }
+  }, {
+    key: "start",
+    value: function start() {
+      this.scopeObserver.start();
+    }
+  }, {
+    key: "stop",
+    value: function stop() {
+      this.scopeObserver.stop();
+    }
+  }, {
+    key: "loadDefinition",
+    value: function loadDefinition(definition) {
+      this.unloadIdentifier(definition.identifier);
+      var module = new _module__WEBPACK_IMPORTED_MODULE_0__.Module(this.application, definition);
+      this.connectModule(module);
+      var afterLoad = definition.controllerConstructor.afterLoad;
+
+      if (afterLoad) {
+        afterLoad.call(definition.controllerConstructor, definition.identifier, this.application);
+      }
+    }
+  }, {
+    key: "unloadIdentifier",
+    value: function unloadIdentifier(identifier) {
+      var module = this.modulesByIdentifier.get(identifier);
+
+      if (module) {
+        this.disconnectModule(module);
+      }
+    }
+  }, {
+    key: "getContextForElementAndIdentifier",
+    value: function getContextForElementAndIdentifier(element, identifier) {
+      var module = this.modulesByIdentifier.get(identifier);
+
+      if (module) {
+        return module.contexts.find(function (context) {
+          return context.element == element;
+        });
+      }
+    } // Error handler delegate
+
+  }, {
+    key: "handleError",
+    value: function handleError(error, message, detail) {
+      this.application.handleError(error, message, detail);
+    } // Scope observer delegate
+
+  }, {
+    key: "createScopeForElementAndIdentifier",
+    value: function createScopeForElementAndIdentifier(element, identifier) {
+      return new _scope__WEBPACK_IMPORTED_MODULE_1__.Scope(element, identifier);
+    }
+  }, {
+    key: "scopeConnected",
+    value: function scopeConnected(scope) {
+      this.scopesByIdentifier.add(scope.identifier, scope);
+      var module = this.modulesByIdentifier.get(scope.identifier);
+
+      if (module) {
+        module.connectContextForScope(scope);
+      }
+    }
+  }, {
+    key: "scopeDisconnected",
+    value: function scopeDisconnected(scope) {
+      this.scopesByIdentifier["delete"](scope.identifier, scope);
+      var module = this.modulesByIdentifier.get(scope.identifier);
+
+      if (module) {
+        module.disconnectContextForScope(scope);
+      }
+    } // Modules
+
+  }, {
+    key: "connectModule",
+    value: function connectModule(module) {
+      this.modulesByIdentifier.set(module.identifier, module);
+      var scopes = this.scopesByIdentifier.getValuesForKey(module.identifier);
+      scopes.forEach(function (scope) {
+        return module.connectContextForScope(scope);
+      });
+    }
+  }, {
+    key: "disconnectModule",
+    value: function disconnectModule(module) {
+      this.modulesByIdentifier["delete"](module.identifier);
+      var scopes = this.scopesByIdentifier.getValuesForKey(module.identifier);
+      scopes.forEach(function (scope) {
+        return module.disconnectContextForScope(scope);
+      });
+    }
+  }]);
+
+  return Container;
+}();
+
+/***/ }),
+
+/***/ "./src/observe/context.js":
+/*!********************************!*\
+  !*** ./src/observe/context.js ***!
+  \********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Context": () => (/* binding */ Context)
+/* harmony export */ });
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+
+var Context = /*#__PURE__*/function () {
+  function Context(module, scope) {
+    _classCallCheck(this, Context);
+
+    this.module = module;
+    this.scope = scope;
+    this.controller = new module.controllerConstructor(this);
+
+    try {
+      this.controller.initInternal();
+      this.controller.init();
+    } catch (error) {
+      this.handleError(error, 'initializing controller');
+    }
+  }
+
+  _createClass(Context, [{
+    key: "connect",
+    value: function connect() {
+      try {
+        this.controller.connectInternal();
+        this.controller.connect();
+      } catch (error) {
+        this.handleError(error, 'connecting controller');
+      }
+    }
+  }, {
+    key: "refresh",
+    value: function refresh() {}
+  }, {
+    key: "disconnect",
+    value: function disconnect() {
+      try {
+        this.controller.disconnect();
+        this.controller.disconnectInternal();
+      } catch (error) {
+        this.handleError(error, 'disconnecting controller');
+      }
+    }
+  }, {
+    key: "application",
+    get: function get() {
+      return this.module.application;
+    }
+  }, {
+    key: "identifier",
+    get: function get() {
+      return this.module.identifier;
+    }
+  }, {
+    key: "dispatcher",
+    get: function get() {
+      return this.application.dispatcher;
+    }
+  }, {
+    key: "element",
+    get: function get() {
+      return this.scope.element;
+    }
+  }, {
+    key: "parentElement",
+    get: function get() {
+      return this.element.parentElement;
+    } // Error handling
+
+  }, {
+    key: "handleError",
+    value: function handleError(error, message) {
+      var detail = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+      var identifier = this.identifier,
+          controller = this.controller,
+          element = this.element;
+      detail = Object.assign({
+        identifier: identifier,
+        controller: controller,
+        element: element
+      }, detail);
+      this.application.handleError(error, "Error ".concat(message), detail);
+    }
+  }]);
+
+  return Context;
+}();
+
+/***/ }),
+
+/***/ "./src/observe/control-base.js":
+/*!*************************************!*\
+  !*** ./src/observe/control-base.js ***!
+  \*************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "ControlBase": () => (/* binding */ ControlBase)
+/* harmony export */ });
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+var ControlBase = /*#__PURE__*/function () {
+  function ControlBase(context) {
+    _classCallCheck(this, ControlBase);
+
+    this.context = context;
+  }
+
+  _createClass(ControlBase, [{
+    key: "application",
+    get: function get() {
+      return this.context.application;
+    }
+  }, {
+    key: "scope",
+    get: function get() {
+      return this.context.scope;
+    }
+  }, {
+    key: "element",
+    get: function get() {
+      return this.scope.element;
+    }
+  }, {
+    key: "identifier",
+    get: function get() {
+      return this.scope.identifier;
+    }
+  }, {
+    key: "init",
+    value: function init() {// Set up initial control state
+    }
+  }, {
+    key: "connect",
+    value: function connect() {// Control is connected to the DOM
+    }
+  }, {
+    key: "disconnect",
+    value: function disconnect() {// Control is disconnected from the DOM
+    } // Internal events avoid the need to call parent logic
+
+  }, {
+    key: "initInternal",
+    value: function initInternal() {
+      this.proxiedEvents = {};
+      this.proxiedMethods = {};
+      this.config = this.element.dataset;
+    }
+  }, {
+    key: "connectInternal",
+    value: function connectInternal() {}
+  }, {
+    key: "disconnectInternal",
+    value: function disconnectInternal() {
+      for (var key in this.proxiedEvents) {
+        this.forget.apply(this, _toConsumableArray(this.proxiedEvents[key]));
+      }
+
+      for (var _key in this.proxiedMethods) {
+        this.proxiedMethods[_key] = null;
+      }
+
+      var _iterator = _createForOfIteratorHelper(Object.getOwnPropertyNames(this)),
+          _step;
+
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+          var propertyName = _step.value;
+          this[propertyName] = null;
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
+    } // Events
+
+  }, {
+    key: "listen",
+    value: function listen(eventName, targetOrHandler, handler) {
+      if (typeof targetOrHandler === 'string') {
+        oc.Events.on(this.element, eventName, targetOrHandler, this.proxy(handler));
+      } else {
+        oc.Events.on(this.element, eventName, this.proxy(targetOrHandler));
+      }
+
+      ControlBase.proxyCounter++;
+      this.proxiedEvents[ControlBase.proxyCounter] = arguments;
+    }
+  }, {
+    key: "forget",
+    value: function forget(eventName, targetOrHandler, handler) {
+      if (typeof targetOrHandler === 'string') {
+        oc.Events.off(this.element, eventName, targetOrHandler, this.proxy(handler));
+      } else {
+        oc.Events.off(this.element, eventName, this.proxy(targetOrHandler));
+      }
+    }
+  }, {
+    key: "dispatch",
+    value: function dispatch(eventName) {
+      var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+          _ref$target = _ref.target,
+          target = _ref$target === void 0 ? this.element : _ref$target,
+          _ref$detail = _ref.detail,
+          detail = _ref$detail === void 0 ? {} : _ref$detail,
+          _ref$prefix = _ref.prefix,
+          prefix = _ref$prefix === void 0 ? this.identifier : _ref$prefix,
+          _ref$bubbles = _ref.bubbles,
+          bubbles = _ref$bubbles === void 0 ? true : _ref$bubbles,
+          _ref$cancelable = _ref.cancelable,
+          cancelable = _ref$cancelable === void 0 ? true : _ref$cancelable;
+
+      var type = prefix ? "".concat(prefix, ":").concat(eventName) : eventName;
+      var event = new CustomEvent(type, {
+        detail: detail,
+        bubbles: bubbles,
+        cancelable: cancelable
+      });
+      target.dispatchEvent(event);
+      return event;
+    }
+  }, {
+    key: "proxy",
+    value: function proxy(method) {
+      if (method.ocProxyId === undefined) {
+        ControlBase.proxyCounter++;
+        method.ocProxyId = ControlBase.proxyCounter;
+      }
+
+      if (this.proxiedMethods[method.ocProxyId] !== undefined) {
+        return this.proxiedMethods[method.ocProxyId];
+      }
+
+      this.proxiedMethods[method.ocProxyId] = method.bind(this);
+      return this.proxiedMethods[method.ocProxyId];
+    }
+  }], [{
+    key: "shouldLoad",
+    get: function get() {
+      return true;
+    }
+  }, {
+    key: "afterLoad",
+    value: function afterLoad(_identifier, _application) {
+      return;
+    }
+  }]);
+
+  return ControlBase;
+}();
+
+_defineProperty(ControlBase, "proxyCounter", 0);
+
+
+
+/***/ }),
+
+/***/ "./src/observe/dispatcher.js":
+/*!***********************************!*\
+  !*** ./src/observe/dispatcher.js ***!
+  \***********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Dispatcher": () => (/* binding */ Dispatcher)
+/* harmony export */ });
+/* harmony import */ var _event_listener__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./event-listener */ "./src/observe/event-listener.js");
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+
+
+var Dispatcher = /*#__PURE__*/function () {
+  function Dispatcher(application) {
+    _classCallCheck(this, Dispatcher);
+
+    this.application = application;
+    this.eventListenerMaps = new Map();
+    this.started = false;
+  }
+
+  _createClass(Dispatcher, [{
+    key: "start",
+    value: function start() {
+      if (!this.started) {
+        this.started = true;
+        this.eventListeners.forEach(function (eventListener) {
+          return eventListener.connect();
+        });
+      }
+    }
+  }, {
+    key: "stop",
+    value: function stop() {
+      if (this.started) {
+        this.started = false;
+        this.eventListeners.forEach(function (eventListener) {
+          return eventListener.disconnect();
+        });
+      }
+    }
+  }, {
+    key: "eventListeners",
+    get: function get() {
+      return Array.from(this.eventListenerMaps.values()).reduce(function (listeners, map) {
+        return listeners.concat(Array.from(map.values()));
+      }, []);
+    } // Binding observer delegate
+
+  }, {
+    key: "bindingConnected",
+    value: function bindingConnected(binding) {
+      this.fetchEventListenerForBinding(binding).bindingConnected(binding);
+    }
+  }, {
+    key: "bindingDisconnected",
+    value: function bindingDisconnected(binding) {
+      var clearEventListeners = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+      this.fetchEventListenerForBinding(binding).bindingDisconnected(binding);
+      if (clearEventListeners) this.clearEventListenersForBinding(binding);
+    } // Error handling
+
+  }, {
+    key: "handleError",
+    value: function handleError(error, message) {
+      var detail = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+      this.application.handleError(error, "Error ".concat(message), detail);
+    }
+  }, {
+    key: "clearEventListenersForBinding",
+    value: function clearEventListenersForBinding(binding) {
+      var eventListener = this.fetchEventListenerForBinding(binding);
+
+      if (!eventListener.hasBindings()) {
+        eventListener.disconnect();
+        this.removeMappedEventListenerFor(binding);
+      }
+    }
+  }, {
+    key: "removeMappedEventListenerFor",
+    value: function removeMappedEventListenerFor(binding) {
+      var eventTarget = binding.eventTarget,
+          eventName = binding.eventName,
+          eventOptions = binding.eventOptions;
+      var eventListenerMap = this.fetchEventListenerMapForEventTarget(eventTarget);
+      var cacheKey = this.cacheKey(eventName, eventOptions);
+      eventListenerMap["delete"](cacheKey);
+
+      if (eventListenerMap.size == 0) {
+        this.eventListenerMaps["delete"](eventTarget);
+      }
+    }
+  }, {
+    key: "fetchEventListenerForBinding",
+    value: function fetchEventListenerForBinding(binding) {
+      var eventTarget = binding.eventTarget,
+          eventName = binding.eventName,
+          eventOptions = binding.eventOptions;
+      return this.fetchEventListener(eventTarget, eventName, eventOptions);
+    }
+  }, {
+    key: "fetchEventListener",
+    value: function fetchEventListener(eventTarget, eventName, eventOptions) {
+      var eventListenerMap = this.fetchEventListenerMapForEventTarget(eventTarget);
+      var cacheKey = this.cacheKey(eventName, eventOptions);
+      var eventListener = eventListenerMap.get(cacheKey);
+
+      if (!eventListener) {
+        eventListener = this.createEventListener(eventTarget, eventName, eventOptions);
+        eventListenerMap.set(cacheKey, eventListener);
+      }
+
+      return eventListener;
+    }
+  }, {
+    key: "createEventListener",
+    value: function createEventListener(eventTarget, eventName, eventOptions) {
+      var eventListener = new _event_listener__WEBPACK_IMPORTED_MODULE_0__.EventListener(eventTarget, eventName, eventOptions);
+
+      if (this.started) {
+        eventListener.connect();
+      }
+
+      return eventListener;
+    }
+  }, {
+    key: "fetchEventListenerMapForEventTarget",
+    value: function fetchEventListenerMapForEventTarget(eventTarget) {
+      var eventListenerMap = this.eventListenerMaps.get(eventTarget);
+
+      if (!eventListenerMap) {
+        eventListenerMap = new Map();
+        this.eventListenerMaps.set(eventTarget, eventListenerMap);
+      }
+
+      return eventListenerMap;
+    }
+  }, {
+    key: "cacheKey",
+    value: function cacheKey(eventName, eventOptions) {
+      var parts = [eventName];
+      Object.keys(eventOptions).sort().forEach(function (key) {
+        parts.push("".concat(eventOptions[key] ? "" : "!").concat(key));
+      });
+      return parts.join(":");
+    }
+  }]);
+
+  return Dispatcher;
+}();
+
+/***/ }),
+
+/***/ "./src/observe/event-listener.js":
+/*!***************************************!*\
+  !*** ./src/observe/event-listener.js ***!
+  \***************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "EventListener": () => (/* binding */ EventListener)
+/* harmony export */ });
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+
+var EventListener = /*#__PURE__*/function () {
+  function EventListener(eventTarget, eventName, eventOptions) {
+    _classCallCheck(this, EventListener);
+
+    this.eventTarget = eventTarget;
+    this.eventName = eventName;
+    this.eventOptions = eventOptions;
+    this.unorderedBindings = new Set();
+  }
+
+  _createClass(EventListener, [{
+    key: "connect",
+    value: function connect() {
+      this.eventTarget.addEventListener(this.eventName, this, this.eventOptions);
+    }
+  }, {
+    key: "disconnect",
+    value: function disconnect() {
+      this.eventTarget.removeEventListener(this.eventName, this, this.eventOptions);
+    } // Binding observer delegate
+
+  }, {
+    key: "bindingConnected",
+    value: function bindingConnected(binding) {
+      this.unorderedBindings.add(binding);
+    }
+  }, {
+    key: "bindingDisconnected",
+    value: function bindingDisconnected(binding) {
+      this.unorderedBindings["delete"](binding);
+    }
+  }, {
+    key: "handleEvent",
+    value: function handleEvent(event) {
+      var extendedEvent = extendEvent(event);
+
+      var _iterator = _createForOfIteratorHelper(this.bindings),
+          _step;
+
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+          var binding = _step.value;
+
+          if (extendedEvent.immediatePropagationStopped) {
+            break;
+          } else {
+            binding.handleEvent(extendedEvent);
+          }
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
+    }
+  }, {
+    key: "hasBindings",
+    value: function hasBindings() {
+      return this.unorderedBindings.size > 0;
+    }
+  }, {
+    key: "bindings",
+    get: function get() {
+      return Array.from(this.unorderedBindings).sort(function (left, right) {
+        var leftIndex = left.index,
+            rightIndex = right.index;
+        return leftIndex < rightIndex ? -1 : leftIndex > rightIndex ? 1 : 0;
+      });
+    }
+  }]);
+
+  return EventListener;
+}();
+
+function extendEvent(event) {
+  if ('immediatePropagationStopped' in event) {
+    return event;
+  } else {
+    var _stopImmediatePropagation = event.stopImmediatePropagation;
+    return Object.assign(event, {
+      immediatePropagationStopped: false,
+      stopImmediatePropagation: function stopImmediatePropagation() {
+        this.immediatePropagationStopped = true;
+
+        _stopImmediatePropagation.call(this);
+      }
+    });
+  }
+}
+
+/***/ }),
+
+/***/ "./src/observe/index.js":
+/*!******************************!*\
+  !*** ./src/observe/index.js ***!
+  \******************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _control_base__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./control-base */ "./src/observe/control-base.js");
+/* harmony import */ var _namespace__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./namespace */ "./src/observe/namespace.js");
+function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
+
+
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_namespace__WEBPACK_IMPORTED_MODULE_1__["default"]);
+
+if (!window.oc) {
+  window.oc = {};
+}
+
+if (!window.oc.AjaxObserve) {
+  // Namespace
+  window.oc.AjaxObserve = _namespace__WEBPACK_IMPORTED_MODULE_1__["default"]; // Control API
+
+  window.oc.registerControl = _namespace__WEBPACK_IMPORTED_MODULE_1__["default"].registerControl;
+  window.oc.fetchControl = _namespace__WEBPACK_IMPORTED_MODULE_1__["default"].fetchControl;
+  window.oc.fetchControls = _namespace__WEBPACK_IMPORTED_MODULE_1__["default"].fetchControls; // Control base class
+
+  window.oc.ControlBase = _control_base__WEBPACK_IMPORTED_MODULE_0__.ControlBase; // Boot controller
+
+  if (!isAMD() && !isCommonJS()) {
+    _namespace__WEBPACK_IMPORTED_MODULE_1__["default"].start();
+  }
+}
+
+function isAMD() {
+  return typeof define == "function" && __webpack_require__.amdO;
+}
+
+function isCommonJS() {
+  return (typeof exports === "undefined" ? "undefined" : _typeof(exports)) == "object" && "object" != "undefined";
+}
+
+/***/ }),
+
+/***/ "./src/observe/module.js":
+/*!*******************************!*\
+  !*** ./src/observe/module.js ***!
+  \*******************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Module": () => (/* binding */ Module)
+/* harmony export */ });
+/* harmony import */ var _context__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./context */ "./src/observe/context.js");
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+
+
+var Module = /*#__PURE__*/function () {
+  function Module(application, definition) {
+    _classCallCheck(this, Module);
+
+    this.application = application;
+    this.definition = blessDefinition(definition);
+    this.contextsByScope = new WeakMap();
+    this.connectedContexts = new Set();
+  }
+
+  _createClass(Module, [{
+    key: "identifier",
+    get: function get() {
+      return this.definition.identifier;
+    }
+  }, {
+    key: "controllerConstructor",
+    get: function get() {
+      return this.definition.controllerConstructor;
+    }
+  }, {
+    key: "contexts",
+    get: function get() {
+      return Array.from(this.connectedContexts);
+    }
+  }, {
+    key: "connectContextForScope",
+    value: function connectContextForScope(scope) {
+      var context = this.fetchContextForScope(scope);
+      this.connectedContexts.add(context);
+      context.connect();
+    }
+  }, {
+    key: "disconnectContextForScope",
+    value: function disconnectContextForScope(scope) {
+      var context = this.contextsByScope.get(scope);
+
+      if (context) {
+        this.connectedContexts["delete"](context);
+        context.disconnect();
+      }
+    }
+  }, {
+    key: "fetchContextForScope",
+    value: function fetchContextForScope(scope) {
+      var context = this.contextsByScope.get(scope);
+
+      if (!context) {
+        context = new _context__WEBPACK_IMPORTED_MODULE_0__.Context(this, scope);
+        this.contextsByScope.set(scope, context);
+      }
+
+      return context;
+    }
+  }]);
+
+  return Module;
+}();
+
+function blessDefinition(definition) {
+  return {
+    identifier: definition.identifier,
+    controllerConstructor: definition.controllerConstructor
+  };
+}
+
+/***/ }),
+
+/***/ "./src/observe/mutation/attribute-observer.js":
+/*!****************************************************!*\
+  !*** ./src/observe/mutation/attribute-observer.js ***!
+  \****************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "AttributeObserver": () => (/* binding */ AttributeObserver)
+/* harmony export */ });
+/* harmony import */ var _element_observer__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./element-observer */ "./src/observe/mutation/element-observer.js");
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+
+
+var AttributeObserver = /*#__PURE__*/function () {
+  function AttributeObserver(element, attributeName, delegate) {
+    _classCallCheck(this, AttributeObserver);
+
+    this.delegate = delegate;
+    this.attributeName = attributeName;
+    this.elementObserver = new _element_observer__WEBPACK_IMPORTED_MODULE_0__.ElementObserver(element, this);
+  }
+
+  _createClass(AttributeObserver, [{
+    key: "element",
+    get: function get() {
+      return this.elementObserver.element;
+    }
+  }, {
+    key: "selector",
+    get: function get() {
+      return "[".concat(this.attributeName, "]");
+    }
+  }, {
+    key: "start",
+    value: function start() {
+      this.elementObserver.start();
+    }
+  }, {
+    key: "pause",
+    value: function pause(callback) {
+      this.elementObserver.pause(callback);
+    }
+  }, {
+    key: "stop",
+    value: function stop() {
+      this.elementObserver.stop();
+    }
+  }, {
+    key: "refresh",
+    value: function refresh() {
+      this.elementObserver.refresh();
+    }
+  }, {
+    key: "started",
+    get: function get() {
+      return this.elementObserver.started;
+    } // Element observer delegate
+
+  }, {
+    key: "matchElement",
+    value: function matchElement(element) {
+      return element.hasAttribute(this.attributeName);
+    }
+  }, {
+    key: "matchElementsInTree",
+    value: function matchElementsInTree(tree) {
+      var match = this.matchElement(tree) ? [tree] : [];
+      var matches = Array.from(tree.querySelectorAll(this.selector));
+      return match.concat(matches);
+    }
+  }, {
+    key: "elementMatched",
+    value: function elementMatched(element) {
+      if (this.delegate.elementMatchedAttribute) {
+        this.delegate.elementMatchedAttribute(element, this.attributeName);
+      }
+    }
+  }, {
+    key: "elementUnmatched",
+    value: function elementUnmatched(element) {
+      if (this.delegate.elementUnmatchedAttribute) {
+        this.delegate.elementUnmatchedAttribute(element, this.attributeName);
+      }
+    }
+  }, {
+    key: "elementAttributeChanged",
+    value: function elementAttributeChanged(element, attributeName) {
+      if (this.delegate.elementAttributeValueChanged && this.attributeName == attributeName) {
+        this.delegate.elementAttributeValueChanged(element, attributeName);
+      }
+    }
+  }]);
+
+  return AttributeObserver;
+}();
+
+/***/ }),
+
+/***/ "./src/observe/mutation/element-observer.js":
+/*!**************************************************!*\
+  !*** ./src/observe/mutation/element-observer.js ***!
+  \**************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "ElementObserver": () => (/* binding */ ElementObserver)
+/* harmony export */ });
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+
+var ElementObserver = /*#__PURE__*/function () {
+  function ElementObserver(element, delegate) {
+    var _this = this;
+
+    _classCallCheck(this, ElementObserver);
+
+    this.mutationObserverInit = {
+      attributes: true,
+      childList: true,
+      subtree: true
+    };
+    this.element = element;
+    this.started = false;
+    this.delegate = delegate;
+    this.elements = new Set();
+    this.mutationObserver = new MutationObserver(function (mutations) {
+      return _this.processMutations(mutations);
+    });
+  }
+
+  _createClass(ElementObserver, [{
+    key: "start",
+    value: function start() {
+      if (!this.started) {
+        this.started = true;
+        this.mutationObserver.observe(this.element, this.mutationObserverInit);
+        this.refresh();
+      }
+    }
+  }, {
+    key: "pause",
+    value: function pause(callback) {
+      if (this.started) {
+        this.mutationObserver.disconnect();
+        this.started = false;
+      }
+
+      callback();
+
+      if (!this.started) {
+        this.mutationObserver.observe(this.element, this.mutationObserverInit);
+        this.started = true;
+      }
+    }
+  }, {
+    key: "stop",
+    value: function stop() {
+      if (this.started) {
+        this.mutationObserver.takeRecords();
+        this.mutationObserver.disconnect();
+        this.started = false;
+      }
+    }
+  }, {
+    key: "refresh",
+    value: function refresh() {
+      if (this.started) {
+        var matches = new Set(this.matchElementsInTree());
+
+        for (var _i = 0, _Array$from = Array.from(this.elements); _i < _Array$from.length; _i++) {
+          var element = _Array$from[_i];
+
+          if (!matches.has(element)) {
+            this.removeElement(element);
+          }
+        }
+
+        for (var _i2 = 0, _Array$from2 = Array.from(matches); _i2 < _Array$from2.length; _i2++) {
+          var _element = _Array$from2[_i2];
+          this.addElement(_element);
+        }
+      }
+    } // Mutation record processing
+
+  }, {
+    key: "processMutations",
+    value: function processMutations(mutations) {
+      if (this.started) {
+        var _iterator = _createForOfIteratorHelper(mutations),
+            _step;
+
+        try {
+          for (_iterator.s(); !(_step = _iterator.n()).done;) {
+            var mutation = _step.value;
+            this.processMutation(mutation);
+          }
+        } catch (err) {
+          _iterator.e(err);
+        } finally {
+          _iterator.f();
+        }
+      }
+    }
+  }, {
+    key: "processMutation",
+    value: function processMutation(mutation) {
+      if (mutation.type == "attributes") {
+        this.processAttributeChange(mutation.target, mutation.attributeName);
+      } else if (mutation.type == "childList") {
+        this.processRemovedNodes(mutation.removedNodes);
+        this.processAddedNodes(mutation.addedNodes);
+      }
+    }
+  }, {
+    key: "processAttributeChange",
+    value: function processAttributeChange(element, attributeName) {
+      if (this.elements.has(element)) {
+        if (this.delegate.elementAttributeChanged && this.matchElement(element)) {
+          this.delegate.elementAttributeChanged(element, attributeName);
+        } else {
+          this.removeElement(element);
+        }
+      } else if (this.matchElement(element)) {
+        this.addElement(element);
+      }
+    }
+  }, {
+    key: "processRemovedNodes",
+    value: function processRemovedNodes(nodes) {
+      for (var _i3 = 0, _Array$from3 = Array.from(nodes); _i3 < _Array$from3.length; _i3++) {
+        var node = _Array$from3[_i3];
+        var element = this.elementFromNode(node);
+
+        if (element) {
+          this.processTree(element, this.removeElement);
+        }
+      }
+    }
+  }, {
+    key: "processAddedNodes",
+    value: function processAddedNodes(nodes) {
+      for (var _i4 = 0, _Array$from4 = Array.from(nodes); _i4 < _Array$from4.length; _i4++) {
+        var node = _Array$from4[_i4];
+        var element = this.elementFromNode(node);
+
+        if (element && this.elementIsActive(element)) {
+          this.processTree(element, this.addElement);
+        }
+      }
+    } // Element matching
+
+  }, {
+    key: "matchElement",
+    value: function matchElement(element) {
+      return this.delegate.matchElement(element);
+    }
+  }, {
+    key: "matchElementsInTree",
+    value: function matchElementsInTree() {
+      var tree = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.element;
+      return this.delegate.matchElementsInTree(tree);
+    }
+  }, {
+    key: "processTree",
+    value: function processTree(tree, processor) {
+      var _iterator2 = _createForOfIteratorHelper(this.matchElementsInTree(tree)),
+          _step2;
+
+      try {
+        for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+          var element = _step2.value;
+          processor.call(this, element);
+        }
+      } catch (err) {
+        _iterator2.e(err);
+      } finally {
+        _iterator2.f();
+      }
+    }
+  }, {
+    key: "elementFromNode",
+    value: function elementFromNode(node) {
+      if (node.nodeType == Node.ELEMENT_NODE) {
+        return node;
+      }
+    }
+  }, {
+    key: "elementIsActive",
+    value: function elementIsActive(element) {
+      if (element.isConnected != this.element.isConnected) {
+        return false;
+      } else {
+        return this.element.contains(element);
+      }
+    } // Element tracking
+
+  }, {
+    key: "addElement",
+    value: function addElement(element) {
+      if (!this.elements.has(element)) {
+        if (this.elementIsActive(element)) {
+          this.elements.add(element);
+
+          if (this.delegate.elementMatched) {
+            this.delegate.elementMatched(element);
+          }
+        }
+      }
+    }
+  }, {
+    key: "removeElement",
+    value: function removeElement(element) {
+      if (this.elements.has(element)) {
+        this.elements["delete"](element);
+
+        if (this.delegate.elementUnmatched) {
+          this.delegate.elementUnmatched(element);
+        }
+      }
+    }
+  }]);
+
+  return ElementObserver;
+}();
+
+/***/ }),
+
+/***/ "./src/observe/mutation/index.js":
+/*!***************************************!*\
+  !*** ./src/observe/mutation/index.js ***!
+  \***************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "AttributeObserver": () => (/* reexport safe */ _attribute_observer__WEBPACK_IMPORTED_MODULE_0__.AttributeObserver),
+/* harmony export */   "ElementObserver": () => (/* reexport safe */ _element_observer__WEBPACK_IMPORTED_MODULE_1__.ElementObserver),
+/* harmony export */   "SelectorObserver": () => (/* reexport safe */ _selector_observer__WEBPACK_IMPORTED_MODULE_2__.SelectorObserver),
+/* harmony export */   "TokenListObserver": () => (/* reexport safe */ _token_list_observer__WEBPACK_IMPORTED_MODULE_3__.TokenListObserver),
+/* harmony export */   "ValueListObserver": () => (/* reexport safe */ _value_list_observer__WEBPACK_IMPORTED_MODULE_4__.ValueListObserver)
+/* harmony export */ });
+/* harmony import */ var _attribute_observer__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./attribute-observer */ "./src/observe/mutation/attribute-observer.js");
+/* harmony import */ var _element_observer__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./element-observer */ "./src/observe/mutation/element-observer.js");
+/* harmony import */ var _selector_observer__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./selector-observer */ "./src/observe/mutation/selector-observer.js");
+/* harmony import */ var _token_list_observer__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./token-list-observer */ "./src/observe/mutation/token-list-observer.js");
+/* harmony import */ var _value_list_observer__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./value-list-observer */ "./src/observe/mutation/value-list-observer.js");
+
+
+
+
+
+
+/***/ }),
+
+/***/ "./src/observe/mutation/selector-observer.js":
+/*!***************************************************!*\
+  !*** ./src/observe/mutation/selector-observer.js ***!
+  \***************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "SelectorObserver": () => (/* binding */ SelectorObserver)
+/* harmony export */ });
+/* harmony import */ var _element_observer__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./element-observer */ "./src/observe/mutation/element-observer.js");
+/* harmony import */ var _util_multimap__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../util/multimap */ "./src/observe/util/multimap.js");
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+
+
+
+var SelectorObserver = /*#__PURE__*/function () {
+  function SelectorObserver(element, selector, delegate, details) {
+    _classCallCheck(this, SelectorObserver);
+
+    this._selector = selector;
+    this.details = details;
+    this.elementObserver = new _element_observer__WEBPACK_IMPORTED_MODULE_0__.ElementObserver(element, this);
+    this.delegate = delegate;
+    this.matchesByElement = new _util_multimap__WEBPACK_IMPORTED_MODULE_1__.Multimap();
+  }
+
+  _createClass(SelectorObserver, [{
+    key: "started",
+    get: function get() {
+      return this.elementObserver.started;
+    }
+  }, {
+    key: "selector",
+    get: function get() {
+      return this._selector;
+    },
+    set: function set(selector) {
+      this._selector = selector;
+      this.refresh();
+    }
+  }, {
+    key: "start",
+    value: function start() {
+      this.elementObserver.start();
+    }
+  }, {
+    key: "pause",
+    value: function pause(callback) {
+      this.elementObserver.pause(callback);
+    }
+  }, {
+    key: "stop",
+    value: function stop() {
+      this.elementObserver.stop();
+    }
+  }, {
+    key: "refresh",
+    value: function refresh() {
+      this.elementObserver.refresh();
+    }
+  }, {
+    key: "element",
+    get: function get() {
+      return this.elementObserver.element;
+    } // Element observer delegate
+
+  }, {
+    key: "matchElement",
+    value: function matchElement(element) {
+      var selector = this.selector;
+
+      if (selector) {
+        var matches = element.matches(selector);
+
+        if (this.delegate.selectorMatchElement) {
+          return matches && this.delegate.selectorMatchElement(element, this.details);
+        }
+
+        return matches;
+      } else {
+        return false;
+      }
+    }
+  }, {
+    key: "matchElementsInTree",
+    value: function matchElementsInTree(tree) {
+      var _this = this;
+
+      var selector = this.selector;
+
+      if (selector) {
+        var match = this.matchElement(tree) ? [tree] : [];
+        var matches = Array.from(tree.querySelectorAll(selector)).filter(function (match) {
+          return _this.matchElement(match);
+        });
+        return match.concat(matches);
+      } else {
+        return [];
+      }
+    }
+  }, {
+    key: "elementMatched",
+    value: function elementMatched(element) {
+      var selector = this.selector;
+
+      if (selector) {
+        this.selectorMatched(element, selector);
+      }
+    }
+  }, {
+    key: "elementUnmatched",
+    value: function elementUnmatched(element) {
+      var selectors = this.matchesByElement.getKeysForValue(element);
+
+      var _iterator = _createForOfIteratorHelper(selectors),
+          _step;
+
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+          var selector = _step.value;
+          this.selectorUnmatched(element, selector);
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
+    }
+  }, {
+    key: "elementAttributeChanged",
+    value: function elementAttributeChanged(element, _attributeName) {
+      var selector = this.selector;
+
+      if (selector) {
+        var matches = this.matchElement(element);
+        var matchedBefore = this.matchesByElement.has(selector, element);
+
+        if (matches && !matchedBefore) {
+          this.selectorMatched(element, selector);
+        } else if (!matches && matchedBefore) {
+          this.selectorUnmatched(element, selector);
+        }
+      }
+    } // Selector management
+
+  }, {
+    key: "selectorMatched",
+    value: function selectorMatched(element, selector) {
+      this.delegate.selectorMatched(element, selector, this.details);
+      this.matchesByElement.add(selector, element);
+    }
+  }, {
+    key: "selectorUnmatched",
+    value: function selectorUnmatched(element, selector) {
+      this.delegate.selectorUnmatched(element, selector, this.details);
+      this.matchesByElement["delete"](selector, element);
+    }
+  }]);
+
+  return SelectorObserver;
+}();
+
+/***/ }),
+
+/***/ "./src/observe/mutation/token-list-observer.js":
+/*!*****************************************************!*\
+  !*** ./src/observe/mutation/token-list-observer.js ***!
+  \*****************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "TokenListObserver": () => (/* binding */ TokenListObserver)
+/* harmony export */ });
+/* harmony import */ var _attribute_observer__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./attribute-observer */ "./src/observe/mutation/attribute-observer.js");
+/* harmony import */ var _util_multimap__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../util/multimap */ "./src/observe/util/multimap.js");
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]; if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+
+
+
+var TokenListObserver = /*#__PURE__*/function () {
+  function TokenListObserver(element, attributeName, delegate) {
+    _classCallCheck(this, TokenListObserver);
+
+    this.delegate = delegate;
+    this.attributeObserver = new _attribute_observer__WEBPACK_IMPORTED_MODULE_0__.AttributeObserver(element, attributeName, this);
+    this.tokensByElement = new _util_multimap__WEBPACK_IMPORTED_MODULE_1__.Multimap();
+  }
+
+  _createClass(TokenListObserver, [{
+    key: "started",
+    get: function get() {
+      return this.attributeObserver.started;
+    }
+  }, {
+    key: "start",
+    value: function start() {
+      this.attributeObserver.start();
+    }
+  }, {
+    key: "pause",
+    value: function pause(callback) {
+      this.attributeObserver.pause(callback);
+    }
+  }, {
+    key: "stop",
+    value: function stop() {
+      this.attributeObserver.stop();
+    }
+  }, {
+    key: "refresh",
+    value: function refresh() {
+      this.attributeObserver.refresh();
+    }
+  }, {
+    key: "element",
+    get: function get() {
+      return this.attributeObserver.element;
+    }
+  }, {
+    key: "attributeName",
+    get: function get() {
+      return this.attributeObserver.attributeName;
+    } // Attribute observer delegate
+
+  }, {
+    key: "elementMatchedAttribute",
+    value: function elementMatchedAttribute(element) {
+      this.tokensMatched(this.readTokensForElement(element));
+    }
+  }, {
+    key: "elementAttributeValueChanged",
+    value: function elementAttributeValueChanged(element) {
+      var _this$refreshTokensFo = this.refreshTokensForElement(element),
+          _this$refreshTokensFo2 = _slicedToArray(_this$refreshTokensFo, 2),
+          unmatchedTokens = _this$refreshTokensFo2[0],
+          matchedTokens = _this$refreshTokensFo2[1];
+
+      this.tokensUnmatched(unmatchedTokens);
+      this.tokensMatched(matchedTokens);
+    }
+  }, {
+    key: "elementUnmatchedAttribute",
+    value: function elementUnmatchedAttribute(element) {
+      this.tokensUnmatched(this.tokensByElement.getValuesForKey(element));
+    }
+  }, {
+    key: "tokensMatched",
+    value: function tokensMatched(tokens) {
+      var _this = this;
+
+      tokens.forEach(function (token) {
+        return _this.tokenMatched(token);
+      });
+    }
+  }, {
+    key: "tokensUnmatched",
+    value: function tokensUnmatched(tokens) {
+      var _this2 = this;
+
+      tokens.forEach(function (token) {
+        return _this2.tokenUnmatched(token);
+      });
+    }
+  }, {
+    key: "tokenMatched",
+    value: function tokenMatched(token) {
+      this.delegate.tokenMatched(token);
+      this.tokensByElement.add(token.element, token);
+    }
+  }, {
+    key: "tokenUnmatched",
+    value: function tokenUnmatched(token) {
+      this.delegate.tokenUnmatched(token);
+      this.tokensByElement["delete"](token.element, token);
+    }
+  }, {
+    key: "refreshTokensForElement",
+    value: function refreshTokensForElement(element) {
+      var previousTokens = this.tokensByElement.getValuesForKey(element);
+      var currentTokens = this.readTokensForElement(element);
+      var firstDifferingIndex = zip(previousTokens, currentTokens).findIndex(function (_ref) {
+        var _ref2 = _slicedToArray(_ref, 2),
+            previousToken = _ref2[0],
+            currentToken = _ref2[1];
+
+        return !tokensAreEqual(previousToken, currentToken);
+      });
+
+      if (firstDifferingIndex == -1) {
+        return [[], []];
+      } else {
+        return [previousTokens.slice(firstDifferingIndex), currentTokens.slice(firstDifferingIndex)];
+      }
+    }
+  }, {
+    key: "readTokensForElement",
+    value: function readTokensForElement(element) {
+      var attributeName = this.attributeName;
+      var tokenString = element.getAttribute(attributeName) || "";
+      return parseTokenString(tokenString, element, attributeName);
+    }
+  }]);
+
+  return TokenListObserver;
+}();
+
+function parseTokenString(tokenString, element, attributeName) {
+  return tokenString.trim().split(/\s+/).filter(function (content) {
+    return content.length;
+  }).map(function (content, index) {
+    return {
+      element: element,
+      attributeName: attributeName,
+      content: content,
+      index: index
+    };
+  });
+}
+
+function zip(left, right) {
+  var length = Math.max(left.length, right.length);
+  return Array.from({
+    length: length
+  }, function (_, index) {
+    return [left[index], right[index]];
+  });
+}
+
+function tokensAreEqual(left, right) {
+  return left && right && left.index == right.index && left.content == right.content;
+}
+
+/***/ }),
+
+/***/ "./src/observe/mutation/value-list-observer.js":
+/*!*****************************************************!*\
+  !*** ./src/observe/mutation/value-list-observer.js ***!
+  \*****************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "ValueListObserver": () => (/* binding */ ValueListObserver)
+/* harmony export */ });
+/* harmony import */ var _token_list_observer__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./token-list-observer */ "./src/observe/mutation/token-list-observer.js");
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+
+
+var ValueListObserver = /*#__PURE__*/function () {
+  function ValueListObserver(element, attributeName, delegate) {
+    _classCallCheck(this, ValueListObserver);
+
+    this.tokenListObserver = new _token_list_observer__WEBPACK_IMPORTED_MODULE_0__.TokenListObserver(element, attributeName, this);
+    this.delegate = delegate;
+    this.parseResultsByToken = new WeakMap();
+    this.valuesByTokenByElement = new WeakMap();
+  }
+
+  _createClass(ValueListObserver, [{
+    key: "started",
+    get: function get() {
+      return this.tokenListObserver.started;
+    }
+  }, {
+    key: "start",
+    value: function start() {
+      this.tokenListObserver.start();
+    }
+  }, {
+    key: "stop",
+    value: function stop() {
+      this.tokenListObserver.stop();
+    }
+  }, {
+    key: "refresh",
+    value: function refresh() {
+      this.tokenListObserver.refresh();
+    }
+  }, {
+    key: "element",
+    get: function get() {
+      return this.tokenListObserver.element;
+    }
+  }, {
+    key: "attributeName",
+    get: function get() {
+      return this.tokenListObserver.attributeName;
+    }
+  }, {
+    key: "tokenMatched",
+    value: function tokenMatched(token) {
+      var element = token.element;
+
+      var _this$fetchParseResul = this.fetchParseResultForToken(token),
+          value = _this$fetchParseResul.value;
+
+      if (value) {
+        this.fetchValuesByTokenForElement(element).set(token, value);
+        this.delegate.elementMatchedValue(element, value);
+      }
+    }
+  }, {
+    key: "tokenUnmatched",
+    value: function tokenUnmatched(token) {
+      var element = token.element;
+
+      var _this$fetchParseResul2 = this.fetchParseResultForToken(token),
+          value = _this$fetchParseResul2.value;
+
+      if (value) {
+        this.fetchValuesByTokenForElement(element)["delete"](token);
+        this.delegate.elementUnmatchedValue(element, value);
+      }
+    }
+  }, {
+    key: "fetchParseResultForToken",
+    value: function fetchParseResultForToken(token) {
+      var parseResult = this.parseResultsByToken.get(token);
+
+      if (!parseResult) {
+        parseResult = this.parseToken(token);
+        this.parseResultsByToken.set(token, parseResult);
+      }
+
+      return parseResult;
+    }
+  }, {
+    key: "fetchValuesByTokenForElement",
+    value: function fetchValuesByTokenForElement(element) {
+      var valuesByToken = this.valuesByTokenByElement.get(element);
+
+      if (!valuesByToken) {
+        valuesByToken = new Map();
+        this.valuesByTokenByElement.set(element, valuesByToken);
+      }
+
+      return valuesByToken;
+    }
+  }, {
+    key: "parseToken",
+    value: function parseToken(token) {
+      try {
+        var value = this.delegate.parseValueForToken(token);
+        return {
+          value: value
+        };
+      } catch (error) {
+        return {
+          error: error
+        };
+      }
+    }
+  }]);
+
+  return ValueListObserver;
+}();
+
+/***/ }),
+
+/***/ "./src/observe/namespace.js":
+/*!**********************************!*\
+  !*** ./src/observe/namespace.js ***!
+  \**********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _application__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./application */ "./src/observe/application.js");
+
+var application = new _application__WEBPACK_IMPORTED_MODULE_0__.Application();
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  application: application,
+  registerControl: function registerControl(id, controller) {
+    return application.register(id, controller);
+  },
+  fetchControl: function fetchControl(element) {
+    return application.fetch(element);
+  },
+  fetchControls: function fetchControls(elements) {
+    return application.fetchAll(elements);
+  },
+  start: function start() {
+    application.startAsync();
+  },
+  stop: function stop() {
+    application.stop();
+  }
+});
+
+/***/ }),
+
+/***/ "./src/observe/scope-observer.js":
+/*!***************************************!*\
+  !*** ./src/observe/scope-observer.js ***!
+  \***************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "ScopeObserver": () => (/* binding */ ScopeObserver)
+/* harmony export */ });
+/* harmony import */ var _mutation__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./mutation */ "./src/observe/mutation/index.js");
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+
+
+var ScopeObserver = /*#__PURE__*/function () {
+  function ScopeObserver(element, delegate) {
+    _classCallCheck(this, ScopeObserver);
+
+    this.element = element;
+    this.delegate = delegate;
+    this.valueListObserver = new _mutation__WEBPACK_IMPORTED_MODULE_0__.ValueListObserver(this.element, this.controllerAttribute, this);
+    this.scopesByIdentifierByElement = new WeakMap();
+    this.scopeReferenceCounts = new WeakMap();
+  }
+
+  _createClass(ScopeObserver, [{
+    key: "start",
+    value: function start() {
+      this.valueListObserver.start();
+    }
+  }, {
+    key: "stop",
+    value: function stop() {
+      this.valueListObserver.stop();
+    }
+  }, {
+    key: "controllerAttribute",
+    get: function get() {
+      return 'data-control';
+    } // Value observer delegate
+
+  }, {
+    key: "parseValueForToken",
+    value: function parseValueForToken(token) {
+      var element = token.element,
+          identifier = token.content;
+      var scopesByIdentifier = this.fetchScopesByIdentifierForElement(element);
+      var scope = scopesByIdentifier.get(identifier);
+
+      if (!scope) {
+        scope = this.delegate.createScopeForElementAndIdentifier(element, identifier);
+        scopesByIdentifier.set(identifier, scope);
+      }
+
+      return scope;
+    }
+  }, {
+    key: "elementMatchedValue",
+    value: function elementMatchedValue(element, value) {
+      var referenceCount = (this.scopeReferenceCounts.get(value) || 0) + 1;
+      this.scopeReferenceCounts.set(value, referenceCount);
+
+      if (referenceCount == 1) {
+        this.delegate.scopeConnected(value);
+      }
+    }
+  }, {
+    key: "elementUnmatchedValue",
+    value: function elementUnmatchedValue(element, value) {
+      var referenceCount = this.scopeReferenceCounts.get(value);
+
+      if (referenceCount) {
+        this.scopeReferenceCounts.set(value, referenceCount - 1);
+
+        if (referenceCount == 1) {
+          this.delegate.scopeDisconnected(value);
+        }
+      }
+    }
+  }, {
+    key: "fetchScopesByIdentifierForElement",
+    value: function fetchScopesByIdentifierForElement(element) {
+      var scopesByIdentifier = this.scopesByIdentifierByElement.get(element);
+
+      if (!scopesByIdentifier) {
+        scopesByIdentifier = new Map();
+        this.scopesByIdentifierByElement.set(element, scopesByIdentifier);
+      }
+
+      return scopesByIdentifier;
+    }
+  }]);
+
+  return ScopeObserver;
+}();
+
+/***/ }),
+
+/***/ "./src/observe/scope.js":
+/*!******************************!*\
+  !*** ./src/observe/scope.js ***!
+  \******************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Scope": () => (/* binding */ Scope)
+/* harmony export */ });
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+
+var Scope = /*#__PURE__*/function () {
+  function Scope(element, identifier) {
+    var _this = this;
+
+    _classCallCheck(this, Scope);
+
+    this.element = element;
+    this.identifier = identifier;
+
+    this.containsElement = function (element) {
+      return element.closest(_this.controllerSelector) === _this.element;
+    };
+  }
+
+  _createClass(Scope, [{
+    key: "findElement",
+    value: function findElement(selector) {
+      return this.element.matches(selector) ? this.element : this.queryElements(selector).find(this.containsElement);
+    }
+  }, {
+    key: "findAllElements",
+    value: function findAllElements(selector) {
+      return [].concat(_toConsumableArray(this.element.matches(selector) ? [this.element] : []), _toConsumableArray(this.queryElements(selector).filter(this.containsElement)));
+    }
+  }, {
+    key: "queryElements",
+    value: function queryElements(selector) {
+      return Array.from(this.element.querySelectorAll(selector));
+    }
+  }, {
+    key: "controllerSelector",
+    get: function get() {
+      return attributeValueContainsToken('data-control', this.identifier);
+    }
+  }, {
+    key: "isDocumentScope",
+    get: function get() {
+      return this.element === document.documentElement;
+    }
+  }, {
+    key: "documentScope",
+    get: function get() {
+      return this.isDocumentScope ? this : new Scope(document.documentElement, this.identifier);
+    }
+  }]);
+
+  return Scope;
+}();
+
+function attributeValueContainsToken(attributeName, token) {
+  return "[".concat(attributeName, "~=\"").concat(token, "\"]");
+}
+
+/***/ }),
+
+/***/ "./src/observe/util/multimap.js":
+/*!**************************************!*\
+  !*** ./src/observe/util/multimap.js ***!
+  \**************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Multimap": () => (/* binding */ Multimap)
+/* harmony export */ });
+/* harmony import */ var _set_operations__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./set-operations */ "./src/observe/util/set-operations.js");
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]; if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+
+
+var Multimap = /*#__PURE__*/function () {
+  function Multimap() {
+    _classCallCheck(this, Multimap);
+
+    this.valuesByKey = new Map();
+  }
+
+  _createClass(Multimap, [{
+    key: "keys",
+    get: function get() {
+      return Array.from(this.valuesByKey.keys());
+    }
+  }, {
+    key: "values",
+    get: function get() {
+      var sets = Array.from(this.valuesByKey.values());
+      return sets.reduce(function (values, set) {
+        return values.concat(Array.from(set));
+      }, React.createElement(V, null), [] > []);
+    }
+  }, {
+    key: "size",
+    get: function get() {
+      var sets = Array.from(this.valuesByKey.values());
+      return sets.reduce(function (size, set) {
+        return size + set.size;
+      }, 0);
+    }
+  }, {
+    key: "add",
+    value: function add(key, value) {
+      (0,_set_operations__WEBPACK_IMPORTED_MODULE_0__.add)(this.valuesByKey, key, value);
+    }
+  }, {
+    key: "delete",
+    value: function _delete(key, value) {
+      (0,_set_operations__WEBPACK_IMPORTED_MODULE_0__.del)(this.valuesByKey, key, value);
+    }
+  }, {
+    key: "has",
+    value: function has(key, value) {
+      var values = this.valuesByKey.get(key);
+      return values != null && values.has(value);
+    }
+  }, {
+    key: "hasKey",
+    value: function hasKey(key) {
+      return this.valuesByKey.has(key);
+    }
+  }, {
+    key: "hasValue",
+    value: function hasValue(value) {
+      var sets = Array.from(this.valuesByKey.values());
+      return sets.some(function (set) {
+        return set.has(value);
+      });
+    }
+  }, {
+    key: "getValuesForKey",
+    value: function getValuesForKey(key) {
+      var values = this.valuesByKey.get(key);
+      return values ? Array.from(values) : [];
+    }
+  }, {
+    key: "getKeysForValue",
+    value: function getKeysForValue(value) {
+      return Array.from(this.valuesByKey).filter(function (_ref) {
+        var _ref2 = _slicedToArray(_ref, 2),
+            _key = _ref2[0],
+            values = _ref2[1];
+
+        return values.has(value);
+      }).map(function (_ref3) {
+        var _ref4 = _slicedToArray(_ref3, 2),
+            key = _ref4[0],
+            _values = _ref4[1];
+
+        return key;
+      });
+    }
+  }]);
+
+  return Multimap;
+}();
+
+/***/ }),
+
+/***/ "./src/observe/util/set-operations.js":
+/*!********************************************!*\
+  !*** ./src/observe/util/set-operations.js ***!
+  \********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "add": () => (/* binding */ add),
+/* harmony export */   "del": () => (/* binding */ del),
+/* harmony export */   "fetch": () => (/* binding */ fetch),
+/* harmony export */   "prune": () => (/* binding */ prune)
+/* harmony export */ });
+function add(map, key, value) {
+  fetch(map, key).add(value);
+}
+function del(map, key, value) {
+  fetch(map, key)["delete"](value);
+  prune(map, key);
+}
+function fetch(map, key) {
+  var values = map.get(key);
+
+  if (!values) {
+    values = new Set();
+    map.set(key, values);
+  }
+
+  return values;
+}
+function prune(map, key) {
+  var values = map.get(key);
+
+  if (values != null && values.size == 0) {
+    map["delete"](key);
+  }
+}
+
+/***/ }),
+
 /***/ "./src/request/actions.js":
 /*!********************************!*\
   !*** ./src/request/actions.js ***!
@@ -4621,6 +6870,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _request__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./request */ "./src/request/index.js");
 /* harmony import */ var _core__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./core */ "./src/core/index.js");
 /* harmony import */ var _extras__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./extras */ "./src/extras/index.js");
+/* harmony import */ var _observe__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./observe */ "./src/observe/index.js");
 /**
  * --------------------------------------------------------------------------
  * October CMS: Frontend JavaScript Framework
@@ -4629,6 +6879,7 @@ __webpack_require__.r(__webpack_exports__);
  * Copyright 2013-2023 Alexey Bobkov, Samuel Georges
  * --------------------------------------------------------------------------
  */
+
 
 
 
