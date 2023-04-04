@@ -16,8 +16,8 @@ export default {
         return application.fetchAll(elements);
     },
 
-    start() {
-        application.start();
+    async start() {
+        await application.startAsync();
     },
 
     stop() {

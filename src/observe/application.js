@@ -10,6 +10,11 @@ export class Application
         this.container = new Container(this);
     }
 
+    async startAsync() {
+        await domReady();
+        this.start();
+    }
+
     start() {
         if (!this.started) {
             this.started = true;
@@ -83,4 +88,15 @@ export class Application
         console.error(`%s\n\n%o\n\n%o`, message, error, detail);
         (_a = window.onerror) === null || _a === void 0 ? void 0 : _a.call(window, message, "", 0, 0, error);
     }
+}
+
+function domReady() {
+    return new Promise((resolve) => {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => resolve());
+        }
+        else {
+            resolve();
+        }
+    });
 }

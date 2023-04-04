@@ -34,5 +34,7 @@ export default {
     attachLoader: AjaxExtras.attachLoader,
     useTurbo: AjaxTurbo.isEnabled,
     visit: AjaxTurbo.visit,
-    registerControl: AjaxObserve.registerControl
+    registerControl: AjaxObserve.registerControl,
+    fetchControl: AjaxObserve.fetchControl,
+    fetchControls: AjaxObserve.fetchControls
 };
