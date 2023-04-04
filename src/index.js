@@ -10,7 +10,9 @@
 import AjaxFramework from "./core/namespace";
 import AjaxRequest from "./request/namespace";
 import AjaxExtras from "./extras/namespace";
+import AjaxObserve from "./observe/namespace";
 import AjaxTurbo from "./turbo/namespace";
+import { ControlBase } from "./observe/control-base";
 import { AssetManager } from "./request/asset-manager";
 import { Events } from "./util/events";
 
@@ -18,7 +20,9 @@ export default {
     AjaxFramework,
     AjaxRequest,
     AjaxExtras,
+    AjaxObserve,
     AjaxTurbo,
+    ControlBase,
     AssetManager,
     Events,
     ajax: AjaxRequest.send,
@@ -29,5 +33,8 @@ export default {
     progressBar: AjaxExtras.progressBar,
     attachLoader: AjaxExtras.attachLoader,
     useTurbo: AjaxTurbo.isEnabled,
-    visit: AjaxTurbo.visit
+    visit: AjaxTurbo.visit,
+    registerControl: AjaxObserve.registerControl,
+    fetchControl: AjaxObserve.fetchControl,
+    fetchControls: AjaxObserve.fetchControls
 };
