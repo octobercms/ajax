@@ -10,9 +10,10 @@ export class Application
         this.container = new Container(this);
     }
 
-    async startAsync() {
-        await domReady();
-        this.start();
+    startAsync() {
+        domReady().then(() => {
+            this.start();
+        });
     }
 
     start() {
