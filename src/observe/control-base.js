@@ -1,5 +1,5 @@
 
-class Controller
+class ControlBase
 {
     static proxyCounter = 0;
 
@@ -36,11 +36,11 @@ class Controller
     }
 
     connect() {
-        // Controller is connected to the DOM
+        // Control is connected to the DOM
     }
 
     disconnect() {
-        // Controller is disconnected from the DOM
+        // Control is disconnected from the DOM
     }
 
     // Internal events avoid the need to call parent logic
@@ -76,8 +76,8 @@ class Controller
             oc.Events.on(this.element, eventName, this.proxy(targetOrHandler));
         }
 
-        Controller.proxyCounter++;
-        this.proxiedEvents[Controller.proxyCounter] = arguments;
+        ControlBase.proxyCounter++;
+        this.proxiedEvents[ControlBase.proxyCounter] = arguments;
     }
 
     forget(eventName, targetOrHandler, handler) {
@@ -98,8 +98,8 @@ class Controller
 
     proxy(method) {
         if (method.ocProxyId === undefined) {
-            Controller.proxyCounter++;
-            method.ocProxyId = Controller.proxyCounter;
+            ControlBase.proxyCounter++;
+            method.ocProxyId = ControlBase.proxyCounter;
         }
 
         if (this.proxiedMethods[method.ocProxyId] !== undefined) {
@@ -112,4 +112,4 @@ class Controller
     }
 }
 
-export { Controller };
+export { ControlBase };

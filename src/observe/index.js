@@ -1,4 +1,4 @@
-import { Controller } from "./controller";
+import { ControlBase } from "./control-base";
 import namespace from "./namespace";
 export default namespace;
 
@@ -10,11 +10,15 @@ if (!window.oc.AjaxObserve) {
     // Namespace
     window.oc.AjaxObserve = namespace;
 
-    // Control registration
+    // Control API
     window.oc.registerControl = namespace.registerControl;
 
+    window.oc.fetchControl = namespace.fetchControl;
+
+    window.oc.fetchControls = namespace.fetchControls;
+
     // Control base class
-    window.oc.ControlBase = Controller;
+    window.oc.ControlBase = ControlBase;
 
     // Boot controller
     if (!isAMD() && !isCommonJS()) {

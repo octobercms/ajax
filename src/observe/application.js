@@ -30,6 +30,29 @@ export class Application
         this.load({ identifier, controllerConstructor });
     }
 
+    fetch(element) {
+        if (typeof element === 'string') {
+            element = document.querySelector(element);
+        }
+
+        return element ? this.getControlForElementAndIdentifier(element, element.dataset.control) : null;
+    }
+
+    fetchAll(elements) {
+        if (typeof elements === 'string') {
+            elements = document.querySelectorAll(elements);
+        }
+
+        const result = [];
+        elements.forEach((element) => {
+            const control = this.fetch(element);
+            if (control) {
+                result.push(control);
+            }
+        });
+        return result;
+    }
+
     load(head, ...rest) {
         const definitions = Array.isArray(head) ? head : [head, ...rest];
         definitions.forEach((definition) => {
@@ -49,7 +72,7 @@ export class Application
         return this.container.contexts.map((context) => context.controller);
     }
 
-    getControllerForElementAndIdentifier(element, identifier) {
+    getControlForElementAndIdentifier(element, identifier) {
         const context = this.container.getContextForElementAndIdentifier(element, identifier);
         return context ? context.controller : null;
     }
