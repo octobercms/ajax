@@ -13,8 +13,30 @@ export class FormSerializer
     // Private
     parseContainer(element) {
         let jsonData = {};
-        element.querySelectorAll('input, select').forEach((el) => {
-            this.assignObjectInternal(jsonData, el.name, el.value);
+        element.querySelectorAll('input, textarea, select').forEach((field) => {
+            if (!field.name || field.disabled || ['file', 'reset', 'submit', 'button'].indexOf(field.type) > -1) {
+                return;
+            }
+
+            if (['checkbox', 'radio'].indexOf(field.type) > -1 && !field.checked) {
+                return;
+            }
+
+            if (field.type === 'select-multiple') {
+                var arr = [];
+                Array.from(field.options).forEach(function(option) {
+                    if (option.selected) {
+                        arr.push({
+                            name: field.name,
+                            value: option.value
+                        });
+                    }
+                });
+                this.assignObjectInternal(jsonData, field.name, arr);
+                return;
+            }
+
+            this.assignObjectInternal(jsonData, field.name, field.value);
         });
         return jsonData;
     }
