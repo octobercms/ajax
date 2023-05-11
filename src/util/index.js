@@ -1,11 +1,6 @@
-export function dispatch(eventName, { target, detail, cancelable = true } = {}) {
-    const event = new CustomEvent(eventName, {
-        bubbles: true,
-        cancelable: cancelable === true,
-        detail: detail || {}
-    });
-
-    (target || document).dispatchEvent(event);
+export function dispatch(eventName, { target = document, detail = {}, bubbles = true, cancelable = true } = {}) {
+    const event = new CustomEvent(eventName, { detail, bubbles, cancelable });
+    target.dispatchEvent(event);
     return event;
 }
 

@@ -5,7 +5,7 @@ export class Scope
         this.identifier = identifier;
 
         this.containsElement = (element) => {
-            return element.closest(this.controllerSelector) === this.element;
+            return element.closest(this.controlSelector) === this.element;
         };
     }
 
@@ -24,7 +24,7 @@ export class Scope
         return Array.from(this.element.querySelectorAll(selector));
     }
 
-    get controllerSelector() {
+    get controlSelector() {
         return attributeValueContainsToken('data-control', this.identifier);
     }
 

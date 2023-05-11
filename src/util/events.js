@@ -111,8 +111,8 @@ export class Events
         }
     }
 
-    static dispatch(eventName, { target, detail, cancelable = true } = {}) {
-        return dispatch(eventName, { target, detail, cancelable });
+    static dispatch(eventName, { target = document, detail = {}, bubbles = true, cancelable = true } = {}) {
+        return dispatch(eventName, { target, detail, bubbles, cancelable });
     }
 }
 
