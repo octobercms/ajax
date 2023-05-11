@@ -5384,14 +5384,19 @@ var Events = /*#__PURE__*/function () {
     key: "dispatch",
     value: function dispatch(eventName) {
       var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
-          target = _ref.target,
-          detail = _ref.detail,
+          _ref$target = _ref.target,
+          target = _ref$target === void 0 ? document : _ref$target,
+          _ref$detail = _ref.detail,
+          detail = _ref$detail === void 0 ? {} : _ref$detail,
+          _ref$bubbles = _ref.bubbles,
+          bubbles = _ref$bubbles === void 0 ? true : _ref$bubbles,
           _ref$cancelable = _ref.cancelable,
           cancelable = _ref$cancelable === void 0 ? true : _ref$cancelable;
 
       return (0,_index__WEBPACK_IMPORTED_MODULE_0__.dispatch)(eventName, {
         target: target,
         detail: detail,
+        bubbles: bubbles,
         cancelable: cancelable
       });
     }
@@ -5583,8 +5588,32 @@ var FormSerializer = /*#__PURE__*/function () {
       var _this = this;
 
       var jsonData = {};
-      element.querySelectorAll('input, select').forEach(function (el) {
-        _this.assignObjectInternal(jsonData, el.name, el.value);
+      element.querySelectorAll('input, textarea, select').forEach(function (field) {
+        if (!field.name || field.disabled || ['file', 'reset', 'submit', 'button'].indexOf(field.type) > -1) {
+          return;
+        }
+
+        if (['checkbox', 'radio'].indexOf(field.type) > -1 && !field.checked) {
+          return;
+        }
+
+        if (field.type === 'select-multiple') {
+          var arr = [];
+          Array.from(field.options).forEach(function (option) {
+            if (option.selected) {
+              arr.push({
+                name: field.name,
+                value: option.value
+              });
+            }
+          });
+
+          _this.assignObjectInternal(jsonData, field.name, arr);
+
+          return;
+        }
+
+        _this.assignObjectInternal(jsonData, field.name, field.value);
       });
       return jsonData;
     }
@@ -5897,17 +5926,21 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 function dispatch(eventName) {
   var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
-      target = _ref.target,
-      detail = _ref.detail,
+      _ref$target = _ref.target,
+      target = _ref$target === void 0 ? document : _ref$target,
+      _ref$detail = _ref.detail,
+      detail = _ref$detail === void 0 ? {} : _ref$detail,
+      _ref$bubbles = _ref.bubbles,
+      bubbles = _ref$bubbles === void 0 ? true : _ref$bubbles,
       _ref$cancelable = _ref.cancelable,
       cancelable = _ref$cancelable === void 0 ? true : _ref$cancelable;
 
   var event = new CustomEvent(eventName, {
-    bubbles: true,
-    cancelable: cancelable === true,
-    detail: detail || {}
+    detail: detail,
+    bubbles: bubbles,
+    cancelable: cancelable
   });
-  (target || document).dispatchEvent(event);
+  target.dispatchEvent(event);
   return event;
 }
 function defer(callback) {
