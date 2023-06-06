@@ -4638,13 +4638,8 @@ var Data = /*#__PURE__*/function () {
   }, {
     key: "appendSingleInputElement",
     value: function appendSingleInputElement(requestData) {
-      // Has a form, or no target element
-      if (this.formEl || !this.targetEl) {
-        return;
-      } // Not single or input
-
-
-      if (['INPUT', 'SELECT'].indexOf(this.targetEl.tagName) === -1) {
+      // Has a form, no target element, or not a singular input
+      if (this.formEl || !this.targetEl || !isElementInput(this.targetEl)) {
         return;
       } // No name or supplied by user data already
 
@@ -4755,6 +4750,10 @@ var Data = /*#__PURE__*/function () {
 
   return Data;
 }();
+
+function isElementInput(el) {
+  return ['input', 'select', 'textarea'].includes(el.tagName.toLowerCase());
+}
 
 /***/ }),
 
