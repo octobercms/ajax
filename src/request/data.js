@@ -49,13 +49,8 @@ export class Data
 
     // Private
     appendSingleInputElement(requestData) {
-        // Has a form, or no target element
-        if (this.formEl || !this.targetEl) {
-            return;
-        }
-
-        // Not single or input
-        if (['INPUT', 'SELECT'].indexOf(this.targetEl.tagName) === -1) {
+        // Has a form, no target element, or not a singular input
+        if (this.formEl || !this.targetEl || !isElementInput(this.targetEl)) {
             return;
         }
 
@@ -171,4 +166,8 @@ export class Data
 
         return val;
     }
+}
+
+function isElementInput(el) {
+    return ['input', 'select', 'textarea'].includes(el.tagName.toLowerCase());
 }
