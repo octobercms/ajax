@@ -36,9 +36,9 @@ export class Container
         this.unloadIdentifier(definition.identifier);
         const module = new Module(this.application, definition);
         this.connectModule(module);
-        const afterLoad = definition.controllerConstructor.afterLoad;
+        const afterLoad = definition.controlConstructor.afterLoad;
         if (afterLoad) {
-            afterLoad.call(definition.controllerConstructor, definition.identifier, this.application);
+            afterLoad.call(definition.controlConstructor, definition.identifier, this.application);
         }
     }
 
@@ -47,6 +47,10 @@ export class Container
         if (module) {
             this.disconnectModule(module);
         }
+    }
+
+    getModuleForIdentifier(identifier) {
+        return this.modulesByIdentifier.get(identifier);
     }
 
     getContextForElementAndIdentifier(element, identifier) {

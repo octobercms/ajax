@@ -3,7 +3,7 @@ export class Context
     constructor(module, scope) {
         this.module = module;
         this.scope = scope;
-        this.controller = new module.controllerConstructor(this);
+        this.controller = new module.controlConstructor(this);
 
         try {
             this.controller.initInternal();

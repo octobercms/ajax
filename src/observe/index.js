@@ -13,6 +13,8 @@ if (!window.oc.AjaxObserve) {
     // Control API
     window.oc.registerControl = namespace.registerControl;
 
+    window.oc.importControl = namespace.importControl;
+
     window.oc.fetchControl = namespace.fetchControl;
 
     window.oc.fetchControls = namespace.fetchControls;

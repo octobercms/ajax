@@ -13,8 +13,8 @@ export class Module
         return this.definition.identifier;
     }
 
-    get controllerConstructor() {
-        return this.definition.controllerConstructor;
+    get controlConstructor() {
+        return this.definition.controlConstructor;
     }
 
     get contexts() {
@@ -48,6 +48,6 @@ export class Module
 function blessDefinition(definition) {
     return {
         identifier: definition.identifier,
-        controllerConstructor: definition.controllerConstructor,
+        controlConstructor: definition.controlConstructor,
     };
 }

@@ -35,6 +35,7 @@ export default {
     useTurbo: AjaxTurbo.isEnabled,
     visit: AjaxTurbo.visit,
     registerControl: AjaxObserve.registerControl,
+    importControl: AjaxObserve.importControl,
     fetchControl: AjaxObserve.fetchControl,
     fetchControls: AjaxObserve.fetchControls
 };

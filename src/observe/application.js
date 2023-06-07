@@ -32,8 +32,17 @@ export class Application
         }
     }
 
-    register(identifier, controllerConstructor) {
-        this.load({ identifier, controllerConstructor });
+    register(identifier, controlConstructor) {
+        this.load({ identifier, controlConstructor });
+    }
+
+    import(identifier) {
+        const module = this.container.getModuleForIdentifier(identifier);
+        if (!module) {
+            throw new Error('Control is not registered: ' + identifier);
+        }
+
+        return module.controlConstructor;
     }
 
     fetch(element) {
@@ -62,7 +71,7 @@ export class Application
     load(head, ...rest) {
         const definitions = Array.isArray(head) ? head : [head, ...rest];
         definitions.forEach((definition) => {
-            if (definition.controllerConstructor.shouldLoad) {
+            if (definition.controlConstructor.shouldLoad) {
                 this.container.loadDefinition(definition);
             }
         });

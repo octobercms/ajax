@@ -8,6 +8,10 @@ export default {
         return application.register(id, controller);
     },
 
+    importControl(id) {
+        return application.import(id);
+    },
+
     fetchControl(element) {
         return application.fetch(element);
     },
