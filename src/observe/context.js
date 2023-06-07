@@ -3,24 +3,24 @@ export class Context
     constructor(module, scope) {
         this.module = module;
         this.scope = scope;
-        this.controller = new module.controlConstructor(this);
+        this.control = new module.controlConstructor(this);
 
         try {
-            this.controller.initInternal();
-            this.controller.init();
+            this.control.initInternal();
+            this.control.init();
         }
         catch (error) {
-            this.handleError(error, 'initializing controller');
+            this.handleError(error, 'initializing control');
         }
     }
 
     connect() {
         try {
-            this.controller.connectInternal();
-            this.controller.connect();
+            this.control.connectInternal();
+            this.control.connect();
         }
         catch (error) {
-            this.handleError(error, 'connecting controller');
+            this.handleError(error, 'connecting control');
         }
     }
 
@@ -29,11 +29,11 @@ export class Context
 
     disconnect() {
         try {
-            this.controller.disconnect();
-            this.controller.disconnectInternal();
+            this.control.disconnect();
+            this.control.disconnectInternal();
         }
         catch (error) {
-            this.handleError(error, 'disconnecting controller');
+            this.handleError(error, 'disconnecting control');
         }
     }
 
@@ -59,8 +59,8 @@ export class Context
 
     // Error handling
     handleError(error, message, detail = {}) {
-        const { identifier, controller, element } = this;
-        detail = Object.assign({ identifier, controller, element }, detail);
+        const { identifier, control, element } = this;
+        detail = Object.assign({ identifier, control, element }, detail);
         this.application.handleError(error, `Error ${message}`, detail);
     }
 }

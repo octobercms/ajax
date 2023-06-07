@@ -5,7 +5,7 @@ export class ScopeObserver
     constructor(element, delegate) {
         this.element = element;
         this.delegate = delegate;
-        this.valueListObserver = new ValueListObserver(this.element, this.controllerAttribute, this);
+        this.valueListObserver = new ValueListObserver(this.element, this.controlAttribute, this);
         this.scopesByIdentifierByElement = new WeakMap();
         this.scopeReferenceCounts = new WeakMap();
     }
@@ -18,7 +18,7 @@ export class ScopeObserver
         this.valueListObserver.stop();
     }
 
-    get controllerAttribute() {
+    get controlAttribute() {
         return 'data-control';
     }
 

@@ -4,8 +4,8 @@ const application = new Application;
 export default {
     application,
 
-    registerControl(id, controller) {
-        return application.register(id, controller);
+    registerControl(id, control) {
+        return application.register(id, control);
     },
 
     importControl(id) {

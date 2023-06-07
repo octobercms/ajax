@@ -50,7 +50,9 @@ export class Application
             element = document.querySelector(element);
         }
 
-        return element ? this.getControlForElementAndIdentifier(element, element.dataset.control) : null;
+        return element
+            ? this.getControlForElementAndIdentifier(element, element.dataset.control)
+            : null;
     }
 
     fetchAll(elements) {
@@ -82,14 +84,14 @@ export class Application
         identifiers.forEach((identifier) => this.container.unloadIdentifier(identifier));
     }
 
-    // Controllers
-    get controllers() {
-        return this.container.contexts.map((context) => context.controller);
+    // Controls
+    get controls() {
+        return this.container.contexts.map((context) => context.control);
     }
 
     getControlForElementAndIdentifier(element, identifier) {
         const context = this.container.getContextForElementAndIdentifier(element, identifier);
-        return context ? context.controller : null;
+        return context ? context.control : null;
     }
 
     // Error handling
