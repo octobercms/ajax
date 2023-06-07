@@ -1700,11 +1700,22 @@ var Application = /*#__PURE__*/function () {
     }
   }, {
     key: "register",
-    value: function register(identifier, controllerConstructor) {
+    value: function register(identifier, controlConstructor) {
       this.load({
         identifier: identifier,
-        controllerConstructor: controllerConstructor
+        controlConstructor: controlConstructor
       });
+    }
+  }, {
+    key: "import",
+    value: function _import(identifier) {
+      var module = this.container.getModuleForIdentifier(identifier);
+
+      if (!module) {
+        throw new Error('Control is not registered: ' + identifier);
+      }
+
+      return module.controlConstructor;
     }
   }, {
     key: "fetch",
@@ -1745,7 +1756,7 @@ var Application = /*#__PURE__*/function () {
 
       var definitions = Array.isArray(head) ? head : [head].concat(rest);
       definitions.forEach(function (definition) {
-        if (definition.controllerConstructor.shouldLoad) {
+        if (definition.controlConstructor.shouldLoad) {
           _this3.container.loadDefinition(definition);
         }
       });
@@ -1763,20 +1774,20 @@ var Application = /*#__PURE__*/function () {
       identifiers.forEach(function (identifier) {
         return _this4.container.unloadIdentifier(identifier);
       });
-    } // Controllers
+    } // Controls
 
   }, {
-    key: "controllers",
+    key: "controls",
     get: function get() {
       return this.container.contexts.map(function (context) {
-        return context.controller;
+        return context.control;
       });
     }
   }, {
     key: "getControlForElementAndIdentifier",
     value: function getControlForElementAndIdentifier(element, identifier) {
       var context = this.container.getContextForElementAndIdentifier(element, identifier);
-      return context ? context.controller : null;
+      return context ? context.control : null;
     } // Error handling
 
   }, {
@@ -1873,10 +1884,10 @@ var Container = /*#__PURE__*/function () {
       this.unloadIdentifier(definition.identifier);
       var module = new _module__WEBPACK_IMPORTED_MODULE_0__.Module(this.application, definition);
       this.connectModule(module);
-      var afterLoad = definition.controllerConstructor.afterLoad;
+      var afterLoad = definition.controlConstructor.afterLoad;
 
       if (afterLoad) {
-        afterLoad.call(definition.controllerConstructor, definition.identifier, this.application);
+        afterLoad.call(definition.controlConstructor, definition.identifier, this.application);
       }
     }
   }, {
@@ -1887,6 +1898,11 @@ var Container = /*#__PURE__*/function () {
       if (module) {
         this.disconnectModule(module);
       }
+    }
+  }, {
+    key: "getModuleForIdentifier",
+    value: function getModuleForIdentifier(identifier) {
+      return this.modulesByIdentifier.get(identifier);
     }
   }, {
     key: "getContextForElementAndIdentifier",
@@ -1979,13 +1995,13 @@ var Context = /*#__PURE__*/function () {
 
     this.module = module;
     this.scope = scope;
-    this.controller = new module.controllerConstructor(this);
+    this.control = new module.controlConstructor(this);
 
     try {
-      this.controller.initInternal();
-      this.controller.init();
+      this.control.initInternal();
+      this.control.init();
     } catch (error) {
-      this.handleError(error, 'initializing controller');
+      this.handleError(error, 'initializing control');
     }
   }
 
@@ -1993,10 +2009,10 @@ var Context = /*#__PURE__*/function () {
     key: "connect",
     value: function connect() {
       try {
-        this.controller.connectInternal();
-        this.controller.connect();
+        this.control.connectInternal();
+        this.control.connect();
       } catch (error) {
-        this.handleError(error, 'connecting controller');
+        this.handleError(error, 'connecting control');
       }
     }
   }, {
@@ -2006,10 +2022,10 @@ var Context = /*#__PURE__*/function () {
     key: "disconnect",
     value: function disconnect() {
       try {
-        this.controller.disconnect();
-        this.controller.disconnectInternal();
+        this.control.disconnect();
+        this.control.disconnectInternal();
       } catch (error) {
-        this.handleError(error, 'disconnecting controller');
+        this.handleError(error, 'disconnecting control');
       }
     }
   }, {
@@ -2043,11 +2059,11 @@ var Context = /*#__PURE__*/function () {
     value: function handleError(error, message) {
       var detail = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
       var identifier = this.identifier,
-          controller = this.controller,
+          control = this.control,
           element = this.element;
       detail = Object.assign({
         identifier: identifier,
-        controller: controller,
+        control: control,
         element: element
       }, detail);
       this.application.handleError(error, "Error ".concat(message), detail);
@@ -2069,8 +2085,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "ControlBase": () => (/* binding */ ControlBase)
 /* harmony export */ });
-function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
-
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
 
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
@@ -2114,6 +2128,11 @@ var ControlBase = /*#__PURE__*/function () {
       return this.scope.element;
     }
   }, {
+    key: "config",
+    get: function get() {
+      return this.scope.element.dataset;
+    }
+  }, {
     key: "identifier",
     get: function get() {
       return this.scope.identifier;
@@ -2136,7 +2155,6 @@ var ControlBase = /*#__PURE__*/function () {
     value: function initInternal() {
       this.proxiedEvents = {};
       this.proxiedMethods = {};
-      this.config = this.element.dataset;
     }
   }, {
     key: "connectInternal",
@@ -2150,20 +2168,6 @@ var ControlBase = /*#__PURE__*/function () {
 
       for (var _key in this.proxiedMethods) {
         this.proxiedMethods[_key] = null;
-      }
-
-      var _iterator = _createForOfIteratorHelper(Object.getOwnPropertyNames(this)),
-          _step;
-
-      try {
-        for (_iterator.s(); !(_step = _iterator.n()).done;) {
-          var propertyName = _step.value;
-          this[propertyName] = null;
-        }
-      } catch (err) {
-        _iterator.e(err);
-      } finally {
-        _iterator.f();
       }
     } // Events
 
@@ -2548,6 +2552,7 @@ if (!window.oc.AjaxObserve) {
   window.oc.AjaxObserve = _namespace__WEBPACK_IMPORTED_MODULE_1__["default"]; // Control API
 
   window.oc.registerControl = _namespace__WEBPACK_IMPORTED_MODULE_1__["default"].registerControl;
+  window.oc.importControl = _namespace__WEBPACK_IMPORTED_MODULE_1__["default"].importControl;
   window.oc.fetchControl = _namespace__WEBPACK_IMPORTED_MODULE_1__["default"].fetchControl;
   window.oc.fetchControls = _namespace__WEBPACK_IMPORTED_MODULE_1__["default"].fetchControls; // Control base class
 
@@ -2602,9 +2607,9 @@ var Module = /*#__PURE__*/function () {
       return this.definition.identifier;
     }
   }, {
-    key: "controllerConstructor",
+    key: "controlConstructor",
     get: function get() {
-      return this.definition.controllerConstructor;
+      return this.definition.controlConstructor;
     }
   }, {
     key: "contexts",
@@ -2648,7 +2653,7 @@ var Module = /*#__PURE__*/function () {
 function blessDefinition(definition) {
   return {
     identifier: definition.identifier,
-    controllerConstructor: definition.controllerConstructor
+    controlConstructor: definition.controlConstructor
   };
 }
 
@@ -3529,8 +3534,11 @@ __webpack_require__.r(__webpack_exports__);
 var application = new _application__WEBPACK_IMPORTED_MODULE_0__.Application();
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   application: application,
-  registerControl: function registerControl(id, controller) {
-    return application.register(id, controller);
+  registerControl: function registerControl(id, control) {
+    return application.register(id, control);
+  },
+  importControl: function importControl(id) {
+    return application["import"](id);
   },
   fetchControl: function fetchControl(element) {
     return application.fetch(element);
@@ -3572,7 +3580,7 @@ var ScopeObserver = /*#__PURE__*/function () {
 
     this.element = element;
     this.delegate = delegate;
-    this.valueListObserver = new _mutation__WEBPACK_IMPORTED_MODULE_0__.ValueListObserver(this.element, this.controllerAttribute, this);
+    this.valueListObserver = new _mutation__WEBPACK_IMPORTED_MODULE_0__.ValueListObserver(this.element, this.controlAttribute, this);
     this.scopesByIdentifierByElement = new WeakMap();
     this.scopeReferenceCounts = new WeakMap();
   }
@@ -3588,7 +3596,7 @@ var ScopeObserver = /*#__PURE__*/function () {
       this.valueListObserver.stop();
     }
   }, {
-    key: "controllerAttribute",
+    key: "controlAttribute",
     get: function get() {
       return 'data-control';
     } // Value observer delegate
