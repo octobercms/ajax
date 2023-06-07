@@ -115,7 +115,7 @@ export class AttachLoader
 }
 
 function isElementInput(el) {
-    return ['input', 'select', 'textarea'].includes(el.tagName.toLowerCase());
+    return ['input', 'select', 'textarea'].includes((el.tagName || '').toLowerCase());
 }
 
 function resolveElement(el) {

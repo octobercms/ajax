@@ -824,7 +824,7 @@ var AttachLoader = /*#__PURE__*/function () {
 _defineProperty(AttachLoader, "stylesheetReady", false);
 
 function isElementInput(el) {
-  return ['input', 'select', 'textarea'].includes(el.tagName.toLowerCase());
+  return ['input', 'select', 'textarea'].includes((el.tagName || '').toLowerCase());
 }
 
 function resolveElement(el) {
@@ -4752,7 +4752,7 @@ var Data = /*#__PURE__*/function () {
 }();
 
 function isElementInput(el) {
-  return ['input', 'select', 'textarea'].includes(el.tagName.toLowerCase());
+  return ['input', 'select', 'textarea'].includes((el.tagName || '').toLowerCase());
 }
 
 /***/ }),

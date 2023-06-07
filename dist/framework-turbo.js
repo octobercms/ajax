@@ -1743,7 +1743,7 @@ var Data = /*#__PURE__*/function () {
 }();
 
 function isElementInput(el) {
-  return ['input', 'select', 'textarea'].includes(el.tagName.toLowerCase());
+  return ['input', 'select', 'textarea'].includes((el.tagName || '').toLowerCase());
 }
 
 /***/ }),
