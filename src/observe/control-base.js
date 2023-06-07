@@ -27,6 +27,10 @@ class ControlBase
         return this.scope.element;
     }
 
+    get config() {
+        return this.scope.element.dataset;
+    }
+
     get identifier() {
         return this.scope.identifier;
     }
@@ -47,7 +51,6 @@ class ControlBase
     initInternal() {
         this.proxiedEvents = {};
         this.proxiedMethods = {};
-        this.config = this.element.dataset;
     }
 
     connectInternal() {
@@ -60,10 +63,6 @@ class ControlBase
 
         for (const key in this.proxiedMethods) {
             this.proxiedMethods[key] = null;
-        }
-
-        for (const propertyName of Object.getOwnPropertyNames(this)) {
-            this[propertyName] = null;
         }
     }
 
