@@ -62,7 +62,7 @@ class ControlBase
         }
 
         for (const key in this.proxiedMethods) {
-            this.proxiedMethods[key] = null;
+            this.proxiedMethods[key] = undefined;
         }
     }
 

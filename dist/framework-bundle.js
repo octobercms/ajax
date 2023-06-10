@@ -2167,7 +2167,7 @@ var ControlBase = /*#__PURE__*/function () {
       }
 
       for (var _key in this.proxiedMethods) {
-        this.proxiedMethods[_key] = null;
+        this.proxiedMethods[_key] = undefined;
       }
     } // Events
 
