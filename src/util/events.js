@@ -66,20 +66,20 @@ const nativeEvents = new Set([
 
 export class Events
 {
-    static on(element, event, handler, delegationFunction) {
-        addHandler(element, event, handler, delegationFunction, false);
+    static on(element, event, handler, delegationFunction, options) {
+        addHandler(element, event, handler, delegationFunction, options, false);
     }
 
-    static one(element, event, handler, delegationFunction) {
-        addHandler(element, event, handler, delegationFunction, true);
+    static one(element, event, handler, delegationFunction, options) {
+        addHandler(element, event, handler, delegationFunction, options, true);
     }
 
-    static off(element, originalTypeEvent, handler, delegationFunction) {
+    static off(element, originalTypeEvent, handler, delegationFunction, options) {
         if (typeof originalTypeEvent !== 'string' || !element) {
             return;
         }
 
-        const [isDelegated, callable, typeEvent] = normalizeParameters(originalTypeEvent, handler, delegationFunction);
+        const [isDelegated, callable, typeEvent, opts] = normalizeParameters(originalTypeEvent, handler, delegationFunction, options);
         const inNamespace = typeEvent !== originalTypeEvent;
         const events = getElementEvents(element);
         const storeElementEvent = events[typeEvent] || {};
@@ -91,7 +91,7 @@ export class Events
                 return;
             }
 
-            removeHandler(element, events, typeEvent, callable, isDelegated ? handler : null);
+            removeHandler(element, events, typeEvent, callable, isDelegated ? handler : null, opts);
             return;
         }
 
@@ -106,7 +106,7 @@ export class Events
 
             if (!inNamespace || originalTypeEvent.includes(handlerKey)) {
                 const event = storeElementEvent[keyHandlers];
-                removeHandler(element, events, typeEvent, event.callable, event.delegationSelector);
+                removeHandler(element, events, typeEvent, event.callable, event.delegationSelector, opts);
             }
         }
     }
@@ -137,24 +137,25 @@ function findHandler(events, callable, delegationSelector = null) {
         .find(event => event.callable === callable && event.delegationSelector === delegationSelector);
 }
 
-function normalizeParameters(originalTypeEvent, handler, delegationFunction) {
+function normalizeParameters(originalTypeEvent, handler, delegationFunction, options) {
     const isDelegated = typeof handler === 'string';
     const callable = isDelegated ? delegationFunction : handler;
+    const opts = isDelegated ? options : delegationFunction;
     let typeEvent = getTypeEvent(originalTypeEvent);
 
     if (!nativeEvents.has(typeEvent)) {
         typeEvent = originalTypeEvent;
     }
 
-    return [isDelegated, callable, typeEvent];
+    return [isDelegated, callable, typeEvent, opts];
 }
 
-function addHandler(element, originalTypeEvent, handler, delegationFunction, oneOff) {
+function addHandler(element, originalTypeEvent, handler, delegationFunction, options, oneOff) {
     if (typeof originalTypeEvent !== 'string' || !element) {
         return;
     }
 
-    let [isDelegated, callable, typeEvent] = normalizeParameters(originalTypeEvent, handler, delegationFunction);
+    let [isDelegated, callable, typeEvent, opts] = normalizeParameters(originalTypeEvent, handler, delegationFunction, options);
 
     // in case of mouseenter or mouseleave wrap the handler within a function that checks for its DOM position
     // this prevents the handler from being dispatched the same way as mouseover or mouseout does
@@ -190,17 +191,17 @@ function addHandler(element, originalTypeEvent, handler, delegationFunction, one
     fn.uidEvent = uid;
     handlers[uid] = fn;
 
-    element.addEventListener(typeEvent, fn);
+    element.addEventListener(typeEvent, fn, opts);
 }
 
-function removeHandler(element, events, typeEvent, handler, delegationSelector) {
+function removeHandler(element, events, typeEvent, handler, delegationSelector, options) {
     const fn = findHandler(events[typeEvent], handler, delegationSelector);
 
     if (!fn) {
         return;
     }
 
-    element.removeEventListener(typeEvent, fn);
+    element.removeEventListener(typeEvent, fn, options);
     delete events[typeEvent][fn.uidEvent];
 }
 
