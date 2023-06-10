@@ -2750,26 +2750,27 @@ var Events = /*#__PURE__*/function () {
 
   _createClass(Events, null, [{
     key: "on",
-    value: function on(element, event, handler, delegationFunction) {
-      addHandler(element, event, handler, delegationFunction, false);
+    value: function on(element, event, handler, delegationFunction, options) {
+      addHandler(element, event, handler, delegationFunction, options, false);
     }
   }, {
     key: "one",
-    value: function one(element, event, handler, delegationFunction) {
-      addHandler(element, event, handler, delegationFunction, true);
+    value: function one(element, event, handler, delegationFunction, options) {
+      addHandler(element, event, handler, delegationFunction, options, true);
     }
   }, {
     key: "off",
-    value: function off(element, originalTypeEvent, handler, delegationFunction) {
+    value: function off(element, originalTypeEvent, handler, delegationFunction, options) {
       if (typeof originalTypeEvent !== 'string' || !element) {
         return;
       }
 
-      var _normalizeParameters = normalizeParameters(originalTypeEvent, handler, delegationFunction),
-          _normalizeParameters2 = _slicedToArray(_normalizeParameters, 3),
+      var _normalizeParameters = normalizeParameters(originalTypeEvent, handler, delegationFunction, options),
+          _normalizeParameters2 = _slicedToArray(_normalizeParameters, 4),
           isDelegated = _normalizeParameters2[0],
           callable = _normalizeParameters2[1],
-          typeEvent = _normalizeParameters2[2];
+          typeEvent = _normalizeParameters2[2],
+          opts = _normalizeParameters2[3];
 
       var inNamespace = typeEvent !== originalTypeEvent;
       var events = getElementEvents(element);
@@ -2782,7 +2783,7 @@ var Events = /*#__PURE__*/function () {
           return;
         }
 
-        removeHandler(element, events, typeEvent, callable, isDelegated ? handler : null);
+        removeHandler(element, events, typeEvent, callable, isDelegated ? handler : null, opts);
         return;
       }
 
@@ -2799,7 +2800,7 @@ var Events = /*#__PURE__*/function () {
 
         if (!inNamespace || originalTypeEvent.includes(handlerKey)) {
           var event = storeElementEvent[keyHandlers];
-          removeHandler(element, events, typeEvent, event.callable, event.delegationSelector);
+          removeHandler(element, events, typeEvent, event.callable, event.delegationSelector, opts);
         }
       }
     }
@@ -2849,28 +2850,30 @@ function findHandler(events, callable) {
   });
 }
 
-function normalizeParameters(originalTypeEvent, handler, delegationFunction) {
+function normalizeParameters(originalTypeEvent, handler, delegationFunction, options) {
   var isDelegated = typeof handler === 'string';
   var callable = isDelegated ? delegationFunction : handler;
+  var opts = isDelegated ? options : delegationFunction;
   var typeEvent = getTypeEvent(originalTypeEvent);
 
   if (!nativeEvents.has(typeEvent)) {
     typeEvent = originalTypeEvent;
   }
 
-  return [isDelegated, callable, typeEvent];
+  return [isDelegated, callable, typeEvent, opts];
 }
 
-function addHandler(element, originalTypeEvent, handler, delegationFunction, oneOff) {
+function addHandler(element, originalTypeEvent, handler, delegationFunction, options, oneOff) {
   if (typeof originalTypeEvent !== 'string' || !element) {
     return;
   }
 
-  var _normalizeParameters3 = normalizeParameters(originalTypeEvent, handler, delegationFunction),
-      _normalizeParameters4 = _slicedToArray(_normalizeParameters3, 3),
+  var _normalizeParameters3 = normalizeParameters(originalTypeEvent, handler, delegationFunction, options),
+      _normalizeParameters4 = _slicedToArray(_normalizeParameters3, 4),
       isDelegated = _normalizeParameters4[0],
       callable = _normalizeParameters4[1],
-      typeEvent = _normalizeParameters4[2]; // in case of mouseenter or mouseleave wrap the handler within a function that checks for its DOM position
+      typeEvent = _normalizeParameters4[2],
+      opts = _normalizeParameters4[3]; // in case of mouseenter or mouseleave wrap the handler within a function that checks for its DOM position
   // this prevents the handler from being dispatched the same way as mouseover or mouseout does
 
 
@@ -2902,17 +2905,17 @@ function addHandler(element, originalTypeEvent, handler, delegationFunction, one
   fn.oneOff = oneOff;
   fn.uidEvent = uid;
   handlers[uid] = fn;
-  element.addEventListener(typeEvent, fn);
+  element.addEventListener(typeEvent, fn, opts);
 }
 
-function removeHandler(element, events, typeEvent, handler, delegationSelector) {
+function removeHandler(element, events, typeEvent, handler, delegationSelector, options) {
   var fn = findHandler(events[typeEvent], handler, delegationSelector);
 
   if (!fn) {
     return;
   }
 
-  element.removeEventListener(typeEvent, fn);
+  element.removeEventListener(typeEvent, fn, options);
   delete events[typeEvent][fn.uidEvent];
 }
 
