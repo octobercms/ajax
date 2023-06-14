@@ -2173,11 +2173,11 @@ var ControlBase = /*#__PURE__*/function () {
 
   }, {
     key: "listen",
-    value: function listen(eventName, targetOrHandler, handler) {
+    value: function listen(eventName, targetOrHandler, handler, options) {
       if (typeof targetOrHandler === 'string') {
-        oc.Events.on(this.element, eventName, targetOrHandler, this.proxy(handler));
+        oc.Events.on(this.element, eventName, targetOrHandler, this.proxy(handler), options);
       } else {
-        oc.Events.on(this.element, eventName, this.proxy(targetOrHandler));
+        oc.Events.on(this.element, eventName, this.proxy(targetOrHandler), options);
       }
 
       ControlBase.proxyCounter++;
@@ -2185,11 +2185,11 @@ var ControlBase = /*#__PURE__*/function () {
     }
   }, {
     key: "forget",
-    value: function forget(eventName, targetOrHandler, handler) {
+    value: function forget(eventName, targetOrHandler, handler, options) {
       if (typeof targetOrHandler === 'string') {
-        oc.Events.off(this.element, eventName, targetOrHandler, this.proxy(handler));
+        oc.Events.off(this.element, eventName, targetOrHandler, this.proxy(handler), options);
       } else {
-        oc.Events.off(this.element, eventName, this.proxy(targetOrHandler));
+        oc.Events.off(this.element, eventName, this.proxy(targetOrHandler), options);
       }
     }
   }, {
