@@ -67,24 +67,24 @@ class ControlBase
     }
 
     // Events
-    listen(eventName, targetOrHandler, handler) {
+    listen(eventName, targetOrHandler, handler, options) {
         if (typeof targetOrHandler === 'string') {
-            oc.Events.on(this.element, eventName, targetOrHandler, this.proxy(handler));
+            oc.Events.on(this.element, eventName, targetOrHandler, this.proxy(handler), options);
         }
         else {
-            oc.Events.on(this.element, eventName, this.proxy(targetOrHandler));
+            oc.Events.on(this.element, eventName, this.proxy(targetOrHandler), options);
         }
 
         ControlBase.proxyCounter++;
         this.proxiedEvents[ControlBase.proxyCounter] = arguments;
     }
 
-    forget(eventName, targetOrHandler, handler) {
+    forget(eventName, targetOrHandler, handler, options) {
         if (typeof targetOrHandler === 'string') {
-            oc.Events.off(this.element, eventName, targetOrHandler, this.proxy(handler));
+            oc.Events.off(this.element, eventName, targetOrHandler, this.proxy(handler), options);
         }
         else {
-            oc.Events.off(this.element, eventName, this.proxy(targetOrHandler));
+            oc.Events.off(this.element, eventName, this.proxy(targetOrHandler), options);
         }
     }
 
