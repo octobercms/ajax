@@ -67,30 +67,30 @@ class ControlBase
     }
 
     // Events
-    listen(eventName, targetOrHandler, handler, options) {
+    listen(eventName, targetOrHandler, handlerOrOptions, options) {
         if (typeof targetOrHandler === 'string') {
-            oc.Events.on(this.element, eventName, targetOrHandler, this.proxy(handler), options);
+            oc.Events.on(this.element, eventName, targetOrHandler, this.proxy(handlerOrOptions), options);
         }
         else if (targetOrHandler instanceof Element) {
-            oc.Events.on(targetOrHandler, eventName, this.proxy(handler), options);
+            oc.Events.on(targetOrHandler, eventName, this.proxy(handlerOrOptions), options);
         }
         else {
-            oc.Events.on(this.element, eventName, this.proxy(targetOrHandler), options);
+            oc.Events.on(this.element, eventName, this.proxy(targetOrHandler), handlerOrOptions);
         }
 
         ControlBase.proxyCounter++;
         this.proxiedEvents[ControlBase.proxyCounter] = arguments;
     }
 
-    forget(eventName, targetOrHandler, handler, options) {
+    forget(eventName, targetOrHandler, handlerOrOptions, options) {
         if (typeof targetOrHandler === 'string') {
-            oc.Events.off(this.element, eventName, targetOrHandler, this.proxy(handler), options);
+            oc.Events.off(this.element, eventName, targetOrHandler, this.proxy(handlerOrOptions), options);
         }
         else if (targetOrHandler instanceof Element) {
-            oc.Events.off(targetOrHandler, eventName, this.proxy(handler), options);
+            oc.Events.off(targetOrHandler, eventName, this.proxy(handlerOrOptions), options);
         }
         else {
-            oc.Events.off(this.element, eventName, this.proxy(targetOrHandler), options);
+            oc.Events.off(this.element, eventName, this.proxy(targetOrHandler), handlerOrOptions);
         }
     }
 
