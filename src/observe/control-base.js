@@ -71,6 +71,9 @@ class ControlBase
         if (typeof targetOrHandler === 'string') {
             oc.Events.on(this.element, eventName, targetOrHandler, this.proxy(handler), options);
         }
+        else if (targetOrHandler instanceof Element) {
+            oc.Events.on(targetOrHandler, eventName, this.proxy(handler), options);
+        }
         else {
             oc.Events.on(this.element, eventName, this.proxy(targetOrHandler), options);
         }
@@ -82,6 +85,9 @@ class ControlBase
     forget(eventName, targetOrHandler, handler, options) {
         if (typeof targetOrHandler === 'string') {
             oc.Events.off(this.element, eventName, targetOrHandler, this.proxy(handler), options);
+        }
+        else if (targetOrHandler instanceof Element) {
+            oc.Events.off(targetOrHandler, eventName, this.proxy(handler), options);
         }
         else {
             oc.Events.off(this.element, eventName, this.proxy(targetOrHandler), options);
