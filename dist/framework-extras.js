@@ -2173,11 +2173,13 @@ var ControlBase = /*#__PURE__*/function () {
 
   }, {
     key: "listen",
-    value: function listen(eventName, targetOrHandler, handler, options) {
+    value: function listen(eventName, targetOrHandler, handlerOrOptions, options) {
       if (typeof targetOrHandler === 'string') {
-        oc.Events.on(this.element, eventName, targetOrHandler, this.proxy(handler), options);
+        oc.Events.on(this.element, eventName, targetOrHandler, this.proxy(handlerOrOptions), options);
+      } else if (targetOrHandler instanceof Element) {
+        oc.Events.on(targetOrHandler, eventName, this.proxy(handlerOrOptions), options);
       } else {
-        oc.Events.on(this.element, eventName, this.proxy(targetOrHandler), options);
+        oc.Events.on(this.element, eventName, this.proxy(targetOrHandler), handlerOrOptions);
       }
 
       ControlBase.proxyCounter++;
@@ -2185,11 +2187,13 @@ var ControlBase = /*#__PURE__*/function () {
     }
   }, {
     key: "forget",
-    value: function forget(eventName, targetOrHandler, handler, options) {
+    value: function forget(eventName, targetOrHandler, handlerOrOptions, options) {
       if (typeof targetOrHandler === 'string') {
-        oc.Events.off(this.element, eventName, targetOrHandler, this.proxy(handler), options);
+        oc.Events.off(this.element, eventName, targetOrHandler, this.proxy(handlerOrOptions), options);
+      } else if (targetOrHandler instanceof Element) {
+        oc.Events.off(targetOrHandler, eventName, this.proxy(handlerOrOptions), options);
       } else {
-        oc.Events.off(this.element, eventName, this.proxy(targetOrHandler), options);
+        oc.Events.off(this.element, eventName, this.proxy(targetOrHandler), handlerOrOptions);
       }
     }
   }, {
