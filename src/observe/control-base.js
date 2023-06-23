@@ -58,7 +58,8 @@ class ControlBase
 
     disconnectInternal() {
         for (const key in this.proxiedEvents) {
-            this.forget(...this.proxiedEvents[key])
+            this.forget(...this.proxiedEvents[key]);
+            delete this.proxiedEvents[key];
         }
 
         for (const key in this.proxiedMethods) {
@@ -78,6 +79,7 @@ class ControlBase
             oc.Events.on(this.element, eventName, this.proxy(targetOrHandler), handlerOrOptions);
         }
 
+        // Automatic unbinding
         ControlBase.proxyCounter++;
         this.proxiedEvents[ControlBase.proxyCounter] = arguments;
     }
@@ -91,6 +93,25 @@ class ControlBase
         }
         else {
             oc.Events.off(this.element, eventName, this.proxy(targetOrHandler), handlerOrOptions);
+        }
+
+        // Fills JS gap
+        const compareArrays = (a, b) => {
+            if (a.length === b.length) {
+                for (var i = 0; i < a.length; i++) {
+                    if (a[i] === b[i]) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        };
+
+        // Seeking GC
+        for (const key in this.proxiedEvents) {
+            if (compareArrays(arguments, this.proxiedEvents[key])) {
+                delete this.proxiedEvents[key];
+            }
         }
     }
 
