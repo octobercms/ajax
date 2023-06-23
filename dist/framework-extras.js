@@ -2164,6 +2164,7 @@ var ControlBase = /*#__PURE__*/function () {
     value: function disconnectInternal() {
       for (var key in this.proxiedEvents) {
         this.forget.apply(this, _toConsumableArray(this.proxiedEvents[key]));
+        delete this.proxiedEvents[key];
       }
 
       for (var _key in this.proxiedMethods) {
@@ -2180,7 +2181,8 @@ var ControlBase = /*#__PURE__*/function () {
         oc.Events.on(targetOrHandler, eventName, this.proxy(handlerOrOptions), options);
       } else {
         oc.Events.on(this.element, eventName, this.proxy(targetOrHandler), handlerOrOptions);
-      }
+      } // Automatic unbinding
+
 
       ControlBase.proxyCounter++;
       this.proxiedEvents[ControlBase.proxyCounter] = arguments;
@@ -2194,6 +2196,26 @@ var ControlBase = /*#__PURE__*/function () {
         oc.Events.off(targetOrHandler, eventName, this.proxy(handlerOrOptions), options);
       } else {
         oc.Events.off(this.element, eventName, this.proxy(targetOrHandler), handlerOrOptions);
+      } // Fills a gap in JS lang
+
+
+      var compareArrays = function compareArrays(a, b) {
+        if (a.length === b.length) {
+          for (var i = 0; i < a.length; i++) {
+            if (a[i] === b[i]) {
+              return true;
+            }
+          }
+        }
+
+        return false;
+      }; // Seek and garbage collect
+
+
+      for (var key in this.proxiedEvents) {
+        if (compareArrays(arguments, this.proxiedEvents[key])) {
+          delete this.proxiedEvents[key];
+        }
       }
     }
   }, {
