@@ -371,7 +371,7 @@ export class Actions
             if (value === null) {
                 searchParams.delete(key);
             } else {
-                searchParams.set(key, queryData[key]);
+                searchParams.set(key, value);
             }
         }
 
