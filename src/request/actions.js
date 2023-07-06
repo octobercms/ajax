@@ -374,6 +374,7 @@ export class Actions
             }
             else if (value === null) {
                 searchParams.delete(key);
+                searchParams.delete(`${key}[]`);
             }
             else {
                 searchParams.set(key, value);
