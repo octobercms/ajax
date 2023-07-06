@@ -1282,7 +1282,13 @@ var Actions = /*#__PURE__*/function () {
 
       for (var _i = 0, _Object$keys = Object.keys(queryData); _i < _Object$keys.length; _i++) {
         var key = _Object$keys[_i];
-        searchParams.set(key, queryData[key]);
+        var value = queryData[key];
+
+        if (value === null) {
+          searchParams["delete"](key);
+        } else {
+          searchParams.set(key, value);
+        }
       }
 
       var newUrl = window.location.pathname + '?' + searchParams.toString();

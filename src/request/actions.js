@@ -367,10 +367,10 @@ export class Actions
         const searchParams = new URLSearchParams(window.location.search)
         for (const key of Object.keys(queryData)) {
             const value = queryData[key];
-
             if (value === null) {
                 searchParams.delete(key);
-            } else {
+            }
+            else {
                 searchParams.set(key, value);
             }
         }
