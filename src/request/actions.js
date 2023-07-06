@@ -367,7 +367,12 @@ export class Actions
         const searchParams = new URLSearchParams(window.location.search)
         for (const key of Object.keys(queryData)) {
             const value = queryData[key];
-            if (value === null) {
+            if (Array.isArray(value)) {
+                searchParams.delete(key);
+                searchParams.delete(`${key}[]`);
+                value.forEach(val => searchParams.append(`${key}[]`, val));
+            }
+            else if (value === null) {
                 searchParams.delete(key);
             }
             else {
@@ -375,7 +380,7 @@ export class Actions
             }
         }
 
-        const newUrl = window.location.pathname + '?' + searchParams.toString();
+        const newUrl = window.location.pathname + '?' + searchParams.toString().replaceAll('%5B%5D=', '[]=');
         if (oc.useTurbo && oc.useTurbo()) {
             oc.visit(newUrl, { action: 'swap', scroll: false });
         }
