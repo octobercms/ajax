@@ -366,7 +366,13 @@ export class Actions
     applyQueryToUrl(queryData) {
         const searchParams = new URLSearchParams(window.location.search)
         for (const key of Object.keys(queryData)) {
-            searchParams.set(key, queryData[key]);
+            const value = queryData[key];
+
+            if (value === null) {
+                searchParams.delete(key);
+            } else {
+                searchParams.set(key, value);
+            }
         }
 
         const newUrl = window.location.pathname + '?' + searchParams.toString();
