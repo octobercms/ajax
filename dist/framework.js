@@ -1280,18 +1280,28 @@ var Actions = /*#__PURE__*/function () {
     value: function applyQueryToUrl(queryData) {
       var searchParams = new URLSearchParams(window.location.search);
 
-      for (var _i = 0, _Object$keys = Object.keys(queryData); _i < _Object$keys.length; _i++) {
+      var _loop2 = function _loop2() {
         var key = _Object$keys[_i];
         var value = queryData[key];
 
-        if (value === null) {
+        if (Array.isArray(value)) {
+          searchParams["delete"](key);
+          searchParams["delete"]("".concat(key, "[]"));
+          value.forEach(function (val) {
+            return searchParams.append("".concat(key, "[]"), val);
+          });
+        } else if (value === null) {
           searchParams["delete"](key);
         } else {
           searchParams.set(key, value);
         }
+      };
+
+      for (var _i = 0, _Object$keys = Object.keys(queryData); _i < _Object$keys.length; _i++) {
+        _loop2();
       }
 
-      var newUrl = window.location.pathname + '?' + searchParams.toString();
+      var newUrl = window.location.pathname + '?' + searchParams.toString().replaceAll('%5B%5D=', '[]=');
 
       if (oc.useTurbo && oc.useTurbo()) {
         oc.visit(newUrl, {
