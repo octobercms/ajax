@@ -381,7 +381,11 @@ export class Actions
             }
         }
 
-        const newUrl = window.location.pathname + '?' + searchParams.toString().replaceAll('%5B%5D=', '[]=');
+        var newUrl = window.location.pathname;
+        if (searchParams.size > 0) {
+            newUrl += '?' + searchParams.toString().replaceAll('%5B%5D=', '[]=')
+        }
+
         if (oc.useTurbo && oc.useTurbo()) {
             oc.visit(newUrl, { action: 'swap', scroll: false });
         }
