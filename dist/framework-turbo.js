@@ -1292,6 +1292,7 @@ var Actions = /*#__PURE__*/function () {
           });
         } else if (value === null) {
           searchParams["delete"](key);
+          searchParams["delete"]("".concat(key, "[]"));
         } else {
           searchParams.set(key, value);
         }
@@ -1301,7 +1302,11 @@ var Actions = /*#__PURE__*/function () {
         _loop2();
       }
 
-      var newUrl = window.location.pathname + '?' + searchParams.toString().replaceAll('%5B%5D=', '[]=');
+      var newUrl = window.location.pathname;
+
+      if (searchParams.size > 0) {
+        newUrl += '?' + searchParams.toString().replaceAll('%5B%5D=', '[]=');
+      }
 
       if (oc.useTurbo && oc.useTurbo()) {
         oc.visit(newUrl, {
