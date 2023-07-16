@@ -217,7 +217,7 @@ export class Actions
             const data = event.data || {};
             const evt = new CustomEvent(event.event, {
                 bubbles: true,
-                detail: data
+                detail: { ...data, context: this.context }
             });
 
             this.el.dispatchEvent(evt);
