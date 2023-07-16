@@ -207,6 +207,23 @@ export class Actions
         }
     }
 
+    // Custom function, handle a browser event coming from the server
+    handleBrowserEvents(events) {
+        if (!events || !events.length) {
+            return;
+        }
+
+        events.forEach(event => {
+            const data = event.data || {};
+            const evt = new CustomEvent(event.event, {
+                bubbles: true,
+                detail: data
+            });
+
+            this.el.dispatchEvent(evt);
+        });
+    }
+
     // Custom function, redirect the browser to another location
     handleRedirectResponse(href) {
         const event = this.delegate.notifyApplicationBeforeRedirect();
@@ -250,7 +267,7 @@ export class Actions
     }
 
     // Custom function, handle any application specific response values
-    // Using a promisary object here in case injected assets need time to load
+    // Using a promissory object here in case injected assets need time to load
     handleUpdateResponse(data, responseCode, xhr) {
         var self = this,
             updateOptions = this.options.update || {},
@@ -311,7 +328,7 @@ export class Actions
                 self.invoke('afterUpdate', [data, responseCode, xhr]);
                 self.invokeFunc('afterUpdateFunc', data);
             }, 0);
-        })
+        });
 
         // Handle redirect
         if (data['X_OCTOBER_REDIRECT']) {
@@ -320,6 +337,11 @@ export class Actions
 
         if (this.delegate.isRedirect) {
             this.invoke('handleRedirectResponse', [this.delegate.options.redirect]);
+        }
+
+        // Handle browser events
+        if (data['X_OCTOBER_DISPATCHES']) {
+            this.invoke('handleBrowserEvents', [data['X_OCTOBER_DISPATCHES']]);
         }
 
         // Handle validation
