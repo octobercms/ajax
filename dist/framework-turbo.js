@@ -895,6 +895,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _asset_manager__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./asset-manager */ "./src/request/asset-manager.js");
 /* harmony import */ var _util_http_request__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../util/http-request */ "./src/util/http-request.js");
 /* harmony import */ var _util_deferred__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../util/deferred */ "./src/util/deferred.js");
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { _defineProperty(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
 
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
@@ -1138,7 +1144,9 @@ var Actions = /*#__PURE__*/function () {
         var data = event.data || {};
         var evt = new CustomEvent(event.event, {
           bubbles: true,
-          detail: data
+          detail: _objectSpread(_objectSpread({}, data), {}, {
+            context: _this.context
+          })
         });
 
         _this.el.dispatchEvent(evt);
