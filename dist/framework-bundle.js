@@ -4166,6 +4166,26 @@ var Actions = /*#__PURE__*/function () {
           }
         }
       }
+    } // Custom function, handle a browser event coming from the server
+
+  }, {
+    key: "handleBrowserEvents",
+    value: function handleBrowserEvents(events) {
+      var _this = this;
+
+      if (!events || !events.length) {
+        return;
+      }
+
+      events.forEach(function (event) {
+        var data = event.data || {};
+        var evt = new CustomEvent(event.event, {
+          bubbles: true,
+          detail: data
+        });
+
+        _this.el.dispatchEvent(evt);
+      });
     } // Custom function, redirect the browser to another location
 
   }, {
@@ -4209,7 +4229,7 @@ var Actions = /*#__PURE__*/function () {
         });
       }
     } // Custom function, handle any application specific response values
-    // Using a promisary object here in case injected assets need time to load
+    // Using a promissory object here in case injected assets need time to load
 
   }, {
     key: "handleUpdateResponse",
@@ -4278,6 +4298,11 @@ var Actions = /*#__PURE__*/function () {
 
       if (this.delegate.isRedirect) {
         this.invoke('handleRedirectResponse', [this.delegate.options.redirect]);
+      } // Handle browser events
+
+
+      if (data['X_OCTOBER_DISPATCHES']) {
+        this.invoke('handleBrowserEvents', [data['X_OCTOBER_DISPATCHES']]);
       } // Handle validation
 
 
