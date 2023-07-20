@@ -4345,9 +4345,10 @@ var Actions = /*#__PURE__*/function () {
         _loop2();
       }
 
-      var newUrl = window.location.pathname;
+      var newUrl = window.location.pathname,
+          queryStr = searchParams.toString();
 
-      if (searchParams.size > 0) {
+      if (queryStr) {
         newUrl += '?' + searchParams.toString().replaceAll('%5B%5D=', '[]=');
       }
 

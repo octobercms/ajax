@@ -364,7 +364,7 @@ export class Actions
 
     // Custom function, adds query data to the current URL
     applyQueryToUrl(queryData) {
-        const searchParams = new URLSearchParams(window.location.search)
+        const searchParams = new URLSearchParams(window.location.search);
         for (const key of Object.keys(queryData)) {
             const value = queryData[key];
             if (Array.isArray(value)) {
@@ -381,8 +381,10 @@ export class Actions
             }
         }
 
-        var newUrl = window.location.pathname;
-        if (searchParams.size > 0) {
+        var newUrl = window.location.pathname,
+            queryStr = searchParams.toString();
+
+        if (queryStr) {
             newUrl += '?' + searchParams.toString().replaceAll('%5B%5D=', '[]=')
         }
 
