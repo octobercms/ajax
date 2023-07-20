@@ -82,6 +82,10 @@ export class RequestBuilder
     }
 
     assignAsEval(optionName, name) {
+        if (this.options[optionName] !== undefined) {
+            return;
+        }
+
         var attrVal;
         if (this.element.dataset[name]) {
             attrVal = this.element.dataset[name];
@@ -96,10 +100,14 @@ export class RequestBuilder
 
         this.options[optionName] = function(element, data) {
             return (new Function('data', attrVal)).apply(element, [data]);
-        }
+        };
     }
 
     assignAsData(optionName, name, { parseJson = false, emptyAsTrue = false } = {}) {
+        if (this.options[optionName] !== undefined) {
+            return;
+        }
+
         var attrVal;
         if (this.element.dataset[name]) {
             attrVal = this.element.dataset[name];
@@ -140,7 +148,7 @@ export class RequestBuilder
 
         if (mergeValue) {
             this.options[optionName] = {
-                ...this.options[optionName],
+                ...(this.options[optionName] || {}),
                 ...attrVal
             }
         }
