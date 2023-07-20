@@ -218,6 +218,10 @@ export class Request
         return dispatch('ajax:error-message', { target: window, detail: { message } });
     }
 
+    notifyApplicationCustomEvent(name, data) {
+        return dispatch(name, { target: this.el, detail: data });
+    }
+
     // HTTP request delegate
     requestStarted() {
         this.markAsProgress(true);

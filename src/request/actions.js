@@ -51,24 +51,26 @@ export class Actions
     }
 
     success(data, responseCode, xhr) {
+        let updatePromise = new Deferred;
+
         // Halt here if beforeUpdate() or data-request-before-update returns false
         if (this.invoke('beforeUpdate', [data, responseCode, xhr]) === false) {
-            return;
+            return updatePromise;
         }
 
         // Halt here if the error function returns false
         if (this.invokeFunc('beforeUpdateFunc', data) === false) {
-            return;
+            return updatePromise;
         }
 
         // Trigger 'ajaxBeforeUpdate' on the form, halt if event.preventDefault() is called
         if (!this.delegate.applicationAllowsUpdate(data, responseCode, xhr)) {
-            return;
+            return updatePromise;
         }
 
         if (this.delegate.options.download && data instanceof Blob) {
             if (this.invoke('handleFileDownload', [data, xhr])) {
-                return;
+                return updatePromise;
             }
         }
 
@@ -78,13 +80,17 @@ export class Actions
             }
         }
 
-        // Proceed with the update process
-        var self = this,
-            updatePromise = this.invoke('handleUpdateResponse', [data, responseCode, xhr]);
+        // Browser event has halted the process
+        if (data['X_OCTOBER_DISPATCHES'] && this.invoke('handleBrowserEvents', [data['X_OCTOBER_DISPATCHES']])) {
+            return updatePromise;
+        }
 
-        updatePromise.done(function() {
-            self.delegate.notifyApplicationRequestSuccess(data, responseCode, xhr);
-            self.invokeFunc('successFunc', data);
+        // Proceed with the update process
+        updatePromise = this.invoke('handleUpdateResponse', [data, responseCode, xhr]);
+
+        updatePromise.done(() => {
+            this.delegate.notifyApplicationRequestSuccess(data, responseCode, xhr);
+            this.invokeFunc('successFunc', data);
         });
 
         return updatePromise;
@@ -92,19 +98,23 @@ export class Actions
 
     error(data, responseCode, xhr) {
         let errorMsg,
-            updatePromise = new Deferred,
-            self = this;
+            updatePromise = new Deferred;
 
         if ((window.ocUnloading !== undefined && window.ocUnloading) || responseCode == SystemStatusCode.userAborted) {
-            return;
+            return updatePromise;
         }
 
         // Disable redirects
         this.delegate.toggleRedirect(false);
 
         // Error 406 is a "smart error" that returns response object that is
-        // processed in the same fashion as a successful response.
+        // processed in the same fashion as a successful response. The response
+        // may also dispatch events which can halt the process
         if (responseCode == 406 && data) {
+            if (data['X_OCTOBER_DISPATCHES'] && this.invoke('handleBrowserEvents', [data['X_OCTOBER_DISPATCHES']])) {
+                return updatePromise;
+            }
+
             errorMsg = data['X_OCTOBER_ERROR_MESSAGE'];
             updatePromise = this.invoke('handleUpdateResponse', [data, responseCode, xhr]);
         }
@@ -114,23 +124,23 @@ export class Actions
             updatePromise.resolve();
         }
 
-        updatePromise.done(function() {
+        updatePromise.done(() => {
             // Capture the error message on the node
-            if (self.el !== document) {
-                self.el.setAttribute('data-error-message', errorMsg);
+            if (this.el !== document) {
+                this.el.setAttribute('data-error-message', errorMsg);
             }
 
             // Trigger 'ajaxError' on the form, halt if event.preventDefault() is called
-            if (!self.delegate.applicationAllowsError(data, responseCode, xhr)) {
+            if (!this.delegate.applicationAllowsError(data, responseCode, xhr)) {
                 return;
             }
 
             // Halt here if the error function returns false
-            if (self.invokeFunc('errorFunc', data) === false) {
+            if (this.invokeFunc('errorFunc', data) === false) {
                 return;
             }
 
-            self.invoke('handleErrorMessage', [errorMsg]);
+            this.invoke('handleErrorMessage', [errorMsg]);
         });
 
         return updatePromise;
@@ -144,10 +154,9 @@ export class Actions
 
     // Custom function, requests confirmation from the user
     handleConfirmMessage(message) {
-        var self = this;
         const promise = new Deferred;
-        promise.done(function() {
-            self.delegate.sendInternal();
+        promise.done(() => {
+            this.delegate.sendInternal();
         });
 
         const event = this.delegate.notifyApplicationConfirmMessage(message, promise);
@@ -210,18 +219,23 @@ export class Actions
     // Custom function, handle a browser event coming from the server
     handleBrowserEvents(events) {
         if (!events || !events.length) {
-            return;
+            return false;
         }
 
-        events.forEach(event => {
-            const data = event.data || {};
-            const evt = new CustomEvent(event.event, {
-                bubbles: true,
-                detail: { ...data, context: this.context }
+        let defaultPrevented = false;
+
+        events.forEach(dispatched => {
+            const event = this.delegate.notifyApplicationCustomEvent(dispatched.event, {
+                ...(dispatched.data || {}),
+                context: this.context
             });
 
-            this.el.dispatchEvent(evt);
+            if (event.defaultPrevented) {
+                defaultPrevented = true;
+            }
         });
+
+        return defaultPrevented;
     }
 
     // Custom function, redirect the browser to another location
@@ -337,11 +351,6 @@ export class Actions
 
         if (this.delegate.isRedirect) {
             this.invoke('handleRedirectResponse', [this.delegate.options.redirect]);
-        }
-
-        // Handle browser events
-        if (data['X_OCTOBER_DISPATCHES']) {
-            this.invoke('handleBrowserEvents', [data['X_OCTOBER_DISPATCHES']]);
         }
 
         // Handle validation
