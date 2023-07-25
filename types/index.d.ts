@@ -158,8 +158,8 @@ declare function useTurbo(): boolean;
 declare function visit(location: string, options?: { scroll?: boolean; action: string }): void;
 declare function registerControl(id: string, control: Constructor<ObserveControlBase>): void;
 declare function importControl(id: string): void;
-declare function fetchControl(element: HTMLElement | string): void;
-declare function fetchControls(element: HTMLElement | string): void;
+declare function fetchControl(element: HTMLElement | string): ObserveControlBase;
+declare function fetchControls(element: HTMLElement | string): ObserveControlBase[];
 declare var progressBar: ProgressBar;
 
 export {
