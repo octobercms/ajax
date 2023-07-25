@@ -543,6 +543,10 @@ var RequestBuilder = /*#__PURE__*/function () {
   }, {
     key: "assignAsEval",
     value: function assignAsEval(optionName, name) {
+      if (this.options[optionName] !== undefined) {
+        return;
+      }
+
       var attrVal;
 
       if (this.element.dataset[name]) {
@@ -567,6 +571,10 @@ var RequestBuilder = /*#__PURE__*/function () {
           parseJson = _ref$parseJson === void 0 ? false : _ref$parseJson,
           _ref$emptyAsTrue = _ref.emptyAsTrue,
           emptyAsTrue = _ref$emptyAsTrue === void 0 ? false : _ref$emptyAsTrue;
+
+      if (this.options[optionName] !== undefined) {
+        return;
+      }
 
       var attrVal;
 
@@ -612,7 +620,7 @@ var RequestBuilder = /*#__PURE__*/function () {
       }
 
       if (mergeValue) {
-        this.options[optionName] = _objectSpread(_objectSpread({}, this.options[optionName]), attrVal);
+        this.options[optionName] = _objectSpread(_objectSpread({}, this.options[optionName] || {}), attrVal);
       } else {
         this.options[optionName] = attrVal;
       }
@@ -4018,24 +4026,27 @@ var Actions = /*#__PURE__*/function () {
   }, {
     key: "success",
     value: function success(data, responseCode, xhr) {
-      // Halt here if beforeUpdate() or data-request-before-update returns false
+      var _this = this;
+
+      var updatePromise = new _util_deferred__WEBPACK_IMPORTED_MODULE_2__.Deferred(); // Halt here if beforeUpdate() or data-request-before-update returns false
+
       if (this.invoke('beforeUpdate', [data, responseCode, xhr]) === false) {
-        return;
+        return updatePromise;
       } // Halt here if the error function returns false
 
 
       if (this.invokeFunc('beforeUpdateFunc', data) === false) {
-        return;
+        return updatePromise;
       } // Trigger 'ajaxBeforeUpdate' on the form, halt if event.preventDefault() is called
 
 
       if (!this.delegate.applicationAllowsUpdate(data, responseCode, xhr)) {
-        return;
+        return updatePromise;
       }
 
       if (this.delegate.options.download && data instanceof Blob) {
         if (this.invoke('handleFileDownload', [data, xhr])) {
-          return;
+          return updatePromise;
         }
       }
 
@@ -4043,33 +4054,44 @@ var Actions = /*#__PURE__*/function () {
         for (var type in data['X_OCTOBER_FLASH_MESSAGES']) {
           this.invoke('handleFlashMessage', [data['X_OCTOBER_FLASH_MESSAGES'][type], type]);
         }
+      } // Browser event has halted the process
+
+
+      if (data['X_OCTOBER_DISPATCHES'] && this.invoke('handleBrowserEvents', [data['X_OCTOBER_DISPATCHES']])) {
+        return updatePromise;
       } // Proceed with the update process
 
 
-      var self = this,
-          updatePromise = this.invoke('handleUpdateResponse', [data, responseCode, xhr]);
+      updatePromise = this.invoke('handleUpdateResponse', [data, responseCode, xhr]);
       updatePromise.done(function () {
-        self.delegate.notifyApplicationRequestSuccess(data, responseCode, xhr);
-        self.invokeFunc('successFunc', data);
+        _this.delegate.notifyApplicationRequestSuccess(data, responseCode, xhr);
+
+        _this.invokeFunc('successFunc', data);
       });
       return updatePromise;
     }
   }, {
     key: "error",
     value: function error(data, responseCode, xhr) {
+      var _this2 = this;
+
       var errorMsg,
-          updatePromise = new _util_deferred__WEBPACK_IMPORTED_MODULE_2__.Deferred(),
-          self = this;
+          updatePromise = new _util_deferred__WEBPACK_IMPORTED_MODULE_2__.Deferred();
 
       if (window.ocUnloading !== undefined && window.ocUnloading || responseCode == _util_http_request__WEBPACK_IMPORTED_MODULE_1__.SystemStatusCode.userAborted) {
-        return;
+        return updatePromise;
       } // Disable redirects
 
 
       this.delegate.toggleRedirect(false); // Error 406 is a "smart error" that returns response object that is
-      // processed in the same fashion as a successful response.
+      // processed in the same fashion as a successful response. The response
+      // may also dispatch events which can halt the process
 
       if (responseCode == 406 && data) {
+        if (data['X_OCTOBER_DISPATCHES'] && this.invoke('handleBrowserEvents', [data['X_OCTOBER_DISPATCHES']])) {
+          return updatePromise;
+        }
+
         errorMsg = data['X_OCTOBER_ERROR_MESSAGE'];
         updatePromise = this.invoke('handleUpdateResponse', [data, responseCode, xhr]);
       } // Standard error with standard response text
@@ -4080,21 +4102,21 @@ var Actions = /*#__PURE__*/function () {
 
       updatePromise.done(function () {
         // Capture the error message on the node
-        if (self.el !== document) {
-          self.el.setAttribute('data-error-message', errorMsg);
+        if (_this2.el !== document) {
+          _this2.el.setAttribute('data-error-message', errorMsg);
         } // Trigger 'ajaxError' on the form, halt if event.preventDefault() is called
 
 
-        if (!self.delegate.applicationAllowsError(data, responseCode, xhr)) {
+        if (!_this2.delegate.applicationAllowsError(data, responseCode, xhr)) {
           return;
         } // Halt here if the error function returns false
 
 
-        if (self.invokeFunc('errorFunc', data) === false) {
+        if (_this2.invokeFunc('errorFunc', data) === false) {
           return;
         }
 
-        self.invoke('handleErrorMessage', [errorMsg]);
+        _this2.invoke('handleErrorMessage', [errorMsg]);
       });
       return updatePromise;
     }
@@ -4109,10 +4131,11 @@ var Actions = /*#__PURE__*/function () {
   }, {
     key: "handleConfirmMessage",
     value: function handleConfirmMessage(message) {
-      var self = this;
+      var _this3 = this;
+
       var promise = new _util_deferred__WEBPACK_IMPORTED_MODULE_2__.Deferred();
       promise.done(function () {
-        self.delegate.sendInternal();
+        _this3.delegate.sendInternal();
       });
       var event = this.delegate.notifyApplicationConfirmMessage(message, promise);
 
@@ -4177,23 +4200,23 @@ var Actions = /*#__PURE__*/function () {
   }, {
     key: "handleBrowserEvents",
     value: function handleBrowserEvents(events) {
-      var _this = this;
+      var _this4 = this;
 
       if (!events || !events.length) {
-        return;
+        return false;
       }
 
-      events.forEach(function (event) {
-        var data = event.data || {};
-        var evt = new CustomEvent(event.event, {
-          bubbles: true,
-          detail: _objectSpread(_objectSpread({}, data), {}, {
-            context: _this.context
-          })
-        });
+      var defaultPrevented = false;
+      events.forEach(function (dispatched) {
+        var event = _this4.delegate.notifyApplicationCustomEvent(dispatched.event, _objectSpread(_objectSpread({}, dispatched.data || {}), {}, {
+          context: _this4.context
+        }));
 
-        _this.el.dispatchEvent(evt);
+        if (event.defaultPrevented) {
+          defaultPrevented = true;
+        }
       });
+      return defaultPrevented;
     } // Custom function, redirect the browser to another location
 
   }, {
@@ -4306,11 +4329,6 @@ var Actions = /*#__PURE__*/function () {
 
       if (this.delegate.isRedirect) {
         this.invoke('handleRedirectResponse', [this.delegate.options.redirect]);
-      } // Handle browser events
-
-
-      if (data['X_OCTOBER_DISPATCHES']) {
-        this.invoke('handleBrowserEvents', [data['X_OCTOBER_DISPATCHES']]);
       } // Handle validation
 
 
@@ -5436,6 +5454,14 @@ var Request = /*#__PURE__*/function () {
         detail: {
           message: message
         }
+      });
+    }
+  }, {
+    key: "notifyApplicationCustomEvent",
+    value: function notifyApplicationCustomEvent(name, data) {
+      return (0,_util__WEBPACK_IMPORTED_MODULE_6__.dispatch)(name, {
+        target: this.el,
+        detail: data
       });
     } // HTTP request delegate
 
