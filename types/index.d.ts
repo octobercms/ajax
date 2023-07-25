@@ -1,5 +1,7 @@
 declare module 'octobercms';
 
+type Constructor<T> = new (...args: any[]) => T;
+
 type ResponseCallback<T> = (data: T, statusCode: number, xhr: XMLHttpRequest) => void;
 
 type DataResponse = Record<string, unknown>;
@@ -13,6 +15,7 @@ export interface RequestOptions<T = unknown> {
     update?: Record<string, string>;
     confirm?: string;
     data?: unknown;
+    query?: unknown;
     headers?: Record<string, string>;
     redirect?: string;
     beforeUpdate?: ResponseCallback<T>;
@@ -141,15 +144,37 @@ export interface AjaxInvalidFieldEvent extends Event {
     };
 }
 
+export interface ObserveControlBase {
+    init: () => void;
+    connect: () => void;
+    disconnect: () => void;
+}
+
 declare function ajax<T = unknown>(handler: string, options: RequestOptions<T>): void;
 declare function request<T = unknown>(element: HTMLElement | string, handler: string, options: RequestOptions<T>): void;
 declare function parseJson(json: string): void;
 declare function flashMsg(options: { text: string, class: string, interval?: number }): void;
 declare function useTurbo(): boolean;
 declare function visit(location: string, options?: { scroll?: boolean; action: string }): void;
+declare function registerControl(id: string, control: Constructor<ObserveControlBase>): void;
+declare function importControl(id: string): void;
+declare function fetchControl(element: HTMLElement | string): void;
+declare function fetchControls(element: HTMLElement | string): void;
 declare var progressBar: ProgressBar;
 
-export { ajax, request, parseJson, flashMsg, progressBar, useTurbo, visit };
+export {
+    ajax,
+    request,
+    parseJson,
+    flashMsg,
+    progressBar,
+    useTurbo,
+    visit,
+    registerControl,
+    importControl,
+    fetchControl,
+    fetchControls
+};
 
 declare global {
     interface Window {
@@ -161,6 +186,11 @@ declare global {
             progressBar?: typeof progressBar; // Optional, only available with extra's
             useTurbo?: typeof useTurbo; // Optional, only available with turbo
             visit?: typeof visit; // Optional, only available with turbo
+            ControlBase?: typeof ObserveControlBase; // Optional, only available with observe
+            registerControl?: typeof registerControl; // Optional, only available with observe
+            importControl?: typeof importControl; // Optional, only available with observe
+            fetchControl?: typeof fetchControl; // Optional, only available with observe
+            fetchControls?: typeof fetchControls; // Optional, only available with observe
         },
     }
 
