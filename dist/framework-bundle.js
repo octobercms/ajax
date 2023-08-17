@@ -2006,8 +2006,9 @@ var Context = /*#__PURE__*/function () {
     this.control = new module.controlConstructor(this);
 
     try {
-      this.control.initInternal();
+      this.control.initBefore();
       this.control.init();
+      this.control.initAfter();
     } catch (error) {
       this.handleError(error, 'initializing control');
     }
@@ -2017,8 +2018,9 @@ var Context = /*#__PURE__*/function () {
     key: "connect",
     value: function connect() {
       try {
-        this.control.connectInternal();
+        this.control.connectBefore();
         this.control.connect();
+        this.control.connectAfter();
       } catch (error) {
         this.handleError(error, 'connecting control');
       }
@@ -2030,8 +2032,9 @@ var Context = /*#__PURE__*/function () {
     key: "disconnect",
     value: function disconnect() {
       try {
+        this.control.disconnectBefore();
         this.control.disconnect();
-        this.control.disconnectInternal();
+        this.control.disconnectAfter();
       } catch (error) {
         this.handleError(error, 'disconnecting control');
       }
@@ -2159,17 +2162,26 @@ var ControlBase = /*#__PURE__*/function () {
     } // Internal events avoid the need to call parent logic
 
   }, {
-    key: "initInternal",
-    value: function initInternal() {
+    key: "initBefore",
+    value: function initBefore() {
       this.proxiedEvents = {};
       this.proxiedMethods = {};
     }
   }, {
-    key: "connectInternal",
-    value: function connectInternal() {}
+    key: "initAfter",
+    value: function initAfter() {}
   }, {
-    key: "disconnectInternal",
-    value: function disconnectInternal() {
+    key: "connectBefore",
+    value: function connectBefore() {}
+  }, {
+    key: "connectAfter",
+    value: function connectAfter() {}
+  }, {
+    key: "disconnectBefore",
+    value: function disconnectBefore() {}
+  }, {
+    key: "disconnectAfter",
+    value: function disconnectAfter() {
       for (var key in this.proxiedEvents) {
         this.forget.apply(this, _toConsumableArray(this.proxiedEvents[key]));
         delete this.proxiedEvents[key];
@@ -5187,7 +5199,7 @@ var Request = /*#__PURE__*/function () {
 
 
       this.sendInternal();
-      return this.promise;
+      return this.options.async ? this.wrapInAsyncPromise(this.promise) : this.promise;
     }
   }, {
     key: "sendInternal",
@@ -5591,6 +5603,20 @@ var Request = /*#__PURE__*/function () {
           this.formEl.removeAttribute('data-ajax-progress');
         }
       }
+    }
+  }, {
+    key: "wrapInAsyncPromise",
+    value: function wrapInAsyncPromise(requestPromise) {
+      return new Promise(function (resolve, reject, onCancel) {
+        requestPromise.fail(function (data) {
+          reject(data);
+        }).done(function (data) {
+          resolve(data);
+        });
+        onCancel(function () {
+          requestPromise.abort();
+        });
+      });
     }
   }], [{
     key: "DEFAULTS",
