@@ -77,7 +77,10 @@ export class Request
 
         // Send request
         this.sendInternal();
-        return this.promise;
+
+        return this.options.async
+            ? this.wrapInAsyncPromise(this.promise)
+            : this.promise;
     }
 
     sendInternal() {
@@ -349,5 +352,21 @@ export class Request
                 this.formEl.removeAttribute('data-ajax-progress');
             }
         }
+    }
+
+    wrapInAsyncPromise(requestPromise) {
+        return new Promise(function (resolve, reject, onCancel) {
+            requestPromise
+                .fail(function(data) {
+                    reject(data);
+                })
+                .done(function(data) {
+                    resolve(data);
+                });
+
+            onCancel(function() {
+                requestPromise.abort();
+            });
+        });
     }
 }
