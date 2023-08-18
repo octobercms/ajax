@@ -216,11 +216,8 @@ export class Controller
     decrementPendingAsset() {
         this.pendingAssets--;
         if (this.pendingAssets === 0) {
-            // Wait for assets to execute after loading
-            setTimeout(() => {
-                this.notifyApplicationAfterPageAndScriptsLoad();
-                this.notifyApplicationAfterLoadScripts();
-            }, 0);
+            this.notifyApplicationAfterPageAndScriptsLoad();
+            this.notifyApplicationAfterLoadScripts();
         }
     }
 
