@@ -283,12 +283,11 @@ export class Actions
     // Custom function, handle any application specific response values
     // Using a promissory object here in case injected assets need time to load
     handleUpdateResponse(data, responseCode, xhr) {
-        var self = this,
-            updateOptions = this.options.update || {},
+        var updateOptions = this.options.update || {},
             updatePromise = new Deferred;
 
         // Update partials and finish request
-        updatePromise.done(function() {
+        updatePromise.done(() => {
             for (var partial in data) {
                 // If a partial has been supplied on the client side that matches the server supplied key, look up
                 // it's selector and use that. If not, we assume it is an explicit selector reference.
@@ -297,15 +296,15 @@ export class Actions
 
                 // If the update options has a _self, values like true and '^' will resolve to the partial element,
                 // these values are also used to make AJAX partial handlers available without performing an update
-                if (updateOptions['_self'] && partial == self.options.partial && self.delegate.partialEl) {
+                if (updateOptions['_self'] && partial == this.options.partial && this.delegate.partialEl) {
                     selector = updateOptions['_self'];
-                    selectedEl = [self.delegate.partialEl];
+                    selectedEl = [this.delegate.partialEl];
                 }
                 else {
                     selectedEl = resolveSelectorResponse(selector, '[data-ajax-partial="'+partial+'"]');
                 }
 
-                selectedEl.forEach(function(el) {
+                selectedEl.forEach((el) => {
                     const updateMode = getSelectorUpdateMode(selector, el);
 
                     // Replace With
@@ -327,20 +326,20 @@ export class Actions
                     }
                     // Insert
                     else {
-                        self.delegate.notifyApplicationBeforeReplace(el);
+                        this.delegate.notifyApplicationBeforeReplace(el);
                         el.innerHTML = data[partial];
                         runScriptsOnElement(el);
                     }
 
-                    self.delegate.notifyApplicationAjaxUpdate(el, data, responseCode, xhr);
+                    this.delegate.notifyApplicationAjaxUpdate(el, data, responseCode, xhr);
                 });
             }
 
             // Wait for update method to finish rendering from partial updates
-            setTimeout(function() {
-                self.delegate.notifyApplicationUpdateComplete(data, responseCode, xhr);
-                self.invoke('afterUpdate', [data, responseCode, xhr]);
-                self.invokeFunc('afterUpdateFunc', data);
+            setTimeout(() => {
+                this.delegate.notifyApplicationUpdateComplete(data, responseCode, xhr);
+                this.invoke('afterUpdate', [data, responseCode, xhr]);
+                this.invokeFunc('afterUpdateFunc', data);
             }, 0);
         });
 
