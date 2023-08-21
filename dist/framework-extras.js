@@ -4277,8 +4277,9 @@ var Actions = /*#__PURE__*/function () {
   }, {
     key: "handleUpdateResponse",
     value: function handleUpdateResponse(data, responseCode, xhr) {
-      var self = this,
-          updateOptions = this.options.update || {},
+      var _this5 = this;
+
+      var updateOptions = this.options.update || {},
           updatePromise = new _util_deferred__WEBPACK_IMPORTED_MODULE_2__.Deferred(); // Update partials and finish request
 
       updatePromise.done(function () {
@@ -4289,9 +4290,9 @@ var Actions = /*#__PURE__*/function () {
           var selectedEl = []; // If the update options has a _self, values like true and '^' will resolve to the partial element,
           // these values are also used to make AJAX partial handlers available without performing an update
 
-          if (updateOptions['_self'] && partial == self.options.partial && self.delegate.partialEl) {
+          if (updateOptions['_self'] && partial == _this5.options.partial && _this5.delegate.partialEl) {
             selector = updateOptions['_self'];
-            selectedEl = [self.delegate.partialEl];
+            selectedEl = [_this5.delegate.partialEl];
           } else {
             selectedEl = resolveSelectorResponse(selector, '[data-ajax-partial="' + partial + '"]');
           }
@@ -4314,12 +4315,13 @@ var Actions = /*#__PURE__*/function () {
               runScriptsOnFragment(el, data[partial]);
             } // Insert
             else {
-              self.delegate.notifyApplicationBeforeReplace(el);
+              _this5.delegate.notifyApplicationBeforeReplace(el);
+
               el.innerHTML = data[partial];
               runScriptsOnElement(el);
             }
 
-            self.delegate.notifyApplicationAjaxUpdate(el, data, responseCode, xhr);
+            _this5.delegate.notifyApplicationAjaxUpdate(el, data, responseCode, xhr);
           });
         };
 
@@ -4329,9 +4331,11 @@ var Actions = /*#__PURE__*/function () {
 
 
         setTimeout(function () {
-          self.delegate.notifyApplicationUpdateComplete(data, responseCode, xhr);
-          self.invoke('afterUpdate', [data, responseCode, xhr]);
-          self.invokeFunc('afterUpdateFunc', data);
+          _this5.delegate.notifyApplicationUpdateComplete(data, responseCode, xhr);
+
+          _this5.invoke('afterUpdate', [data, responseCode, xhr]);
+
+          _this5.invokeFunc('afterUpdateFunc', data);
         }, 0);
       }); // Handle redirect
 
