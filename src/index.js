@@ -33,6 +33,7 @@ export default {
     progressBar: AjaxExtras.progressBar,
     attachLoader: AjaxExtras.attachLoader,
     useTurbo: AjaxTurbo.isEnabled,
+    pageReady: AjaxTurbo.pageReady,
     visit: AjaxTurbo.visit,
     registerControl: AjaxObserve.registerControl,
     importControl: AjaxObserve.importControl,

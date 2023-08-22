@@ -15,6 +15,9 @@ if (!window.oc.AjaxTurbo) {
     // Enabled helper
     window.oc.useTurbo = namespace.isEnabled;
 
+    // Page ready helper
+    window.oc.pageReady = namespace.pageReady;
+
     // Boot controller
     if (!isAMD() && !isCommonJS()) {
         namespace.start();

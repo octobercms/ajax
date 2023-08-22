@@ -25,9 +25,11 @@ export class Controller
         this.uniqueInlineScripts = [];
         this.currentVisit = null;
         this.historyVisit = null;
+        this.pageIsReady = false;
 
         // Event handlers
         this.pageLoaded = () => {
+            this.pageIsReady = true;
             this.lastRenderedLocation = this.location;
             this.notifyApplicationAfterPageLoad();
             this.notifyApplicationAfterPageAndScriptsLoad();
@@ -82,6 +84,17 @@ export class Controller
 
     isEnabled() {
         return this.started && this.enabled;
+    }
+
+    pageReady() {
+        return new Promise((resolve) => {
+            if (!this.pageIsReady) {
+                addEventListener('render', () => resolve(), { once: true });
+            }
+            else {
+                resolve();
+            }
+        });
     }
 
     clearCache() {
@@ -216,6 +229,7 @@ export class Controller
     decrementPendingAsset() {
         this.pendingAssets--;
         if (this.pendingAssets === 0) {
+            this.pageIsReady = true;
             this.notifyApplicationAfterPageAndScriptsLoad();
             this.notifyApplicationAfterLoadScripts();
         }
@@ -231,6 +245,7 @@ export class Controller
     }
 
     viewAllowsImmediateRender(newBody, options) {
+        this.pageIsReady = false;
         this.notifyApplicationUnload();
         const event = this.notifyApplicationBeforeRender(newBody, options);
         return !event.defaultPrevented;
@@ -333,6 +348,7 @@ export class Controller
         this.notifyApplicationAfterPageLoad(visit.getTimingMetrics());
 
         if (this.pendingAssets === 0) {
+            this.pageIsReady = true;
             this.notifyApplicationAfterPageAndScriptsLoad();
             this.notifyApplicationAfterLoadScripts();
         }
