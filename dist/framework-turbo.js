@@ -2802,9 +2802,11 @@ var Controller = /*#__PURE__*/function () {
     this.started = false;
     this.uniqueInlineScripts = [];
     this.currentVisit = null;
-    this.historyVisit = null; // Event handlers
+    this.historyVisit = null;
+    this.pageIsReady = false; // Event handlers
 
     this.pageLoaded = function () {
+      _this.pageIsReady = true;
       _this.lastRenderedLocation = _this.location;
 
       _this.notifyApplicationAfterPageLoad();
@@ -2875,6 +2877,23 @@ var Controller = /*#__PURE__*/function () {
     key: "isEnabled",
     value: function isEnabled() {
       return this.started && this.enabled;
+    }
+  }, {
+    key: "pageReady",
+    value: function pageReady() {
+      var _this2 = this;
+
+      return new Promise(function (resolve) {
+        if (!_this2.pageIsReady) {
+          addEventListener('render', function () {
+            return resolve();
+          }, {
+            once: true
+          });
+        } else {
+          resolve();
+        }
+      });
     }
   }, {
     key: "clearCache",
@@ -2987,14 +3006,14 @@ var Controller = /*#__PURE__*/function () {
   }, {
     key: "cacheSnapshot",
     value: function cacheSnapshot() {
-      var _this2 = this;
+      var _this3 = this;
 
       if (this.shouldCacheSnapshot()) {
         this.notifyApplicationBeforeCachingSnapshot();
         var snapshot = this.view.getSnapshot();
         var location = this.lastRenderedLocation || _location__WEBPACK_IMPORTED_MODULE_2__.Location.currentLocation;
         (0,_util__WEBPACK_IMPORTED_MODULE_5__.defer)(function () {
-          return _this2.cache.put(location, snapshot.clone());
+          return _this3.cache.put(location, snapshot.clone());
         });
       }
     } // Scrolling
@@ -3042,6 +3061,7 @@ var Controller = /*#__PURE__*/function () {
       this.pendingAssets--;
 
       if (this.pendingAssets === 0) {
+        this.pageIsReady = true;
         this.notifyApplicationAfterPageAndScriptsLoad();
         this.notifyApplicationAfterLoadScripts();
       }
@@ -3060,6 +3080,7 @@ var Controller = /*#__PURE__*/function () {
   }, {
     key: "viewAllowsImmediateRender",
     value: function viewAllowsImmediateRender(newBody, options) {
+      this.pageIsReady = false;
       this.notifyApplicationUnload();
       var event = this.notifyApplicationBeforeRender(newBody, options);
       return !event.defaultPrevented;
@@ -3074,10 +3095,10 @@ var Controller = /*#__PURE__*/function () {
   }, {
     key: "observeInlineScripts",
     value: function observeInlineScripts() {
-      var _this3 = this;
+      var _this4 = this;
 
       document.documentElement.querySelectorAll('script[data-turbo-eval-once]').forEach(function (el) {
-        return _this3.applicationHasSeenInlineScript(el);
+        return _this4.applicationHasSeenInlineScript(el);
       });
     }
   }, {
@@ -3220,6 +3241,7 @@ var Controller = /*#__PURE__*/function () {
       this.notifyApplicationAfterPageLoad(visit.getTimingMetrics());
 
       if (this.pendingAssets === 0) {
+        this.pageIsReady = true;
         this.notifyApplicationAfterPageAndScriptsLoad();
         this.notifyApplicationAfterLoadScripts();
       }
@@ -3759,7 +3781,9 @@ if (!window.oc.AjaxTurbo) {
 
   window.oc.visit = _namespace__WEBPACK_IMPORTED_MODULE_0__["default"].visit; // Enabled helper
 
-  window.oc.useTurbo = _namespace__WEBPACK_IMPORTED_MODULE_0__["default"].isEnabled; // Boot controller
+  window.oc.useTurbo = _namespace__WEBPACK_IMPORTED_MODULE_0__["default"].isEnabled; // Page ready helper
+
+  window.oc.pageReady = _namespace__WEBPACK_IMPORTED_MODULE_0__["default"].pageReady; // Boot controller
 
   if (!isAMD() && !isCommonJS()) {
     _namespace__WEBPACK_IMPORTED_MODULE_0__["default"].start();
@@ -3943,6 +3967,9 @@ var controller = new _controller__WEBPACK_IMPORTED_MODULE_0__.Controller();
   },
   isEnabled: function isEnabled() {
     return controller.isEnabled();
+  },
+  pageReady: function pageReady() {
+    return controller.pageReady();
   }
 });
 
