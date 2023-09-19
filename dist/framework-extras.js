@@ -4190,9 +4190,26 @@ var Actions = /*#__PURE__*/function () {
       var isFirstInvalidField = true;
 
       for (var fieldName in fields) {
-        var fieldNameRaw = fieldName.replace(/\.(\w+)/g, '[$1]'),
-            fieldNameArr = ('.' + fieldName).replace(/\.(\w+)/g, '[$1]');
-        var fieldNameOptions = ['[name="' + fieldNameRaw + '"]:not([disabled])', '[name="' + fieldNameRaw + '[]"]:not([disabled])', '[name$="' + fieldNameArr + '"]:not([disabled])', '[name$="' + fieldNameArr + '[]"]:not([disabled])'];
+        var fieldCheck,
+            fieldNameOptions = []; // field1[field2][field3]
+
+        fieldCheck = fieldName.replace(/\.(\w+)/g, '[$1]');
+        fieldNameOptions.push('[name="' + fieldCheck + '"]:not([disabled])');
+        fieldNameOptions.push('[name="' + fieldCheck + '[]"]:not([disabled])'); // [field1][field2][field3]
+
+        fieldCheck = ('.' + fieldName).replace(/\.(\w+)/g, '[$1]');
+        fieldNameOptions.push('[name$="' + fieldCheck + '"]:not([disabled])');
+        fieldNameOptions.push('[name$="' + fieldCheck + '[]"]:not([disabled])'); // field.0 → field[]
+
+        var fieldEmpty = fieldName.replace(/\.[0-9]+$/g, '');
+
+        if (fieldName !== fieldEmpty) {
+          fieldCheck = fieldEmpty.replace(/\.(\w+)/g, '[$1]');
+          fieldNameOptions.push('[name="' + fieldCheck + '[]"]:not([disabled])');
+          fieldCheck = ('.' + fieldEmpty).replace(/\.(\w+)/g, '[$1]');
+          fieldNameOptions.push('[name$="' + fieldCheck + '[]"]:not([disabled])');
+        }
+
         var fieldElement = this.delegate.formEl.querySelector(fieldNameOptions.join(', '));
 
         if (fieldElement) {
