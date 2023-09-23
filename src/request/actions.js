@@ -51,24 +51,26 @@ export class Actions
     }
 
     success(data, responseCode, xhr) {
+        let updatePromise = new Deferred;
+
         // Halt here if beforeUpdate() or data-request-before-update returns false
         if (this.invoke('beforeUpdate', [data, responseCode, xhr]) === false) {
-            return;
+            return updatePromise;
         }
 
         // Halt here if the error function returns false
         if (this.invokeFunc('beforeUpdateFunc', data) === false) {
-            return;
+            return updatePromise;
         }
 
         // Trigger 'ajaxBeforeUpdate' on the form, halt if event.preventDefault() is called
         if (!this.delegate.applicationAllowsUpdate(data, responseCode, xhr)) {
-            return;
+            return updatePromise;
         }
 
         if (this.delegate.options.download && data instanceof Blob) {
             if (this.invoke('handleFileDownload', [data, xhr])) {
-                return;
+                return updatePromise;
             }
         }
 
@@ -78,13 +80,17 @@ export class Actions
             }
         }
 
-        // Proceed with the update process
-        var self = this,
-            updatePromise = this.invoke('handleUpdateResponse', [data, responseCode, xhr]);
+        // Browser event has halted the process
+        if (data['X_OCTOBER_DISPATCHES'] && this.invoke('handleBrowserEvents', [data['X_OCTOBER_DISPATCHES']])) {
+            return updatePromise;
+        }
 
-        updatePromise.done(function() {
-            self.delegate.notifyApplicationRequestSuccess(data, responseCode, xhr);
-            self.invokeFunc('successFunc', data);
+        // Proceed with the update process
+        updatePromise = this.invoke('handleUpdateResponse', [data, responseCode, xhr]);
+
+        updatePromise.done(() => {
+            this.delegate.notifyApplicationRequestSuccess(data, responseCode, xhr);
+            this.invokeFunc('successFunc', data);
         });
 
         return updatePromise;
@@ -92,19 +98,23 @@ export class Actions
 
     error(data, responseCode, xhr) {
         let errorMsg,
-            updatePromise = new Deferred,
-            self = this;
+            updatePromise = new Deferred;
 
         if ((window.ocUnloading !== undefined && window.ocUnloading) || responseCode == SystemStatusCode.userAborted) {
-            return;
+            return updatePromise;
         }
 
         // Disable redirects
         this.delegate.toggleRedirect(false);
 
         // Error 406 is a "smart error" that returns response object that is
-        // processed in the same fashion as a successful response.
+        // processed in the same fashion as a successful response. The response
+        // may also dispatch events which can halt the process
         if (responseCode == 406 && data) {
+            if (data['X_OCTOBER_DISPATCHES'] && this.invoke('handleBrowserEvents', [data['X_OCTOBER_DISPATCHES']])) {
+                return updatePromise;
+            }
+
             errorMsg = data['X_OCTOBER_ERROR_MESSAGE'];
             updatePromise = this.invoke('handleUpdateResponse', [data, responseCode, xhr]);
         }
@@ -114,23 +124,23 @@ export class Actions
             updatePromise.resolve();
         }
 
-        updatePromise.done(function() {
+        updatePromise.done(() => {
             // Capture the error message on the node
-            if (self.el !== document) {
-                self.el.setAttribute('data-error-message', errorMsg);
+            if (this.el !== document) {
+                this.el.setAttribute('data-error-message', errorMsg);
             }
 
             // Trigger 'ajaxError' on the form, halt if event.preventDefault() is called
-            if (!self.delegate.applicationAllowsError(data, responseCode, xhr)) {
+            if (!this.delegate.applicationAllowsError(data, responseCode, xhr)) {
                 return;
             }
 
             // Halt here if the error function returns false
-            if (self.invokeFunc('errorFunc', data) === false) {
+            if (this.invokeFunc('errorFunc', data) === false) {
                 return;
             }
 
-            self.invoke('handleErrorMessage', [errorMsg]);
+            this.invoke('handleErrorMessage', [errorMsg]);
         });
 
         return updatePromise;
@@ -144,10 +154,9 @@ export class Actions
 
     // Custom function, requests confirmation from the user
     handleConfirmMessage(message) {
-        var self = this;
         const promise = new Deferred;
-        promise.done(function() {
-            self.delegate.sendInternal();
+        promise.done(() => {
+            this.delegate.sendInternal();
         });
 
         const event = this.delegate.notifyApplicationConfirmMessage(message, promise);
@@ -220,6 +229,28 @@ export class Actions
         }
     }
 
+    // Custom function, handle a browser event coming from the server
+    handleBrowserEvents(events) {
+        if (!events || !events.length) {
+            return false;
+        }
+
+        let defaultPrevented = false;
+
+        events.forEach(dispatched => {
+            const event = this.delegate.notifyApplicationCustomEvent(dispatched.event, {
+                ...(dispatched.data || {}),
+                context: this.context
+            });
+
+            if (event.defaultPrevented) {
+                defaultPrevented = true;
+            }
+        });
+
+        return defaultPrevented;
+    }
+
     // Custom function, redirect the browser to another location
     handleRedirectResponse(href) {
         const event = this.delegate.notifyApplicationBeforeRedirect();
@@ -263,14 +294,13 @@ export class Actions
     }
 
     // Custom function, handle any application specific response values
-    // Using a promisary object here in case injected assets need time to load
+    // Using a promissory object here in case injected assets need time to load
     handleUpdateResponse(data, responseCode, xhr) {
-        var self = this,
-            updateOptions = this.options.update || {},
+        var updateOptions = this.options.update || {},
             updatePromise = new Deferred;
 
         // Update partials and finish request
-        updatePromise.done(function() {
+        updatePromise.done(() => {
             for (var partial in data) {
                 // If a partial has been supplied on the client side that matches the server supplied key, look up
                 // it's selector and use that. If not, we assume it is an explicit selector reference.
@@ -279,15 +309,15 @@ export class Actions
 
                 // If the update options has a _self, values like true and '^' will resolve to the partial element,
                 // these values are also used to make AJAX partial handlers available without performing an update
-                if (updateOptions['_self'] && partial == self.options.partial && self.delegate.partialEl) {
+                if (updateOptions['_self'] && partial == this.options.partial && this.delegate.partialEl) {
                     selector = updateOptions['_self'];
-                    selectedEl = [self.delegate.partialEl];
+                    selectedEl = [this.delegate.partialEl];
                 }
                 else {
                     selectedEl = resolveSelectorResponse(selector, '[data-ajax-partial="'+partial+'"]');
                 }
 
-                selectedEl.forEach(function(el) {
+                selectedEl.forEach((el) => {
                     const updateMode = getSelectorUpdateMode(selector, el);
 
                     // Replace With
@@ -309,22 +339,22 @@ export class Actions
                     }
                     // Insert
                     else {
-                        self.delegate.notifyApplicationBeforeReplace(el);
+                        this.delegate.notifyApplicationBeforeReplace(el);
                         el.innerHTML = data[partial];
                         runScriptsOnElement(el);
                     }
 
-                    self.delegate.notifyApplicationAjaxUpdate(el, data, responseCode, xhr);
+                    this.delegate.notifyApplicationAjaxUpdate(el, data, responseCode, xhr);
                 });
             }
 
             // Wait for update method to finish rendering from partial updates
-            setTimeout(function() {
-                self.delegate.notifyApplicationUpdateComplete(data, responseCode, xhr);
-                self.invoke('afterUpdate', [data, responseCode, xhr]);
-                self.invokeFunc('afterUpdateFunc', data);
+            setTimeout(() => {
+                this.delegate.notifyApplicationUpdateComplete(data, responseCode, xhr);
+                this.invoke('afterUpdate', [data, responseCode, xhr]);
+                this.invokeFunc('afterUpdateFunc', data);
             }, 0);
-        })
+        });
 
         // Handle redirect
         if (data['X_OCTOBER_REDIRECT']) {

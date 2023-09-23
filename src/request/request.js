@@ -77,7 +77,10 @@ export class Request
 
         // Send request
         this.sendInternal();
-        return this.promise;
+
+        return this.options.async
+            ? this.wrapInAsyncPromise(this.promise)
+            : this.promise;
     }
 
     sendInternal() {
@@ -218,6 +221,10 @@ export class Request
         return dispatch('ajax:error-message', { target: window, detail: { message } });
     }
 
+    notifyApplicationCustomEvent(name, data) {
+        return dispatch(name, { target: this.el, detail: data });
+    }
+
     // HTTP request delegate
     requestStarted() {
         this.markAsProgress(true);
@@ -345,5 +352,21 @@ export class Request
                 this.formEl.removeAttribute('data-ajax-progress');
             }
         }
+    }
+
+    wrapInAsyncPromise(requestPromise) {
+        return new Promise(function (resolve, reject, onCancel) {
+            requestPromise
+                .fail(function(data) {
+                    reject(data);
+                })
+                .done(function(data) {
+                    resolve(data);
+                });
+
+            onCancel(function() {
+                requestPromise.abort();
+            });
+        });
     }
 }

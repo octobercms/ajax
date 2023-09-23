@@ -30,5 +30,9 @@ export default {
 
     isEnabled() {
         return controller.isEnabled();
+    },
+
+    pageReady() {
+        return controller.pageReady();
     }
 };

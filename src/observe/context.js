@@ -6,8 +6,9 @@ export class Context
         this.control = new module.controlConstructor(this);
 
         try {
-            this.control.initInternal();
+            this.control.initBefore();
             this.control.init();
+            this.control.initAfter();
         }
         catch (error) {
             this.handleError(error, 'initializing control');
@@ -16,8 +17,9 @@ export class Context
 
     connect() {
         try {
-            this.control.connectInternal();
+            this.control.connectBefore();
             this.control.connect();
+            this.control.connectAfter();
         }
         catch (error) {
             this.handleError(error, 'connecting control');
@@ -29,8 +31,9 @@ export class Context
 
     disconnect() {
         try {
+            this.control.disconnectBefore();
             this.control.disconnect();
-            this.control.disconnectInternal();
+            this.control.disconnectAfter();
         }
         catch (error) {
             this.handleError(error, 'disconnecting control');

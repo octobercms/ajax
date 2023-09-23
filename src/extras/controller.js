@@ -46,6 +46,7 @@ export class Controller
             if (options.flash) {
                 options.handleErrorMessage = function(message) {
                     if (
+                        message &&
                         shouldShowFlashMessage(options.flash, 'error') ||
                         shouldShowFlashMessage(options.flash, 'validate')
                     ) {
@@ -54,7 +55,7 @@ export class Controller
                 }
 
                 options.handleFlashMessage = function(message, type) {
-                    if (shouldShowFlashMessage(options.flash, type)) {
+                    if (message && shouldShowFlashMessage(options.flash, type)) {
                         self.flashMessage.show({ message, type });
                     }
                 }

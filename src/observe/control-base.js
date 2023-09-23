@@ -48,15 +48,24 @@ class ControlBase
     }
 
     // Internal events avoid the need to call parent logic
-    initInternal() {
+    initBefore() {
         this.proxiedEvents = {};
         this.proxiedMethods = {};
     }
 
-    connectInternal() {
+    initAfter() {
     }
 
-    disconnectInternal() {
+    connectBefore() {
+    }
+
+    connectAfter() {
+    }
+
+    disconnectBefore() {
+    }
+
+    disconnectAfter() {
         for (const key in this.proxiedEvents) {
             this.forget(...this.proxiedEvents[key]);
             delete this.proxiedEvents[key];
