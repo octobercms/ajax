@@ -17,30 +17,34 @@ export class Controller
         }
 
         // Attach loader
-        this.showAttachLoader = (function(event) {
+        this.showAttachLoader = (event) => {
             this.attachLoader.showForm(event.target);
-        }).bind(this);
+        };
 
-        this.hideAttachLoader = (function(event) {
+        this.hideAttachLoader = (event) => {
             this.attachLoader.hideForm(event.target);
-        }).bind(this);
+        };
+
+        this.hideAllAttachLoaders = (event) => {
+            this.attachLoader.hideAll();
+        };
 
         // Validator
-        this.validatorSubmit = (function(event) {
+        this.validatorSubmit = (event) => {
             this.validator.submit(event.target);
-        }).bind(this);
+        };
 
-        this.validatorValidate = (function(event) {
+        this.validatorValidate = (event) => {
             this.validator.validate(
                 event.target,
                 event.detail.fields,
                 event.detail.message,
                 shouldShowFlashMessage(event.detail.context.options.flash, 'validate')
             );
-        }).bind(this);
+        };
 
         // Flash message
-        this.flashMessageBind = (function(event) {
+        this.flashMessageBind = (event) => {
             const { options } = event.detail.context;
             const self = this;
             if (options.flash) {
@@ -60,11 +64,11 @@ export class Controller
                     }
                 }
             }
-        }).bind(this);
+        };
 
-        this.flashMessageRender = (function(event) {
+        this.flashMessageRender = (event) => {
             this.flashMessage.render();
-        }).bind(this);
+        };
 
         // Browser redirect
         this.handleBrowserRedirect = function(event) {
@@ -99,6 +103,7 @@ export class Controller
             Events.on(document, 'ajax:promise', 'form, [data-attach-loading]', this.showAttachLoader);
             Events.on(document, 'ajax:fail', 'form, [data-attach-loading]', this.hideAttachLoader);
             Events.on(document, 'ajax:done', 'form, [data-attach-loading]', this.hideAttachLoader);
+            addEventListener('page:before-cache', this.hideAllAttachLoaders);
 
             // Validator
             this.validator = new Validator;
@@ -128,6 +133,7 @@ export class Controller
             Events.off(document, 'ajax:promise', 'form, [data-attach-loading]', this.showAttachLoader);
             Events.off(document, 'ajax:fail', 'form, [data-attach-loading]', this.hideAttachLoader);
             Events.off(document, 'ajax:done', 'form, [data-attach-loading]', this.hideAttachLoader);
+            removeEventListener('page:before-cache', this.hideAllAttachLoaders);
 
             // Validator
             this.validator = null;

@@ -760,6 +760,17 @@ var AttachLoader = /*#__PURE__*/function () {
       }
     }
   }, {
+    key: "hideAll",
+    value: function hideAll() {
+      document.querySelectorAll('.oc-attach-loader.is-inline').forEach(function (el) {
+        el.remove();
+      });
+      document.querySelectorAll('.oc-attach-loader').forEach(function (el) {
+        el.classList.remove('oc-attach-loader');
+        el.disabled = false;
+      });
+    }
+  }, {
     key: "showForm",
     value: function showForm(el) {
       if (el.dataset.attachLoading !== undefined) {
@@ -821,6 +832,9 @@ var AttachLoader = /*#__PURE__*/function () {
         },
         hide: function hide(el) {
           new AttachLoader().hide(resolveElement(el));
+        },
+        hideAll: function hideAll() {
+          new AttachLoader().hideAll();
         }
       };
     }
@@ -875,6 +889,8 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 var Controller = /*#__PURE__*/function () {
   function Controller() {
+    var _this = this;
+
     _classCallCheck(this, Controller);
 
     this.started = false; // Progress bar default value
@@ -889,26 +905,30 @@ var Controller = /*#__PURE__*/function () {
 
 
     this.showAttachLoader = function (event) {
-      this.attachLoader.showForm(event.target);
-    }.bind(this);
+      _this.attachLoader.showForm(event.target);
+    };
 
     this.hideAttachLoader = function (event) {
-      this.attachLoader.hideForm(event.target);
-    }.bind(this); // Validator
+      _this.attachLoader.hideForm(event.target);
+    };
+
+    this.hideAllAttachLoaders = function (event) {
+      _this.attachLoader.hideAll();
+    }; // Validator
 
 
     this.validatorSubmit = function (event) {
-      this.validator.submit(event.target);
-    }.bind(this);
+      _this.validator.submit(event.target);
+    };
 
     this.validatorValidate = function (event) {
-      this.validator.validate(event.target, event.detail.fields, event.detail.message, shouldShowFlashMessage(event.detail.context.options.flash, 'validate'));
-    }.bind(this); // Flash message
+      _this.validator.validate(event.target, event.detail.fields, event.detail.message, shouldShowFlashMessage(event.detail.context.options.flash, 'validate'));
+    }; // Flash message
 
 
     this.flashMessageBind = function (event) {
       var options = event.detail.context.options;
-      var self = this;
+      var self = _this;
 
       if (options.flash) {
         options.handleErrorMessage = function (message) {
@@ -929,11 +949,11 @@ var Controller = /*#__PURE__*/function () {
           }
         };
       }
-    }.bind(this);
+    };
 
     this.flashMessageRender = function (event) {
-      this.flashMessage.render();
-    }.bind(this); // Browser redirect
+      _this.flashMessage.render();
+    }; // Browser redirect
 
 
     this.handleBrowserRedirect = function (event) {
@@ -969,7 +989,8 @@ var Controller = /*#__PURE__*/function () {
         this.attachLoader = new _attach_loader__WEBPACK_IMPORTED_MODULE_1__.AttachLoader();
         _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.on(document, 'ajax:promise', 'form, [data-attach-loading]', this.showAttachLoader);
         _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.on(document, 'ajax:fail', 'form, [data-attach-loading]', this.hideAttachLoader);
-        _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.on(document, 'ajax:done', 'form, [data-attach-loading]', this.hideAttachLoader); // Validator
+        _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.on(document, 'ajax:done', 'form, [data-attach-loading]', this.hideAttachLoader);
+        addEventListener('page:before-cache', this.hideAllAttachLoaders); // Validator
 
         this.validator = new _validator__WEBPACK_IMPORTED_MODULE_0__.Validator();
         _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.on(document, 'ajax:before-validate', '[data-request-validate]', this.validatorValidate);
@@ -994,7 +1015,8 @@ var Controller = /*#__PURE__*/function () {
         this.attachLoader = null;
         _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.off(document, 'ajax:promise', 'form, [data-attach-loading]', this.showAttachLoader);
         _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.off(document, 'ajax:fail', 'form, [data-attach-loading]', this.hideAttachLoader);
-        _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.off(document, 'ajax:done', 'form, [data-attach-loading]', this.hideAttachLoader); // Validator
+        _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.off(document, 'ajax:done', 'form, [data-attach-loading]', this.hideAttachLoader);
+        removeEventListener('page:before-cache', this.hideAllAttachLoaders); // Validator
 
         this.validator = null;
         _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.off(document, 'ajax:before-validate', '[data-request-validate]', this.validatorValidate);

@@ -38,6 +38,9 @@ export class AttachLoader
             },
             hide: function(el) {
                 (new AttachLoader).hide(resolveElement(el));
+            },
+            hideAll: function() {
+                (new AttachLoader).hideAll();
             }
         };
     }
@@ -67,6 +70,17 @@ export class AttachLoader
             el.classList.remove('oc-attach-loader');
             el.disabled = false;
         }
+    }
+
+    hideAll() {
+        document.querySelectorAll('.oc-attach-loader.is-inline').forEach((el) => {
+            el.remove();
+        });
+
+        document.querySelectorAll('.oc-attach-loader').forEach((el) => {
+            el.classList.remove('oc-attach-loader');
+            el.disabled = false;
+        });
     }
 
     showForm(el) {
