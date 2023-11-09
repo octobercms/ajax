@@ -15,6 +15,8 @@ if (!window.oc.AjaxObserve) {
 
     window.oc.importControl = namespace.importControl;
 
+    window.oc.observeControl = namespace.observeControl;
+
     window.oc.fetchControl = namespace.fetchControl;
 
     window.oc.fetchControls = namespace.fetchControls;

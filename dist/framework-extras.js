@@ -1737,28 +1737,48 @@ var Application = /*#__PURE__*/function () {
       });
     }
   }, {
+    key: "observe",
+    value: function observe(element, identifier) {
+      var observer = this.container.scopeObserver;
+      observer.elementMatchedValue(element, observer.parseValueForToken({
+        element: element,
+        content: identifier
+      }));
+      var foundControl = this.getControlForElementAndIdentifier(element, identifier);
+
+      if (!element.matches("[data-control~=\"".concat(identifier, "\"]"))) {
+        element.dataset.control = ((element.dataset.control || '') + ' ' + identifier).trim();
+      }
+
+      return foundControl;
+    }
+  }, {
     key: "import",
     value: function _import(identifier) {
       var module = this.container.getModuleForIdentifier(identifier);
 
       if (!module) {
-        throw new Error('Control is not registered: ' + identifier);
+        throw new Error("Control is not registered [".concat(identifier, "]"));
       }
 
       return module.controlConstructor;
     }
   }, {
     key: "fetch",
-    value: function fetch(element) {
+    value: function fetch(element, identifier) {
       if (typeof element === 'string') {
         element = document.querySelector(element);
       }
 
-      return element ? this.getControlForElementAndIdentifier(element, element.dataset.control) : null;
+      if (!identifier) {
+        identifier = element.dataset.control;
+      }
+
+      return element ? this.getControlForElementAndIdentifier(element, identifier) : null;
     }
   }, {
     key: "fetchAll",
-    value: function fetchAll(elements) {
+    value: function fetchAll(elements, identifier) {
       var _this2 = this;
 
       if (typeof elements === 'string') {
@@ -1767,7 +1787,7 @@ var Application = /*#__PURE__*/function () {
 
       var result = [];
       elements.forEach(function (element) {
-        var control = _this2.fetch(element);
+        var control = _this2.fetch(element, identifier);
 
         if (control) {
           result.push(control);
