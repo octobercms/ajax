@@ -45,24 +45,28 @@ export class Application
         return module.controlConstructor;
     }
 
-    fetch(element) {
+    fetch(element, identifier) {
         if (typeof element === 'string') {
             element = document.querySelector(element);
         }
 
+        if (!identifier) {
+            identifier = element.dataset.control;
+        }
+
         return element
-            ? this.getControlForElementAndIdentifier(element, element.dataset.control)
+            ? this.getControlForElementAndIdentifier(element, identifier)
             : null;
     }
 
-    fetchAll(elements) {
+    fetchAll(elements, identifier) {
         if (typeof elements === 'string') {
             elements = document.querySelectorAll(elements);
         }
 
         const result = [];
         elements.forEach((element) => {
-            const control = this.fetch(element);
+            const control = this.fetch(element, identifier);
             if (control) {
                 result.push(control);
             }
