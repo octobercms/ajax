@@ -1,7 +1,7 @@
 import { Options } from "./options";
 import { Actions } from "./actions";
 import { Data } from "./data";
-import { HttpRequest } from "../util/http-request";
+import { HttpRequest, SystemStatusCode } from "../util/http-request";
 import { Deferred } from "../util/deferred";
 import { ProgressBar } from "../extras/progress-bar";
 import { dispatch } from "../util";
@@ -248,7 +248,13 @@ export class Request
     }
 
     requestFailedWithStatusCode(statusCode, response) {
-        this.actions.invoke('error', [response, statusCode, this.request.xhr]);
+        if (statusCode == SystemStatusCode.userAborted) {
+            this.actions.invoke('cancel');
+        }
+        else {
+            this.actions.invoke('error', [response, statusCode, this.request.xhr]);
+        }
+
         this.actions.invoke('complete', [response, statusCode, this.request.xhr]);
         this.promise.reject(response, statusCode, this.request.xhr);
     }
