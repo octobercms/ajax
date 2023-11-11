@@ -467,6 +467,7 @@ var RequestBuilder = /*#__PURE__*/function () {
     this.assignAsEval('afterUpdateFunc', 'requestAfterUpdate');
     this.assignAsEval('successFunc', 'requestSuccess');
     this.assignAsEval('errorFunc', 'requestError');
+    this.assignAsEval('cancelFunc', 'requestCancel');
     this.assignAsEval('completeFunc', 'requestComplete');
     this.assignAsData('progressBar', 'requestProgressBar');
     this.assignAsData('confirm', 'requestConfirm');
@@ -1749,16 +1750,20 @@ var Application = /*#__PURE__*/function () {
     }
   }, {
     key: "fetch",
-    value: function fetch(element) {
+    value: function fetch(element, identifier) {
       if (typeof element === 'string') {
         element = document.querySelector(element);
       }
 
-      return element ? this.getControlForElementAndIdentifier(element, element.dataset.control) : null;
+      if (!identifier) {
+        identifier = element.dataset.control;
+      }
+
+      return element ? this.getControlForElementAndIdentifier(element, identifier) : null;
     }
   }, {
     key: "fetchAll",
-    value: function fetchAll(elements) {
+    value: function fetchAll(elements, identifier) {
       var _this2 = this;
 
       if (typeof elements === 'string') {
@@ -1767,7 +1772,7 @@ var Application = /*#__PURE__*/function () {
 
       var result = [];
       elements.forEach(function (element) {
-        var control = _this2.fetch(element);
+        var control = _this2.fetch(element, identifier);
 
         if (control) {
           result.push(control);
@@ -4026,6 +4031,7 @@ var Actions = /*#__PURE__*/function () {
     this.context.success = this.success.bind(this);
     this.context.error = this.error.bind(this);
     this.context.complete = this.complete.bind(this);
+    this.context.cancel = this.cancel.bind(this);
   } // Options can override all public methods in this class
 
 
@@ -4160,7 +4166,10 @@ var Actions = /*#__PURE__*/function () {
       this.delegate.notifyApplicationRequestComplete(data, responseCode, xhr);
       this.invokeFunc('completeFunc', data);
       this.invoke('markAsUpdating', [false]);
-    } // Custom function, requests confirmation from the user
+    }
+  }, {
+    key: "cancel",
+    value: function cancel() {} // Custom function, requests confirmation from the user
 
   }, {
     key: "handleConfirmMessage",
@@ -4170,6 +4179,10 @@ var Actions = /*#__PURE__*/function () {
       var promise = new _util_deferred__WEBPACK_IMPORTED_MODULE_2__.Deferred();
       promise.done(function () {
         _this3.delegate.sendInternal();
+      }).fail(function () {
+        _this3.invoke('cancel');
+
+        _this3.invokeFunc('cancelFunc');
       });
       var event = this.delegate.notifyApplicationConfirmMessage(message, promise);
 
