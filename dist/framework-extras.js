@@ -4169,7 +4169,9 @@ var Actions = /*#__PURE__*/function () {
     }
   }, {
     key: "cancel",
-    value: function cancel() {} // Custom function, requests confirmation from the user
+    value: function cancel() {
+      this.invokeFunc('cancelFunc');
+    } // Custom function, requests confirmation from the user
 
   }, {
     key: "handleConfirmMessage",
@@ -4181,8 +4183,6 @@ var Actions = /*#__PURE__*/function () {
         _this3.delegate.sendInternal();
       }).fail(function () {
         _this3.invoke('cancel');
-
-        _this3.invokeFunc('cancelFunc');
       });
       var event = this.delegate.notifyApplicationConfirmMessage(message, promise);
 
@@ -4191,7 +4191,13 @@ var Actions = /*#__PURE__*/function () {
       }
 
       if (message) {
-        return confirm(message);
+        var result = confirm(message);
+
+        if (!result) {
+          this.invoke('cancel');
+        }
+
+        return result;
       }
     } // Custom function, display a flash message to the user
 
