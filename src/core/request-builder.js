@@ -16,6 +16,7 @@ export class RequestBuilder
         this.assignAsEval('afterUpdateFunc', 'requestAfterUpdate');
         this.assignAsEval('successFunc', 'requestSuccess');
         this.assignAsEval('errorFunc', 'requestError');
+        this.assignAsEval('cancelFunc', 'requestCancel');
         this.assignAsEval('completeFunc', 'requestComplete');
 
         this.assignAsData('progressBar', 'requestProgressBar');
