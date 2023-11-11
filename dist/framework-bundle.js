@@ -2641,6 +2641,7 @@ if (!window.oc.AjaxObserve) {
 
   window.oc.registerControl = _namespace__WEBPACK_IMPORTED_MODULE_1__["default"].registerControl;
   window.oc.importControl = _namespace__WEBPACK_IMPORTED_MODULE_1__["default"].importControl;
+  window.oc.observeControl = _namespace__WEBPACK_IMPORTED_MODULE_1__["default"].observeControl;
   window.oc.fetchControl = _namespace__WEBPACK_IMPORTED_MODULE_1__["default"].fetchControl;
   window.oc.fetchControls = _namespace__WEBPACK_IMPORTED_MODULE_1__["default"].fetchControls; // Control base class
 
@@ -3627,6 +3628,9 @@ var application = new _application__WEBPACK_IMPORTED_MODULE_0__.Application();
   },
   importControl: function importControl(id) {
     return application["import"](id);
+  },
+  observeControl: function observeControl(element, id) {
+    return application.observe(element, id);
   },
   fetchControl: function fetchControl(element) {
     return application.fetch(element);
