@@ -4003,8 +4003,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "ActionsUpdateMode": () => (/* binding */ ActionsUpdateMode)
 /* harmony export */ });
 /* harmony import */ var _asset_manager__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./asset-manager */ "./src/request/asset-manager.js");
-/* harmony import */ var _util_http_request__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../util/http-request */ "./src/util/http-request.js");
-/* harmony import */ var _util_deferred__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../util/deferred */ "./src/util/deferred.js");
+/* harmony import */ var _util_deferred__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../util/deferred */ "./src/util/deferred.js");
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { _defineProperty(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
@@ -4028,7 +4027,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
-
 
 
 
@@ -4088,7 +4086,7 @@ var Actions = /*#__PURE__*/function () {
     value: function success(data, responseCode, xhr) {
       var _this = this;
 
-      var updatePromise = new _util_deferred__WEBPACK_IMPORTED_MODULE_2__.Deferred(); // Halt here if beforeUpdate() or data-request-before-update returns false
+      var updatePromise = new _util_deferred__WEBPACK_IMPORTED_MODULE_1__.Deferred(); // Halt here if beforeUpdate() or data-request-before-update returns false
 
       if (this.invoke('beforeUpdate', [data, responseCode, xhr]) === false) {
         return updatePromise;
@@ -4136,9 +4134,9 @@ var Actions = /*#__PURE__*/function () {
       var _this2 = this;
 
       var errorMsg,
-          updatePromise = new _util_deferred__WEBPACK_IMPORTED_MODULE_2__.Deferred();
+          updatePromise = new _util_deferred__WEBPACK_IMPORTED_MODULE_1__.Deferred();
 
-      if (window.ocUnloading !== undefined && window.ocUnloading || responseCode == _util_http_request__WEBPACK_IMPORTED_MODULE_1__.SystemStatusCode.userAborted) {
+      if (window.ocUnloading !== undefined && window.ocUnloading) {
         return updatePromise;
       } // Disable redirects
 
@@ -4189,20 +4187,20 @@ var Actions = /*#__PURE__*/function () {
     }
   }, {
     key: "cancel",
-    value: function cancel() {} // Custom function, requests confirmation from the user
+    value: function cancel() {
+      this.invokeFunc('cancelFunc');
+    } // Custom function, requests confirmation from the user
 
   }, {
     key: "handleConfirmMessage",
     value: function handleConfirmMessage(message) {
       var _this3 = this;
 
-      var promise = new _util_deferred__WEBPACK_IMPORTED_MODULE_2__.Deferred();
+      var promise = new _util_deferred__WEBPACK_IMPORTED_MODULE_1__.Deferred();
       promise.done(function () {
         _this3.delegate.sendInternal();
       }).fail(function () {
         _this3.invoke('cancel');
-
-        _this3.invokeFunc('cancelFunc');
       });
       var event = this.delegate.notifyApplicationConfirmMessage(message, promise);
 
@@ -4211,7 +4209,13 @@ var Actions = /*#__PURE__*/function () {
       }
 
       if (message) {
-        return confirm(message);
+        var result = confirm(message);
+
+        if (!result) {
+          this.invoke('cancel');
+        }
+
+        return result;
       }
     } // Custom function, display a flash message to the user
 
@@ -4352,7 +4356,7 @@ var Actions = /*#__PURE__*/function () {
       var _this5 = this;
 
       var updateOptions = this.options.update || {},
-          updatePromise = new _util_deferred__WEBPACK_IMPORTED_MODULE_2__.Deferred(); // Update partials and finish request
+          updatePromise = new _util_deferred__WEBPACK_IMPORTED_MODULE_1__.Deferred(); // Update partials and finish request
 
       updatePromise.done(function () {
         var _loop = function _loop() {
@@ -5580,7 +5584,12 @@ var Request = /*#__PURE__*/function () {
   }, {
     key: "requestFailedWithStatusCode",
     value: function requestFailedWithStatusCode(statusCode, response) {
-      this.actions.invoke('error', [response, statusCode, this.request.xhr]);
+      if (statusCode == _util_http_request__WEBPACK_IMPORTED_MODULE_3__.SystemStatusCode.userAborted) {
+        this.actions.invoke('cancel');
+      } else {
+        this.actions.invoke('error', [response, statusCode, this.request.xhr]);
+      }
+
       this.actions.invoke('complete', [response, statusCode, this.request.xhr]);
       this.promise.reject(response, statusCode, this.request.xhr);
     }

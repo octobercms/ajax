@@ -171,7 +171,11 @@ export class Actions
         }
 
         if (message) {
-            return confirm(message);
+            const result = confirm(message);
+            if (!result) {
+                this.invoke('cancel');
+            }
+            return result;
         }
     }
 
