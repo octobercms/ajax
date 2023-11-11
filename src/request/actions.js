@@ -154,6 +154,7 @@ export class Actions
     }
 
     cancel() {
+        this.invokeFunc('cancelFunc');
     }
 
     // Custom function, requests confirmation from the user
@@ -163,7 +164,6 @@ export class Actions
             this.delegate.sendInternal();
         }).fail(() => {
             this.invoke('cancel');
-            this.invokeFunc('cancelFunc');
         });
 
         const event = this.delegate.notifyApplicationConfirmMessage(message, promise);
