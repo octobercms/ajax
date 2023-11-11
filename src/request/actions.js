@@ -22,6 +22,7 @@ export class Actions
         this.context.success = this.success.bind(this);
         this.context.error = this.error.bind(this);
         this.context.complete = this.complete.bind(this);
+        this.context.cancel = this.cancel.bind(this);
     }
 
     // Options can override all public methods in this class
@@ -152,11 +153,17 @@ export class Actions
         this.invoke('markAsUpdating', [false]);
     }
 
+    cancel() {
+    }
+
     // Custom function, requests confirmation from the user
     handleConfirmMessage(message) {
         const promise = new Deferred;
         promise.done(() => {
             this.delegate.sendInternal();
+        }).fail(() => {
+            this.invoke('cancel');
+            this.invokeFunc('cancelFunc');
         });
 
         const event = this.delegate.notifyApplicationConfirmMessage(message, promise);
