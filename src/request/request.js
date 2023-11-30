@@ -46,6 +46,20 @@ export class Request
             return;
         }
 
+        // Confirm before sending
+        if (this.options.confirm && !this.actions.invoke('handleConfirmMessage', [this.options.confirm])) {
+            return;
+        }
+
+        // Send request
+        this.sendInternal();
+
+        return this.options.async
+            ? this.wrapInAsyncPromise(this.promise)
+            : this.promise;
+    }
+
+    sendInternal() {
         // Prepare data
         const dataObj = new Data(this.options.data, this.el, this.formEl);
         let data;
@@ -70,36 +84,22 @@ export class Request
         this.promise = new Deferred({ delegate: this.request });
         this.isRedirect = this.options.redirect && this.options.redirect.length > 0;
 
-        // Confirm before sending
-        if (this.options.confirm && !this.actions.invoke('handleConfirmMessage', [this.options.confirm])) {
-            return;
-        }
-
-        // Send request
-        this.sendInternal();
-
-        return this.options.async
-            ? this.wrapInAsyncPromise(this.promise)
-            : this.promise;
-    }
-
-    sendInternal() {
-        var self = this;
+        // Lifecycle events
         this.notifyApplicationBeforeSend();
         this.notifyApplicationAjaxPromise();
         this.promise
-            .fail(function(data, responseCode, xhr) {
-                if (!self.isRedirect) {
-                    self.notifyApplicationAjaxFail(data, responseCode, xhr);
+            .fail((data, responseCode, xhr) => {
+                if (!this.isRedirect) {
+                    this.notifyApplicationAjaxFail(data, responseCode, xhr);
                 }
             })
-            .done(function(data, responseCode, xhr) {
-                if (!self.isRedirect) {
-                    self.notifyApplicationAjaxDone(data, responseCode, xhr);
+            .done((data, responseCode, xhr) => {
+                if (!this.isRedirect) {
+                    this.notifyApplicationAjaxDone(data, responseCode, xhr);
                 }
             })
-            .always(function(data, responseCode, xhr) {
-                self.notifyApplicationAjaxAlways(data, responseCode, xhr);
+            .always((data, responseCode, xhr) => {
+                this.notifyApplicationAjaxAlways(data, responseCode, xhr);
             });
 
         this.request.send();
