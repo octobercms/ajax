@@ -2134,9 +2134,23 @@ var Request = /*#__PURE__*/function () {
 
       if (!this.validateClientSideForm() || !this.applicationAllowsRequest()) {
         return;
-      } // Prepare data
+      } // Confirm before sending
 
 
+      if (this.options.confirm && !this.actions.invoke('handleConfirmMessage', [this.options.confirm])) {
+        return;
+      } // Send request
+
+
+      this.sendInternal();
+      return this.options.async ? this.wrapInAsyncPromise(this.promise) : this.promise;
+    }
+  }, {
+    key: "sendInternal",
+    value: function sendInternal() {
+      var _this2 = this;
+
+      // Prepare data
       var dataObj = new _data__WEBPACK_IMPORTED_MODULE_2__.Data(this.options.data, this.el, this.formEl);
       var data;
 
@@ -2170,32 +2184,20 @@ var Request = /*#__PURE__*/function () {
       this.promise = new _util_deferred__WEBPACK_IMPORTED_MODULE_4__.Deferred({
         delegate: this.request
       });
-      this.isRedirect = this.options.redirect && this.options.redirect.length > 0; // Confirm before sending
+      this.isRedirect = this.options.redirect && this.options.redirect.length > 0; // Lifecycle events
 
-      if (this.options.confirm && !this.actions.invoke('handleConfirmMessage', [this.options.confirm])) {
-        return;
-      } // Send request
-
-
-      this.sendInternal();
-      return this.options.async ? this.wrapInAsyncPromise(this.promise) : this.promise;
-    }
-  }, {
-    key: "sendInternal",
-    value: function sendInternal() {
-      var self = this;
       this.notifyApplicationBeforeSend();
       this.notifyApplicationAjaxPromise();
       this.promise.fail(function (data, responseCode, xhr) {
-        if (!self.isRedirect) {
-          self.notifyApplicationAjaxFail(data, responseCode, xhr);
+        if (!_this2.isRedirect) {
+          _this2.notifyApplicationAjaxFail(data, responseCode, xhr);
         }
       }).done(function (data, responseCode, xhr) {
-        if (!self.isRedirect) {
-          self.notifyApplicationAjaxDone(data, responseCode, xhr);
+        if (!_this2.isRedirect) {
+          _this2.notifyApplicationAjaxDone(data, responseCode, xhr);
         }
       }).always(function (data, responseCode, xhr) {
-        self.notifyApplicationAjaxAlways(data, responseCode, xhr);
+        _this2.notifyApplicationAjaxAlways(data, responseCode, xhr);
       });
       this.request.send();
     }
