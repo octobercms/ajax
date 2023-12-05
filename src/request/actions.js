@@ -162,7 +162,7 @@ export class Actions
         promise.done(() => {
             this.delegate.sendInternal();
         }).fail(() => {
-            this.invoke('cancel');
+            this.invoke('cancel', []);
         });
 
         const event = this.delegate.notifyApplicationConfirmMessage(message, promise);
@@ -173,7 +173,7 @@ export class Actions
         if (message) {
             const result = confirm(message);
             if (!result) {
-                this.invoke('cancel');
+                this.invoke('cancel', []);
             }
             return result;
         }

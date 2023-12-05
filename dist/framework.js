@@ -1099,7 +1099,7 @@ var Actions = /*#__PURE__*/function () {
       promise.done(function () {
         _this3.delegate.sendInternal();
       }).fail(function () {
-        _this3.invoke('cancel');
+        _this3.invoke('cancel', []);
       });
       var event = this.delegate.notifyApplicationConfirmMessage(message, promise);
 
@@ -1111,7 +1111,7 @@ var Actions = /*#__PURE__*/function () {
         var result = confirm(message);
 
         if (!result) {
-          this.invoke('cancel');
+          this.invoke('cancel', []);
         }
 
         return result;
