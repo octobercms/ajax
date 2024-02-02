@@ -3,6 +3,7 @@ import { unindent } from "../util";
 export class FlashMessage
 {
     static stylesheetReady = false;
+    static isHolding = false;
 
     constructor() {
         this.stylesheetElement = this.createStylesheetElement();
@@ -10,28 +11,43 @@ export class FlashMessage
 
     static get defaultCSS() {
         return unindent `
-        .oc-flash-message {
+        .oc-flash-messages {
             position: fixed;
             z-index: 10300;
             width: 500px;
             left: 50%;
-            top: 50px;
+            top: 100px;
             margin-left: -250px;
+        }
+        @media (max-width: 768px) {
+            .oc-flash-messages {
+                left: 1rem;
+                right: 1rem;
+                top: 1rem;
+                margin-left: 0;
+                width: auto;
+            }
+        }
+        .oc-flash-message {
+            display: flex;
             color: #fff;
             font-size: 1rem;
-            padding: 10px 30px 10px 15px;
+            padding: 10px 15px;
             border-radius: 5px;
-
+            margin-bottom: .5em;
             opacity: 0;
             transition: all 0.5s, width 0s;
             transform: scale(0.9);
+        }
+        .oc-flash-message:first-child {
+            margin-top: -50px;
         }
         .oc-flash-message.flash-show {
             opacity: 1;
             transform: scale(1);
         }
         .oc-flash-message.success {
-            background: #86cB43;
+            background: #86cb43;
         }
         .oc-flash-message.error {
             background: #cc3300;
@@ -39,8 +55,11 @@ export class FlashMessage
         .oc-flash-message.warning {
             background: #f0ad4e;
         }
-        .oc-flash-message.info {
+        .oc-flash-message.info, .oc-flash-message.loading {
             background: #5fb6f5;
+        }
+        .oc-flash-message span.flash-message {
+            flex-grow: 1;
         }
         .oc-flash-message a.flash-close {
             box-sizing: content-box;
@@ -52,26 +71,41 @@ export class FlashMessage
             border-radius: .25rem;
             opacity: .5;
             text-decoration: none;
-            position: absolute;
-            right: .7rem;
-            top: .7rem;
             cursor: pointer;
         }
         .oc-flash-message a.flash-close:hover,
         .oc-flash-message a.flash-close:focus {
             opacity: 1;
         }
+        .oc-flash-message.loading {
+            transition: opacity 0.2s;
+            transform: scale(1);
+        }
+        .oc-flash-message.loading a.flash-close {
+            display: none;
+        }
+        .oc-flash-message span.flash-loader {
+            margin-right: 1em;
+        }
+        .oc-flash-message span.flash-loader:after {
+            position: relative;
+            top: 2px;
+            content: '';
+            display: inline-block;
+            height: 1.2em;
+            width: 1.2em;
+            animation: oc-flash-loader 0.8s infinite linear;
+            border: .2em solid currentColor;
+            border-right-color: transparent;
+            border-radius: 50%;
+            opacity: .5;
+        }
         html[data-turbo-preview] .oc-flash-message {
             opacity: 0;
         }
-        @media (max-width: 768px) {
-            .oc-flash-message {
-                left: 1rem;
-                right: 1rem;
-                top: 1rem;
-                margin-left: 0;
-                width: auto;
-            }
+        @keyframes oc-flash-loader {
+            0% { transform: rotate(0deg); }
+            100%  { transform: rotate(360deg); }
         }
     `;
     }
@@ -83,30 +117,43 @@ export class FlashMessage
     show(options = {}) {
         this.installStylesheetElement();
 
+        if (FlashMessage.isHolding) {
+            setTimeout(() => this.show({ ...options, holdInterval: null }), 500);
+            return;
+        }
+
         let {
             message = '',
             type = 'info',
             target = null,
-            interval = 5
+            clear = null,
+            interval = 3,
+            holdInterval = 0
         } = options;
 
         // Legacy API
         if (options.text) message = options.text;
         if (options.class) type = options.class;
 
+        // Error singles
+        if (clear || type === 'error' || type === 'loading') {
+            this.deleteFlashMessages(clear);
+        }
+
+        // Nothing to show
+        if (!message) {
+            return;
+        }
+
         // Idempotence
         if (target) {
             target.removeAttribute('data-control');
         }
 
-        // Error singles
-        if (type === 'error') {
-            this.deleteFlashMessages();
-        }
-
         // Inject element
         var flashElement = this.createFlashElement(message, type);
-        document.body.appendChild(flashElement);
+        var flashContainer = this.createMessagesElement();
+        flashContainer.insertBefore(flashElement, flashContainer.firstChild);
         setTimeout(function() { flashElement.classList.add('flash-show'); }, 100);
 
         // Events
@@ -120,17 +167,40 @@ export class FlashMessage
             timer = setTimeout(remove, interval * 1000);
         }
 
+        // Hold for a minimum interval
+        var holdTimer;
+        if (holdInterval) {
+            FlashMessage.isHolding = true;
+            flashElement.flashMessageHold = true;
+
+            holdTimer = setTimeout(() => {
+                FlashMessage.isHolding = false;
+                flashElement.flashMessageHold = false;
+            }, holdInterval * 1000);
+        }
+
         // Remove logic
-        function remove() {
+        function remove(event) {
+            if (flashElement.flashMessageHold) {
+                setTimeout(() => remove(event), 500);
+                return;
+            }
+
             clearInterval(timer);
+            clearInterval(holdTimer);
             flashElement.removeEventListener('click', pause);
             flashElement.removeEventListener('extras:flash-remove', remove);
             flashElement.querySelector('.flash-close').removeEventListener('click', remove);
             flashElement.classList.remove('flash-show');
 
-            setTimeout(function() {
+            if (event && event.detail.isReplace) {
                 flashElement.remove();
-            }, 1000);
+            }
+            else {
+                setTimeout(function() {
+                    flashElement.remove();
+                }, 600);
+            }
         }
 
         // Pause logic
@@ -147,16 +217,19 @@ export class FlashMessage
         });
     }
 
-    deleteFlashMessages() {
-        document.querySelectorAll('.oc-flash-message').forEach(function(el) {
-            el.dispatchEvent(new Event('extras:flash-remove'));
+    deleteFlashMessages(clear) {
+        const flashSelector = typeof clear === 'string' ? '.oc-flash-message.' + clear : '.oc-flash-message';
+        document.querySelectorAll(flashSelector).forEach(function(el) {
+            el.dispatchEvent(new CustomEvent('extras:flash-remove', { detail: { isReplace: true }}));
         });
     }
 
     createFlashElement(message, type) {
         const element = document.createElement('div');
+        const loadingHtml = type === 'loading' ? '<span class="flash-loader"></span>' : '';
+        const closeHtml = '<a class="flash-close"></a>';
         element.className = 'oc-flash-message ' + type;
-        element.innerHTML = '<span>' + message + '</span><a class="flash-close"></a>';
+        element.innerHTML = loadingHtml + '<span class="flash-message">' + message + '</span>' + closeHtml;
         return element;
     }
 
@@ -171,6 +244,18 @@ export class FlashMessage
     createStylesheetElement() {
         const element = document.createElement('style');
         element.textContent = FlashMessage.defaultCSS;
+        return element;
+    }
+
+    createMessagesElement() {
+        const found = document.querySelector('.oc-flash-messages')
+        if (found) {
+            return found;
+        }
+
+        const element = document.createElement('div');
+        element.className = 'oc-flash-messages';
+        document.body.appendChild(element);
         return element;
     }
 }
