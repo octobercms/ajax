@@ -78,6 +78,10 @@ export class Controller
             this.flashMessage.render();
         };
 
+        this.hideAllFlashMessages = (event) => {
+            this.flashMessage.hideAll();
+        };
+
         // Browser redirect
         this.handleBrowserRedirect = function(event) {
             if (event.defaultPrevented) {
@@ -122,6 +126,7 @@ export class Controller
             this.flashMessage = new FlashMessage;
             addEventListener('render', this.flashMessageRender);
             addEventListener('ajax:setup', this.flashMessageBind);
+            addEventListener('page:before-cache', this.hideAllFlashMessages);
 
             // Browser redirect
             Events.on(document, 'click', '[data-browser-redirect-back]', this.handleBrowserRedirect);
@@ -152,6 +157,7 @@ export class Controller
             this.flashMessage = null;
             removeEventListener('render', this.flashMessageRender);
             removeEventListener('ajax:setup', this.flashMessageBind);
+            removeEventListener('page:before-cache', this.hideAllFlashMessages);
 
             // Browser redirect
             Events.off(document, 'click', '[data-browser-redirect-back]', this.handleBrowserRedirect);

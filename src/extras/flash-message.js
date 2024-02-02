@@ -219,6 +219,12 @@ export class FlashMessage
         });
     }
 
+    hideAll() {
+        document.querySelectorAll('.oc-flash-message').forEach(function(el) {
+            el.remove();
+        });
+    }
+
     createFlashElement(message, type) {
         const element = document.createElement('div');
         const loadingHtml = type === 'loading' ? '<span class="flash-loader"></span>' : '';
