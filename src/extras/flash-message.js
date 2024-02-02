@@ -11,16 +11,24 @@ export class FlashMessage
 
     static get defaultCSS() {
         return unindent `
-        .oc-flash-messages {
+        .oc-flash-message {
+            display: flex;
             position: fixed;
             z-index: 10300;
             width: 500px;
             left: 50%;
-            top: 100px;
+            top: 50px;
             margin-left: -250px;
+            color: #fff;
+            font-size: 1rem;
+            padding: 10px 15px;
+            border-radius: 5px;
+            opacity: 0;
+            transition: all 0.5s, width 0s;
+            transform: scale(0.9);
         }
         @media (max-width: 768px) {
-            .oc-flash-messages {
+            .oc-flash-message {
                 left: 1rem;
                 right: 1rem;
                 top: 1rem;
@@ -28,22 +36,12 @@ export class FlashMessage
                 width: auto;
             }
         }
-        .oc-flash-message {
-            display: flex;
-            color: #fff;
-            font-size: 1rem;
-            padding: 10px 15px;
-            border-radius: 5px;
-            margin-bottom: .5em;
-            opacity: 0;
-            transition: all 0.5s, width 0s;
-            transform: scale(0.9);
-        }
-        .oc-flash-message:first-child {
-            margin-top: -50px;
-        }
         .oc-flash-message.flash-show {
             opacity: 1;
+            transform: scale(1);
+        }
+        .oc-flash-message.loading {
+            transition: opacity 0.2s;
             transform: scale(1);
         }
         .oc-flash-message.success {
@@ -76,10 +74,6 @@ export class FlashMessage
         .oc-flash-message a.flash-close:hover,
         .oc-flash-message a.flash-close:focus {
             opacity: 1;
-        }
-        .oc-flash-message.loading {
-            transition: opacity 0.2s;
-            transform: scale(1);
         }
         .oc-flash-message.loading a.flash-close {
             display: none;
@@ -117,6 +111,7 @@ export class FlashMessage
     show(options = {}) {
         this.installStylesheetElement();
 
+        // Wait for hold to be released
         if (FlashMessage.isHolding) {
             setTimeout(() => this.show({ ...options, holdInterval: null }), 500);
             return;
@@ -152,8 +147,7 @@ export class FlashMessage
 
         // Inject element
         var flashElement = this.createFlashElement(message, type);
-        var flashContainer = this.createMessagesElement();
-        flashContainer.insertBefore(flashElement, flashContainer.firstChild);
+        this.createMessagesElement().appendChild(flashElement);
         setTimeout(function() { flashElement.classList.add('flash-show'); }, 100);
 
         // Events
@@ -181,6 +175,7 @@ export class FlashMessage
 
         // Remove logic
         function remove(event) {
+            // Wait for hold to be released
             if (flashElement.flashMessageHold) {
                 setTimeout(() => remove(event), 500);
                 return;

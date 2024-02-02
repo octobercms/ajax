@@ -20,6 +20,7 @@ export class RequestBuilder
         this.assignAsEval('completeFunc', 'requestComplete');
 
         this.assignAsData('progressBar', 'requestProgressBar');
+        this.assignAsData('message', 'requestMessage');
         this.assignAsData('confirm', 'requestConfirm');
         this.assignAsData('redirect', 'requestRedirect');
         this.assignAsData('loading', 'requestLoading');

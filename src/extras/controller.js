@@ -46,22 +46,30 @@ export class Controller
         // Flash message
         this.flashMessageBind = (event) => {
             const { options } = event.detail.context;
-            const self = this;
             if (options.flash) {
-                options.handleErrorMessage = function(message) {
+                options.handleErrorMessage = (message) => {
                     if (
                         message &&
                         shouldShowFlashMessage(options.flash, 'error') ||
                         shouldShowFlashMessage(options.flash, 'validate')
                     ) {
-                        self.flashMessage.show({ message, type: 'error' });
+                        this.flashMessage.show({ message, type: 'error' });
                     }
                 }
 
-                options.handleFlashMessage = function(message, type) {
+                options.handleFlashMessage = (message, type) => {
                     if (message && shouldShowFlashMessage(options.flash, type)) {
-                        self.flashMessage.show({ message, type });
+                        this.flashMessage.show({ message, type });
                     }
+                }
+            }
+
+            options.handleProgressMessage = (message, isDone) => {
+                if (!isDone) {
+                    this.flashMessage.show({ message, type: 'loading', interval: 0, holdInterval: .5 });
+                }
+                else {
+                    this.flashMessage.show({ clear: 'loading' });
                 }
             }
         };
@@ -155,7 +163,7 @@ export class Controller
 }
 
 function shouldShowFlashMessage(value, type) {
-    // Valdiation messages are not included by default
+    // Validation messages are not included by default
     if (value === true && type !== 'validate') {
         return true;
     }
@@ -183,7 +191,7 @@ function getReferrerFromSameOrigin() {
         return null;
     }
 
-    // Fallback when turbo router isnt activated
+    // Fallback when turbo router is not activated
     try {
         const referrer = new URL(document.referrer);
         if (referrer.origin !== location.origin) {

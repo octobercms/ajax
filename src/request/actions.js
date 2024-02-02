@@ -48,6 +48,10 @@ export class Actions
     // Public
     start(xhr) {
         this.invoke('markAsUpdating', [true]);
+
+        if (this.delegate.options.message) {
+            this.invoke('handleProgressMessage', [this.delegate.options.message, false]);
+        }
     }
 
     success(data, responseCode, xhr) {
@@ -150,6 +154,10 @@ export class Actions
         this.delegate.notifyApplicationRequestComplete(data, responseCode, xhr);
         this.invokeFunc('completeFunc', data);
         this.invoke('markAsUpdating', [false]);
+
+        if (this.delegate.options.message) {
+            this.invoke('handleProgressMessage', [null, true]);
+        }
     }
 
     cancel() {
@@ -178,6 +186,9 @@ export class Actions
             return result;
         }
     }
+
+    // Custom function, display a progress message to the user
+    handleProgressMessage(message, isDone) {}
 
     // Custom function, display a flash message to the user
     handleFlashMessage(message, type) {}
