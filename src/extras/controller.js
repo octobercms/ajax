@@ -64,12 +64,17 @@ export class Controller
                 }
             }
 
+            var context = event.detail;
             options.handleProgressMessage = (message, isDone) => {
                 if (!isDone) {
-                    this.flashMessage.show({ message, type: 'loading', interval: 0, holdInterval: .5 });
+                    context.progressMessageId = this.flashMessage.show({ message, type: 'loading', interval: 10 });
                 }
                 else {
-                    this.flashMessage.show({ clear: 'loading' });
+                    this.flashMessage.show(context.progressMessageId
+                        ? { replace: context.progressMessageId }
+                        : { hideAll: true });
+
+                    context = null;
                 }
             }
         };
