@@ -273,7 +273,10 @@ export class FlashMessage
     }
 
     hideAll() {
-        document.querySelectorAll('.oc-flash-message').forEach(function(el) {
+        this.clearQueue();
+        this.displayedMessage = null;
+
+        document.querySelectorAll('.oc-flash-message, [data-control=flash-message]').forEach((el) => {
             el.remove();
         });
     }
