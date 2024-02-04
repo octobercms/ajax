@@ -470,6 +470,7 @@ var RequestBuilder = /*#__PURE__*/function () {
     this.assignAsEval('cancelFunc', 'requestCancel');
     this.assignAsEval('completeFunc', 'requestComplete');
     this.assignAsData('progressBar', 'requestProgressBar');
+    this.assignAsData('message', 'requestMessage');
     this.assignAsData('confirm', 'requestConfirm');
     this.assignAsData('redirect', 'requestRedirect');
     this.assignAsData('loading', 'requestLoading');
@@ -979,6 +980,10 @@ var Actions = /*#__PURE__*/function () {
     key: "start",
     value: function start(xhr) {
       this.invoke('markAsUpdating', [true]);
+
+      if (this.delegate.options.message) {
+        this.invoke('handleProgressMessage', [this.delegate.options.message, false]);
+      }
     }
   }, {
     key: "success",
@@ -1083,6 +1088,10 @@ var Actions = /*#__PURE__*/function () {
       this.delegate.notifyApplicationRequestComplete(data, responseCode, xhr);
       this.invokeFunc('completeFunc', data);
       this.invoke('markAsUpdating', [false]);
+
+      if (this.delegate.options.message) {
+        this.invoke('handleProgressMessage', [null, true]);
+      }
     }
   }, {
     key: "cancel",
@@ -1116,7 +1125,11 @@ var Actions = /*#__PURE__*/function () {
 
         return result;
       }
-    } // Custom function, display a flash message to the user
+    } // Custom function, display a progress message to the user
+
+  }, {
+    key: "handleProgressMessage",
+    value: function handleProgressMessage(message, isDone) {} // Custom function, display a flash message to the user
 
   }, {
     key: "handleFlashMessage",
