@@ -36,10 +36,24 @@ export class Application
         this.load({ identifier, controlConstructor });
     }
 
+    observe(element, identifier) {
+        const observer = this.container.scopeObserver;
+        observer.elementMatchedValue(element, observer.parseValueForToken({
+            element,
+            content: identifier
+        }));
+
+        const foundControl = this.getControlForElementAndIdentifier(element, identifier);
+        if (!element.matches(`[data-control~="${identifier}"]`)) {
+            element.dataset.control = ((element.dataset.control || '') + ' ' + identifier).trim();
+        }
+        return foundControl;
+    }
+
     import(identifier) {
         const module = this.container.getModuleForIdentifier(identifier);
         if (!module) {
-            throw new Error('Control is not registered: ' + identifier);
+            throw new Error(`Control is not registered [${identifier}]`);
         }
 
         return module.controlConstructor;

@@ -470,6 +470,7 @@ var RequestBuilder = /*#__PURE__*/function () {
     this.assignAsEval('cancelFunc', 'requestCancel');
     this.assignAsEval('completeFunc', 'requestComplete');
     this.assignAsData('progressBar', 'requestProgressBar');
+    this.assignAsData('message', 'requestMessage');
     this.assignAsData('confirm', 'requestConfirm');
     this.assignAsData('redirect', 'requestRedirect');
     this.assignAsData('loading', 'requestLoading');
@@ -822,7 +823,7 @@ var AttachLoader = /*#__PURE__*/function () {
   }], [{
     key: "defaultCSS",
     get: function get() {
-      return (0,_util__WEBPACK_IMPORTED_MODULE_0__.unindent)(_templateObject || (_templateObject = _taggedTemplateLiteral(["\n        .oc-attach-loader:after {\n            content: '';\n            display: inline-block;\n            vertical-align: middle;\n            margin-left: .4em;\n            height: 1em;\n            width: 1em;\n            animation: oc-rotate-loader 0.8s infinite linear;\n            border: .2em solid currentColor;\n            border-right-color: transparent;\n            border-radius: 50%;\n            opacity: .5;\n        }\n\n        @keyframes oc-rotate-loader {\n            0%    { transform: rotate(0deg); }\n            100%  { transform: rotate(360deg); }\n        }\n    "])));
+      return (0,_util__WEBPACK_IMPORTED_MODULE_0__.unindent)(_templateObject || (_templateObject = _taggedTemplateLiteral(["\n        .oc-attach-loader:after {\n            content: '';\n            display: inline-block;\n            vertical-align: middle;\n            margin-left: .4em;\n            height: 1em;\n            width: 1em;\n            animation: oc-rotate-loader 0.8s infinite linear;\n            border: .2em solid currentColor;\n            border-right-color: transparent;\n            border-radius: 50%;\n            opacity: .5;\n        }\n        @keyframes oc-rotate-loader {\n            0% { transform: rotate(0deg); }\n            100%  { transform: rotate(360deg); }\n        }\n    "])));
     }
   }, {
     key: "attachLoader",
@@ -929,12 +930,11 @@ var Controller = /*#__PURE__*/function () {
 
     this.flashMessageBind = function (event) {
       var options = event.detail.context.options;
-      var self = _this;
 
       if (options.flash) {
         options.handleErrorMessage = function (message) {
           if (message && shouldShowFlashMessage(options.flash, 'error') || shouldShowFlashMessage(options.flash, 'validate')) {
-            self.flashMessage.show({
+            _this.flashMessage.show({
               message: message,
               type: 'error'
             });
@@ -943,17 +943,41 @@ var Controller = /*#__PURE__*/function () {
 
         options.handleFlashMessage = function (message, type) {
           if (message && shouldShowFlashMessage(options.flash, type)) {
-            self.flashMessage.show({
+            _this.flashMessage.show({
               message: message,
               type: type
             });
           }
         };
       }
+
+      var context = event.detail;
+
+      options.handleProgressMessage = function (message, isDone) {
+        if (!isDone) {
+          context.progressMessageId = _this.flashMessage.show({
+            message: message,
+            type: 'loading',
+            interval: 10
+          });
+        } else {
+          _this.flashMessage.show(context.progressMessageId ? {
+            replace: context.progressMessageId
+          } : {
+            hideAll: true
+          });
+
+          context = null;
+        }
+      };
     };
 
     this.flashMessageRender = function (event) {
       _this.flashMessage.render();
+    };
+
+    this.hideAllFlashMessages = function (event) {
+      _this.flashMessage.hideAll();
     }; // Browser redirect
 
 
@@ -999,7 +1023,8 @@ var Controller = /*#__PURE__*/function () {
 
         this.flashMessage = new _flash_message__WEBPACK_IMPORTED_MODULE_2__.FlashMessage();
         addEventListener('render', this.flashMessageRender);
-        addEventListener('ajax:setup', this.flashMessageBind); // Browser redirect
+        addEventListener('ajax:setup', this.flashMessageBind);
+        addEventListener('page:before-cache', this.hideAllFlashMessages); // Browser redirect
 
         _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.on(document, 'click', '[data-browser-redirect-back]', this.handleBrowserRedirect);
         _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.on(document, 'ajax:before-redirect', '[data-browser-redirect-back]', this.handleBrowserRedirect);
@@ -1025,7 +1050,8 @@ var Controller = /*#__PURE__*/function () {
 
         this.flashMessage = null;
         removeEventListener('render', this.flashMessageRender);
-        removeEventListener('ajax:setup', this.flashMessageBind); // Browser redirect
+        removeEventListener('ajax:setup', this.flashMessageBind);
+        removeEventListener('page:before-cache', this.hideAllFlashMessages); // Browser redirect
 
         _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.off(document, 'click', '[data-browser-redirect-back]', this.handleBrowserRedirect);
         _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.off(document, 'ajax:before-redirect', '[data-browser-redirect-back]', this.handleBrowserRedirect);
@@ -1038,7 +1064,7 @@ var Controller = /*#__PURE__*/function () {
 }();
 
 function shouldShowFlashMessage(value, type) {
-  // Valdiation messages are not included by default
+  // Validation messages are not included by default
   if (value === true && type !== 'validate') {
     return true;
   }
@@ -1063,7 +1089,7 @@ function shouldShowFlashMessage(value, type) {
 function getReferrerFromSameOrigin() {
   if (!document.referrer) {
     return null;
-  } // Fallback when turbo router isnt activated
+  } // Fallback when turbo router is not activated
 
 
   try {
@@ -1117,10 +1143,48 @@ var FlashMessage = /*#__PURE__*/function () {
   function FlashMessage() {
     _classCallCheck(this, FlashMessage);
 
+    this.queue = [];
+    this.timer = null;
+    this.lastUniqueId = 0;
+    this.displayedMessage = null;
     this.stylesheetElement = this.createStylesheetElement();
   }
 
   _createClass(FlashMessage, [{
+    key: "runQueue",
+    value: function runQueue() {
+      if (this.displayedMessage) {
+        return;
+      }
+
+      var options = this.queue.shift();
+
+      if (options === undefined) {
+        return;
+      }
+
+      this.buildFlashMessage(options);
+    }
+  }, {
+    key: "clearQueue",
+    value: function clearQueue() {
+      this.queue = [];
+
+      if (this.displayedMessage && this.displayedMessage.uniqueId) {
+        this.hide(this.displayedMessage.uniqueId, true);
+      }
+    }
+  }, {
+    key: "removeFromQueue",
+    value: function removeFromQueue(uniqueId) {
+      for (var index = 0; index < this.queue.length; index++) {
+        if (this.queue[index].uniqueId == uniqueId) {
+          this.queue.splice(index, 1);
+          return;
+        }
+      }
+    }
+  }, {
     key: "show",
     value: function show() {
       var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -1129,82 +1193,162 @@ var FlashMessage = /*#__PURE__*/function () {
           message = _options$message === void 0 ? '' : _options$message,
           _options$type = options.type,
           type = _options$type === void 0 ? 'info' : _options$type,
+          _options$replace = options.replace,
+          replace = _options$replace === void 0 ? null : _options$replace,
+          _options$hideAll = options.hideAll,
+          hideAll = _options$hideAll === void 0 ? false : _options$hideAll; // Clear all messages
+
+      if (hideAll || type === 'error' || type === 'loading') {
+        this.clearQueue();
+      } // Replace or remove a message
+
+
+      if (replace) {
+        if (this.displayedMessage && replace === this.displayedMessage.uniqueId) {
+          this.hide(replace, true);
+        } else {
+          this.removeFromQueue(replace);
+        }
+      } // Nothing to show
+
+
+      if (!message) {
+        return;
+      }
+
+      var uniqueId = this.makeUniqueId();
+      this.queue.push(_objectSpread(_objectSpread({}, options), {}, {
+        uniqueId: uniqueId
+      }));
+      this.runQueue();
+      return uniqueId;
+    }
+  }, {
+    key: "makeUniqueId",
+    value: function makeUniqueId() {
+      return ++this.lastUniqueId;
+    }
+  }, {
+    key: "buildFlashMessage",
+    value: function buildFlashMessage() {
+      var _this = this;
+
+      var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var _options$message2 = options.message,
+          message = _options$message2 === void 0 ? '' : _options$message2,
+          _options$type2 = options.type,
+          type = _options$type2 === void 0 ? 'info' : _options$type2,
           _options$target = options.target,
           target = _options$target === void 0 ? null : _options$target,
           _options$interval = options.interval,
-          interval = _options$interval === void 0 ? 5 : _options$interval; // Legacy API
+          interval = _options$interval === void 0 ? 3 : _options$interval; // Legacy API
 
       if (options.text) message = options.text;
       if (options["class"]) type = options["class"]; // Idempotence
 
       if (target) {
         target.removeAttribute('data-control');
-      } // Error singles
-
-
-      if (type === 'error') {
-        this.deleteFlashMessages();
       } // Inject element
 
 
       var flashElement = this.createFlashElement(message, type);
-      document.body.appendChild(flashElement);
-      setTimeout(function () {
-        flashElement.classList.add('flash-show');
-      }, 100); // Events
+      this.createMessagesElement().appendChild(flashElement);
+      this.displayedMessage = {
+        uniqueId: options.uniqueId,
+        element: flashElement,
+        options: options
+      }; // Remove logic
 
-      flashElement.addEventListener('click', pause);
-      flashElement.addEventListener('extras:flash-remove', remove);
-      flashElement.querySelector('.flash-close').addEventListener('click', remove); // Timeout
-
-      var timer;
-
-      if (interval && interval !== 0) {
-        timer = setTimeout(remove, interval * 1000);
-      } // Remove logic
-
-
-      function remove() {
+      var remove = function remove(event) {
         clearInterval(timer);
         flashElement.removeEventListener('click', pause);
         flashElement.removeEventListener('extras:flash-remove', remove);
         flashElement.querySelector('.flash-close').removeEventListener('click', remove);
         flashElement.classList.remove('flash-show');
-        setTimeout(function () {
+
+        if (event && event.detail.isReplace) {
           flashElement.remove();
-        }, 1000);
-      } // Pause logic
+          _this.displayedMessage = null;
+
+          _this.runQueue();
+        } else {
+          setTimeout(function () {
+            flashElement.remove();
+            _this.displayedMessage = null;
+
+            _this.runQueue();
+          }, 600);
+        }
+      }; // Pause logic
 
 
-      function pause() {
+      var pause = function pause() {
         clearInterval(timer);
+      }; // Events
+
+
+      flashElement.addEventListener('click', pause, {
+        once: true
+      });
+      flashElement.addEventListener('extras:flash-remove', remove, {
+        once: true
+      });
+      flashElement.querySelector('.flash-close').addEventListener('click', remove, {
+        once: true
+      }); // Timeout
+
+      var timer;
+
+      if (interval && interval !== 0) {
+        timer = setTimeout(remove, interval * 1000);
       }
+
+      setTimeout(function () {
+        flashElement.classList.add('flash-show');
+      }, 20);
     }
   }, {
     key: "render",
     value: function render() {
-      var self = this;
+      var _this2 = this;
+
       document.querySelectorAll('[data-control=flash-message]').forEach(function (el) {
-        self.show(_objectSpread(_objectSpread({}, el.dataset), {}, {
+        _this2.show(_objectSpread(_objectSpread({}, el.dataset), {}, {
           target: el,
           message: el.innerHTML
         }));
+
         el.remove();
       });
     }
   }, {
-    key: "deleteFlashMessages",
-    value: function deleteFlashMessages() {
-      document.querySelectorAll('.oc-flash-message').forEach(function (el) {
-        el.dispatchEvent(new Event('extras:flash-remove'));
+    key: "hide",
+    value: function hide(uniqueId, isReplace) {
+      if (this.displayedMessage && uniqueId === this.displayedMessage.uniqueId) {
+        this.displayedMessage.element.dispatchEvent(new CustomEvent('extras:flash-remove', {
+          detail: {
+            isReplace: isReplace
+          }
+        }));
+      }
+    }
+  }, {
+    key: "hideAll",
+    value: function hideAll() {
+      this.clearQueue();
+      this.displayedMessage = null;
+      document.querySelectorAll('.oc-flash-message, [data-control=flash-message]').forEach(function (el) {
+        el.remove();
       });
     }
   }, {
     key: "createFlashElement",
     value: function createFlashElement(message, type) {
       var element = document.createElement('div');
+      var loadingHtml = type === 'loading' ? '<span class="flash-loader"></span>' : '';
+      var closeHtml = '<a class="flash-close"></a>';
       element.className = 'oc-flash-message ' + type;
-      element.innerHTML = '<span>' + message + '</span><a class="flash-close"></a>';
+      element.innerHTML = loadingHtml + '<span class="flash-message">' + message + '</span>' + closeHtml;
       return element;
     } // Private
 
@@ -1223,22 +1367,46 @@ var FlashMessage = /*#__PURE__*/function () {
       element.textContent = FlashMessage.defaultCSS;
       return element;
     }
+  }, {
+    key: "createMessagesElement",
+    value: function createMessagesElement() {
+      var found = document.querySelector('.oc-flash-messages');
+
+      if (found) {
+        return found;
+      }
+
+      var element = document.createElement('div');
+      element.className = 'oc-flash-messages';
+      document.body.appendChild(element);
+      return element;
+    }
   }], [{
     key: "defaultCSS",
     get: function get() {
-      return (0,_util__WEBPACK_IMPORTED_MODULE_0__.unindent)(_templateObject || (_templateObject = _taggedTemplateLiteral(["\n        .oc-flash-message {\n            position: fixed;\n            z-index: 10300;\n            width: 500px;\n            left: 50%;\n            top: 50px;\n            margin-left: -250px;\n            color: #fff;\n            font-size: 1rem;\n            padding: 10px 30px 10px 15px;\n            border-radius: 5px;\n\n            opacity: 0;\n            transition: all 0.5s, width 0s;\n            transform: scale(0.9);\n        }\n        .oc-flash-message.flash-show {\n            opacity: 1;\n            transform: scale(1);\n        }\n        .oc-flash-message.success {\n            background: #86cB43;\n        }\n        .oc-flash-message.error {\n            background: #cc3300;\n        }\n        .oc-flash-message.warning {\n            background: #f0ad4e;\n        }\n        .oc-flash-message.info {\n            background: #5fb6f5;\n        }\n        .oc-flash-message a.flash-close {\n            box-sizing: content-box;\n            width: 1em;\n            height: 1em;\n            padding: .25em .25em;\n            background: transparent url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23FFF'%3e%3cpath d='M.293.293a1 1 0 011.414 0L8 6.586 14.293.293a1 1 0 111.414 1.414L9.414 8l6.293 6.293a1 1 0 01-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 01-1.414-1.414L6.586 8 .293 1.707a1 1 0 010-1.414z'/%3e%3c/svg%3e\") center/1em auto no-repeat;\n            border: 0;\n            border-radius: .25rem;\n            opacity: .5;\n            text-decoration: none;\n            position: absolute;\n            right: .7rem;\n            top: .7rem;\n            cursor: pointer;\n        }\n        .oc-flash-message a.flash-close:hover,\n        .oc-flash-message a.flash-close:focus {\n            opacity: 1;\n        }\n        html[data-turbo-preview] .oc-flash-message {\n            opacity: 0;\n        }\n        @media (max-width: 768px) {\n            .oc-flash-message {\n                left: 1rem;\n                right: 1rem;\n                top: 1rem;\n                margin-left: 0;\n                width: auto;\n            }\n        }\n    "])));
+      return (0,_util__WEBPACK_IMPORTED_MODULE_0__.unindent)(_templateObject || (_templateObject = _taggedTemplateLiteral(["\n        .oc-flash-message {\n            display: flex;\n            position: fixed;\n            z-index: 10300;\n            width: 500px;\n            left: 50%;\n            top: 50px;\n            margin-left: -250px;\n            color: #fff;\n            font-size: 1rem;\n            padding: 10px 15px;\n            border-radius: 5px;\n            opacity: 0;\n            transition: all 0.5s, width 0s;\n            transform: scale(0.9);\n        }\n        @media (max-width: 768px) {\n            .oc-flash-message {\n                left: 1rem;\n                right: 1rem;\n                top: 1rem;\n                margin-left: 0;\n                width: auto;\n            }\n        }\n        .oc-flash-message.flash-show {\n            opacity: 1;\n            transform: scale(1);\n        }\n        .oc-flash-message.loading {\n            transition: opacity 0.2s;\n            transform: scale(1);\n        }\n        .oc-flash-message.success {\n            background: #86cb43;\n        }\n        .oc-flash-message.error {\n            background: #cc3300;\n        }\n        .oc-flash-message.warning {\n            background: #f0ad4e;\n        }\n        .oc-flash-message.info, .oc-flash-message.loading {\n            background: #5fb6f5;\n        }\n        .oc-flash-message span.flash-message {\n            flex-grow: 1;\n        }\n        .oc-flash-message a.flash-close {\n            box-sizing: content-box;\n            width: 1em;\n            height: 1em;\n            padding: .25em .25em;\n            background: transparent url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23FFF'%3e%3cpath d='M.293.293a1 1 0 011.414 0L8 6.586 14.293.293a1 1 0 111.414 1.414L9.414 8l6.293 6.293a1 1 0 01-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 01-1.414-1.414L6.586 8 .293 1.707a1 1 0 010-1.414z'/%3e%3c/svg%3e\") center/1em auto no-repeat;\n            border: 0;\n            border-radius: .25rem;\n            opacity: .5;\n            text-decoration: none;\n            cursor: pointer;\n        }\n        .oc-flash-message a.flash-close:hover,\n        .oc-flash-message a.flash-close:focus {\n            opacity: 1;\n        }\n        .oc-flash-message.loading a.flash-close {\n            display: none;\n        }\n        .oc-flash-message span.flash-loader {\n            margin-right: 1em;\n        }\n        .oc-flash-message span.flash-loader:after {\n            position: relative;\n            top: 2px;\n            content: '';\n            display: inline-block;\n            height: 1.2em;\n            width: 1.2em;\n            animation: oc-flash-loader 0.8s infinite linear;\n            border: .2em solid currentColor;\n            border-right-color: transparent;\n            border-radius: 50%;\n            opacity: .5;\n        }\n        html[data-turbo-preview] .oc-flash-message {\n            opacity: 0;\n        }\n        @keyframes oc-flash-loader {\n            0% { transform: rotate(0deg); }\n            100%  { transform: rotate(360deg); }\n        }\n    "])));
     }
   }, {
     key: "flashMsg",
     value: function flashMsg(options) {
-      return new FlashMessage().show(options);
+      return getOrCreateInstance().show(options);
     }
   }]);
 
   return FlashMessage;
 }();
 
+_defineProperty(FlashMessage, "instance", null);
+
 _defineProperty(FlashMessage, "stylesheetReady", false);
+
+function getOrCreateInstance() {
+  if (!FlashMessage.instance) {
+    FlashMessage.instance = new FlashMessage();
+  }
+
+  return FlashMessage.instance;
+}
 
 /***/ }),
 
@@ -1738,12 +1906,28 @@ var Application = /*#__PURE__*/function () {
       });
     }
   }, {
+    key: "observe",
+    value: function observe(element, identifier) {
+      var observer = this.container.scopeObserver;
+      observer.elementMatchedValue(element, observer.parseValueForToken({
+        element: element,
+        content: identifier
+      }));
+      var foundControl = this.getControlForElementAndIdentifier(element, identifier);
+
+      if (!element.matches("[data-control~=\"".concat(identifier, "\"]"))) {
+        element.dataset.control = ((element.dataset.control || '') + ' ' + identifier).trim();
+      }
+
+      return foundControl;
+    }
+  }, {
     key: "import",
     value: function _import(identifier) {
       var module = this.container.getModuleForIdentifier(identifier);
 
       if (!module) {
-        throw new Error('Control is not registered: ' + identifier);
+        throw new Error("Control is not registered [".concat(identifier, "]"));
       }
 
       return module.controlConstructor;
@@ -2626,6 +2810,7 @@ if (!window.oc.AjaxObserve) {
 
   window.oc.registerControl = _namespace__WEBPACK_IMPORTED_MODULE_1__["default"].registerControl;
   window.oc.importControl = _namespace__WEBPACK_IMPORTED_MODULE_1__["default"].importControl;
+  window.oc.observeControl = _namespace__WEBPACK_IMPORTED_MODULE_1__["default"].observeControl;
   window.oc.fetchControl = _namespace__WEBPACK_IMPORTED_MODULE_1__["default"].fetchControl;
   window.oc.fetchControls = _namespace__WEBPACK_IMPORTED_MODULE_1__["default"].fetchControls; // Control base class
 
@@ -3613,6 +3798,9 @@ var application = new _application__WEBPACK_IMPORTED_MODULE_0__.Application();
   importControl: function importControl(id) {
     return application["import"](id);
   },
+  observeControl: function observeControl(element, id) {
+    return application.observe(element, id);
+  },
   fetchControl: function fetchControl(element) {
     return application.fetch(element);
   },
@@ -3983,8 +4171,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "ActionsUpdateMode": () => (/* binding */ ActionsUpdateMode)
 /* harmony export */ });
 /* harmony import */ var _asset_manager__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./asset-manager */ "./src/request/asset-manager.js");
-/* harmony import */ var _util_http_request__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../util/http-request */ "./src/util/http-request.js");
-/* harmony import */ var _util_deferred__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../util/deferred */ "./src/util/deferred.js");
+/* harmony import */ var _util_deferred__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../util/deferred */ "./src/util/deferred.js");
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { _defineProperty(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
@@ -4008,7 +4195,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
-
 
 
 
@@ -4062,13 +4248,17 @@ var Actions = /*#__PURE__*/function () {
     key: "start",
     value: function start(xhr) {
       this.invoke('markAsUpdating', [true]);
+
+      if (this.delegate.options.message) {
+        this.invoke('handleProgressMessage', [this.delegate.options.message, false]);
+      }
     }
   }, {
     key: "success",
     value: function success(data, responseCode, xhr) {
       var _this = this;
 
-      var updatePromise = new _util_deferred__WEBPACK_IMPORTED_MODULE_2__.Deferred(); // Halt here if beforeUpdate() or data-request-before-update returns false
+      var updatePromise = new _util_deferred__WEBPACK_IMPORTED_MODULE_1__.Deferred(); // Halt here if beforeUpdate() or data-request-before-update returns false
 
       if (this.invoke('beforeUpdate', [data, responseCode, xhr]) === false) {
         return updatePromise;
@@ -4116,9 +4306,9 @@ var Actions = /*#__PURE__*/function () {
       var _this2 = this;
 
       var errorMsg,
-          updatePromise = new _util_deferred__WEBPACK_IMPORTED_MODULE_2__.Deferred();
+          updatePromise = new _util_deferred__WEBPACK_IMPORTED_MODULE_1__.Deferred();
 
-      if (window.ocUnloading !== undefined && window.ocUnloading || responseCode == _util_http_request__WEBPACK_IMPORTED_MODULE_1__.SystemStatusCode.userAborted) {
+      if (window.ocUnloading !== undefined && window.ocUnloading) {
         return updatePromise;
       } // Disable redirects
 
@@ -4166,6 +4356,10 @@ var Actions = /*#__PURE__*/function () {
       this.delegate.notifyApplicationRequestComplete(data, responseCode, xhr);
       this.invokeFunc('completeFunc', data);
       this.invoke('markAsUpdating', [false]);
+
+      if (this.delegate.options.message) {
+        this.invoke('handleProgressMessage', [null, true]);
+      }
     }
   }, {
     key: "cancel",
@@ -4178,11 +4372,11 @@ var Actions = /*#__PURE__*/function () {
     value: function handleConfirmMessage(message) {
       var _this3 = this;
 
-      var promise = new _util_deferred__WEBPACK_IMPORTED_MODULE_2__.Deferred();
+      var promise = new _util_deferred__WEBPACK_IMPORTED_MODULE_1__.Deferred();
       promise.done(function () {
         _this3.delegate.sendInternal();
       }).fail(function () {
-        _this3.invoke('cancel');
+        _this3.invoke('cancel', []);
       });
       var event = this.delegate.notifyApplicationConfirmMessage(message, promise);
 
@@ -4194,12 +4388,16 @@ var Actions = /*#__PURE__*/function () {
         var result = confirm(message);
 
         if (!result) {
-          this.invoke('cancel');
+          this.invoke('cancel', []);
         }
 
         return result;
       }
-    } // Custom function, display a flash message to the user
+    } // Custom function, display a progress message to the user
+
+  }, {
+    key: "handleProgressMessage",
+    value: function handleProgressMessage(message, isDone) {} // Custom function, display a flash message to the user
 
   }, {
     key: "handleFlashMessage",
@@ -4338,7 +4536,7 @@ var Actions = /*#__PURE__*/function () {
       var _this5 = this;
 
       var updateOptions = this.options.update || {},
-          updatePromise = new _util_deferred__WEBPACK_IMPORTED_MODULE_2__.Deferred(); // Update partials and finish request
+          updatePromise = new _util_deferred__WEBPACK_IMPORTED_MODULE_1__.Deferred(); // Update partials and finish request
 
       updatePromise.done(function () {
         var _loop = function _loop() {
@@ -5568,7 +5766,12 @@ var Request = /*#__PURE__*/function () {
   }, {
     key: "requestFailedWithStatusCode",
     value: function requestFailedWithStatusCode(statusCode, response) {
-      this.actions.invoke('error', [response, statusCode, this.request.xhr]);
+      if (statusCode == _util_http_request__WEBPACK_IMPORTED_MODULE_3__.SystemStatusCode.userAborted) {
+        this.actions.invoke('cancel');
+      } else {
+        this.actions.invoke('error', [response, statusCode, this.request.xhr]);
+      }
+
       this.actions.invoke('complete', [response, statusCode, this.request.xhr]);
       this.promise.reject(response, statusCode, this.request.xhr);
     }

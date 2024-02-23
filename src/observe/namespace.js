@@ -12,6 +12,10 @@ export default {
         return application.import(id);
     },
 
+    observeControl(element, id) {
+        return application.observe(element, id);
+    },
+
     fetchControl(element) {
         return application.fetch(element);
     },
