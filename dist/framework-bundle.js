@@ -1144,7 +1144,6 @@ var FlashMessage = /*#__PURE__*/function () {
     _classCallCheck(this, FlashMessage);
 
     this.queue = [];
-    this.timer = null;
     this.lastUniqueId = 0;
     this.displayedMessage = null;
     this.stylesheetElement = this.createStylesheetElement();
