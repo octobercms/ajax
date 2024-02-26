@@ -249,7 +249,7 @@ export class Request
 
     requestFailedWithStatusCode(statusCode, response) {
         if (statusCode == SystemStatusCode.userAborted) {
-            this.actions.invoke('cancel');
+            this.actions.invoke('cancel', []);
         }
         else {
             this.actions.invoke('error', [response, statusCode, this.request.xhr]);

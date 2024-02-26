@@ -5766,7 +5766,7 @@ var Request = /*#__PURE__*/function () {
     key: "requestFailedWithStatusCode",
     value: function requestFailedWithStatusCode(statusCode, response) {
       if (statusCode == _util_http_request__WEBPACK_IMPORTED_MODULE_3__.SystemStatusCode.userAborted) {
-        this.actions.invoke('cancel');
+        this.actions.invoke('cancel', []);
       } else {
         this.actions.invoke('error', [response, statusCode, this.request.xhr]);
       }
