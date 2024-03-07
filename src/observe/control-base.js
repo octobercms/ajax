@@ -13,6 +13,8 @@ class ControlBase
 
     constructor(context) {
         this.context = context;
+
+        this.config = { ...(context.scope.element.dataset || {}) };
     }
 
     get application() {
@@ -25,10 +27,6 @@ class ControlBase
 
     get element() {
         return this.scope.element;
-    }
-
-    get config() {
-        return this.scope.element.dataset;
     }
 
     get identifier() {
