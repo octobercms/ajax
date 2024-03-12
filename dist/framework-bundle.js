@@ -5406,7 +5406,10 @@ var Request = /*#__PURE__*/function () {
     key: "start",
     value: function start() {
       // Setup
-      this.notifyApplicationAjaxSetup();
+      if (!this.applicationAllowsSetup()) {
+        return;
+      }
+
       this.initOtherElements();
       this.preprocessOptions(); // Prepare actions
 
@@ -5491,6 +5494,12 @@ var Request = /*#__PURE__*/function () {
         this.options.redirect = redirectUrl;
         this.isRedirect = true;
       }
+    }
+  }, {
+    key: "applicationAllowsSetup",
+    value: function applicationAllowsSetup() {
+      var event = this.notifyApplicationAjaxSetup();
+      return !event.defaultPrevented;
     }
   }, {
     key: "applicationAllowsRequest",

@@ -36,7 +36,10 @@ export class Request
 
     start() {
         // Setup
-        this.notifyApplicationAjaxSetup();
+        if (!this.applicationAllowsSetup()) {
+            return;
+        }
+
         this.initOtherElements();
         this.preprocessOptions();
 
@@ -126,6 +129,11 @@ export class Request
             this.options.redirect = redirectUrl;
             this.isRedirect = true;
         }
+    }
+
+    applicationAllowsSetup() {
+        const event = this.notifyApplicationAjaxSetup();
+        return !event.defaultPrevented;
     }
 
     applicationAllowsRequest() {
