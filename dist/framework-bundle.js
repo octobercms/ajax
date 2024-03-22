@@ -4271,13 +4271,16 @@ var Actions = /*#__PURE__*/function () {
 
       if (!this.delegate.applicationAllowsUpdate(data, responseCode, xhr)) {
         return updatePromise;
-      }
+      } // Download file and continue with success response here since data is unusable
+
 
       if (this.delegate.options.download && data instanceof Blob) {
-        if (this.invoke('handleFileDownload', [data, xhr])) {
-          return updatePromise;
-        }
-      }
+        this.invoke('handleFileDownload', [data, xhr]);
+        this.delegate.notifyApplicationRequestSuccess(data, responseCode, xhr);
+        this.invokeFunc('successFunc', data);
+        return updatePromise;
+      } // Dispatch flash messages
+
 
       if (this.delegate.options.flash && data['X_OCTOBER_FLASH_MESSAGES']) {
         for (var type in data['X_OCTOBER_FLASH_MESSAGES']) {
@@ -4624,20 +4627,21 @@ var Actions = /*#__PURE__*/function () {
     value: function handleFileDownload(data, xhr) {
       if (this.options.browserTarget) {
         window.open(window.URL.createObjectURL(data), this.options.browserTarget);
-        return true;
+        return;
       }
 
       var fileName = typeof this.options.download === 'string' ? this.options.download : getFilenameFromHttpResponse(xhr);
 
-      if (fileName) {
-        var anchor = document.createElement('a');
-        anchor.href = window.URL.createObjectURL(data);
-        anchor.download = fileName;
-        anchor.target = '_blank';
-        anchor.click();
-        window.URL.revokeObjectURL(anchor.href);
-        return true;
+      if (!fileName) {
+        return;
       }
+
+      var anchor = document.createElement('a');
+      anchor.href = window.URL.createObjectURL(data);
+      anchor.download = fileName;
+      anchor.target = '_blank';
+      anchor.click();
+      window.URL.revokeObjectURL(anchor.href);
     } // Custom function, adds query data to the current URL
 
   }, {
