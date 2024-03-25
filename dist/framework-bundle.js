@@ -5892,9 +5892,12 @@ var Request = /*#__PURE__*/function () {
         }).done(function (data) {
           resolve(data);
         });
-        onCancel(function () {
-          requestPromise.abort();
-        });
+
+        if (onCancel) {
+          onCancel(function () {
+            requestPromise.abort();
+          });
+        }
       });
     }
   }], [{

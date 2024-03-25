@@ -378,9 +378,11 @@ export class Request
                     resolve(data);
                 });
 
-            onCancel(function() {
-                requestPromise.abort();
-            });
+            if (onCancel) {
+                onCancel(function() {
+                    requestPromise.abort();
+                });
+            }
         });
     }
 }
