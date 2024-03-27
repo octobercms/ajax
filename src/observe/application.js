@@ -1,5 +1,6 @@
 import { Dispatcher } from "./dispatcher";
 import { Container } from "./container";
+import { domReady } from "../util/wait";
 
 export class Application
 {
@@ -118,15 +119,4 @@ export class Application
         console.error(`%s\n\n%o\n\n%o`, message, error, detail);
         (_a = window.onerror) === null || _a === void 0 ? void 0 : _a.call(window, message, "", 0, 0, error);
     }
-}
-
-function domReady() {
-    return new Promise((resolve) => {
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => resolve());
-        }
-        else {
-            resolve();
-        }
-    });
 }

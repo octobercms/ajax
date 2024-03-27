@@ -15,6 +15,7 @@ import AjaxTurbo from "./turbo/namespace";
 import { ControlBase } from "./observe/control-base";
 import { AssetManager } from "./request/asset-manager";
 import { Events } from "./util/events";
+import { waitFor } from "./util/wait";
 
 export default {
     AjaxFramework,
@@ -25,6 +26,7 @@ export default {
     ControlBase,
     AssetManager,
     Events,
+    waitFor,
     ajax: AjaxRequest.send,
     request: AjaxFramework.requestElement,
     parseJSON: AjaxFramework.parseJSON,

@@ -1,4 +1,4 @@
-import { dispatch } from './index'
+import { dispatch } from "./index";
 
 /**
  * Constants

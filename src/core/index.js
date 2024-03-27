@@ -1,4 +1,5 @@
 import { Events } from "../util/events";
+import { waitFor, domReady } from "../util/wait";
 import namespace from "./namespace";
 export default namespace;
 
@@ -21,6 +22,15 @@ if (!window.oc.AjaxFramework) {
 
     // Selector events
     window.oc.Events = Events;
+
+    // Wait for a variable to exist
+    window.oc.waitFor = waitFor;
+
+    // Fallback for turbo
+    window.oc.pageReady = domReady;
+
+    // Fallback for turbo
+    window.oc.visit = (url) => window.location.assign(url);
 
     // Boot controller
     if (!isAMD() && !isCommonJS()) {
