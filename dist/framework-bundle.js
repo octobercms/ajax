@@ -197,12 +197,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var _util_events__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../util/events */ "./src/util/events.js");
-/* harmony import */ var _namespace__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./namespace */ "./src/core/namespace.js");
+/* harmony import */ var _util_wait__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../util/wait */ "./src/util/wait.js");
+/* harmony import */ var _namespace__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./namespace */ "./src/core/namespace.js");
 function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_namespace__WEBPACK_IMPORTED_MODULE_1__["default"]);
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_namespace__WEBPACK_IMPORTED_MODULE_2__["default"]);
 
 if (!window.oc) {
   window.oc = {};
@@ -210,18 +212,27 @@ if (!window.oc) {
 
 if (!window.oc.AjaxFramework) {
   // Namespace
-  window.oc.AjaxFramework = _namespace__WEBPACK_IMPORTED_MODULE_1__["default"]; // Request on element with builder
+  window.oc.AjaxFramework = _namespace__WEBPACK_IMPORTED_MODULE_2__["default"]; // Request on element with builder
 
-  window.oc.request = _namespace__WEBPACK_IMPORTED_MODULE_1__["default"].requestElement; // JSON parser
+  window.oc.request = _namespace__WEBPACK_IMPORTED_MODULE_2__["default"].requestElement; // JSON parser
 
-  window.oc.parseJSON = _namespace__WEBPACK_IMPORTED_MODULE_1__["default"].parseJSON; // Form serializer
+  window.oc.parseJSON = _namespace__WEBPACK_IMPORTED_MODULE_2__["default"].parseJSON; // Form serializer
 
-  window.oc.serializeJSON = _namespace__WEBPACK_IMPORTED_MODULE_1__["default"].serializeJSON; // Selector events
+  window.oc.serializeJSON = _namespace__WEBPACK_IMPORTED_MODULE_2__["default"].serializeJSON; // Selector events
 
-  window.oc.Events = _util_events__WEBPACK_IMPORTED_MODULE_0__.Events; // Boot controller
+  window.oc.Events = _util_events__WEBPACK_IMPORTED_MODULE_0__.Events; // Wait for a variable to exist
+
+  window.oc.waitFor = _util_wait__WEBPACK_IMPORTED_MODULE_1__.waitFor; // Fallback for turbo
+
+  window.oc.pageReady = _util_wait__WEBPACK_IMPORTED_MODULE_1__.domReady; // Fallback for turbo
+
+  window.oc.visit = function (url) {
+    return window.location.assign(url);
+  }; // Boot controller
+
 
   if (!isAMD() && !isCommonJS()) {
-    _namespace__WEBPACK_IMPORTED_MODULE_1__["default"].start();
+    _namespace__WEBPACK_IMPORTED_MODULE_2__["default"].start();
   }
 }
 
@@ -1851,11 +1862,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _dispatcher__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./dispatcher */ "./src/observe/dispatcher.js");
 /* harmony import */ var _container__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./container */ "./src/observe/container.js");
+/* harmony import */ var _util_wait__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../util/wait */ "./src/util/wait.js");
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+
 
 
 
@@ -1874,7 +1887,7 @@ var Application = /*#__PURE__*/function () {
     value: function startAsync() {
       var _this = this;
 
-      domReady().then(function () {
+      (0,_util_wait__WEBPACK_IMPORTED_MODULE_2__.domReady)().then(function () {
         _this.start();
       });
     }
@@ -2020,18 +2033,6 @@ var Application = /*#__PURE__*/function () {
 
   return Application;
 }();
-
-function domReady() {
-  return new Promise(function (resolve) {
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', function () {
-        return resolve();
-      });
-    } else {
-      resolve();
-    }
-  });
-}
 
 /***/ }),
 
@@ -9857,6 +9858,64 @@ var JsonParser = /*#__PURE__*/function () {
 
   return JsonParser;
 }();
+
+/***/ }),
+
+/***/ "./src/util/wait.js":
+/*!**************************!*\
+  !*** ./src/util/wait.js ***!
+  \**************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "domReady": () => (/* binding */ domReady),
+/* harmony export */   "waitFor": () => (/* binding */ waitFor)
+/* harmony export */ });
+/**
+ * Function to wait for predicates.
+ * @param {function() : Boolean} predicate - A function that returns a bool
+ * @param {Number} [timeout] - Optional maximum waiting time in ms after rejected
+ */
+function waitFor(predicate, timeout) {
+  return new Promise(function (resolve, reject) {
+    var check = function check() {
+      if (!predicate()) {
+        return;
+      }
+
+      clearInterval(interval);
+      resolve();
+    };
+
+    var interval = setInterval(check, 100);
+    check();
+
+    if (!timeout) {
+      return;
+    }
+
+    setTimeout(function () {
+      clearInterval(interval);
+      reject();
+    }, timeout);
+  });
+}
+/**
+ * Function to wait for the DOM to be ready, if not already
+ */
+
+function domReady() {
+  return new Promise(function (resolve) {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function () {
+        return resolve();
+      });
+    } else {
+      resolve();
+    }
+  });
+}
 
 /***/ })
 
