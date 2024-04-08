@@ -54,7 +54,7 @@ export class FormSerializer
             lastIndex = fieldArr.length - 1;
 
         fieldArr.forEach(function(prop, index) {
-            if (currentTarget[prop] === undefined) {
+            if (currentTarget[prop] === undefined || currentTarget[prop].constructor !== {}.constructor) {
                 currentTarget[prop] = {};
             }
 
