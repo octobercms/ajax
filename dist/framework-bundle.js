@@ -792,7 +792,7 @@ var AttachLoader = /*#__PURE__*/function () {
 
       if (el.matches('form')) {
         var self = this;
-        el.querySelectorAll('[data-attach-loading]').forEach(function (otherEl) {
+        el.querySelectorAll('[data-attach-loading][type=submit]').forEach(function (otherEl) {
           if (!isElementInput(otherEl)) {
             self.show(otherEl);
           }
