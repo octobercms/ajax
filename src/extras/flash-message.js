@@ -151,6 +151,10 @@ export class FlashMessage
             hideAll = false
         } = options;
 
+        // Legacy API
+        if (options.text) message = options.text;
+        if (options.class) type = options.class;
+
         // Clear all messages
         if (hideAll || type === 'error' || type === 'loading') {
             this.clearQueue();

@@ -1206,7 +1206,10 @@ var FlashMessage = /*#__PURE__*/function () {
           _options$replace = options.replace,
           replace = _options$replace === void 0 ? null : _options$replace,
           _options$hideAll = options.hideAll,
-          hideAll = _options$hideAll === void 0 ? false : _options$hideAll; // Clear all messages
+          hideAll = _options$hideAll === void 0 ? false : _options$hideAll; // Legacy API
+
+      if (options.text) message = options.text;
+      if (options["class"]) type = options["class"]; // Clear all messages
 
       if (hideAll || type === 'error' || type === 'loading') {
         this.clearQueue();
