@@ -38,6 +38,7 @@ export class FormSerializer
 
             this.assignObjectInternal(jsonData, field.name, field.value);
         });
+
         return jsonData;
     }
 
@@ -45,24 +46,34 @@ export class FormSerializer
         this.assignObjectNested(
             obj,
             this.nameToArray(fieldName),
-            fieldValue
+            fieldValue,
+            fieldName.endsWith('[]')
         );
     }
 
-    assignObjectNested(obj, fieldArr, fieldValue) {
+    assignObjectNested(obj, fieldArr, fieldValue, isArray) {
         var currentTarget = obj,
             lastIndex = fieldArr.length - 1;
 
         fieldArr.forEach(function(prop, index) {
-            if (currentTarget[prop] === undefined || currentTarget[prop].constructor !== {}.constructor) {
-                currentTarget[prop] = {};
-            }
+            if (isArray && index === lastIndex) {
+                if (!Array.isArray(currentTarget[prop])) {
+                    currentTarget[prop] = [];
+                }
 
-            if (index === lastIndex) {
-                currentTarget[prop] = fieldValue;
+                currentTarget[prop].push(fieldValue);
             }
+            else {
+                if (currentTarget[prop] === undefined || currentTarget[prop].constructor !== {}.constructor) {
+                    currentTarget[prop] = {};
+                }
 
-            currentTarget = currentTarget[prop];
+                if (index === lastIndex) {
+                    currentTarget[prop] = fieldValue;
+                }
+
+                currentTarget = currentTarget[prop];
+            }
         });
     }
 
