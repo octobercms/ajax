@@ -78,7 +78,11 @@ export class Request
 
         // Prepare query
         if (this.options.query) {
-            this.actions.invoke('applyQueryToUrl', [this.options.query]);
+            this.actions.invoke('applyQueryToUrl', [
+                this.options.query !== true
+                    ? this.options.query
+                    : JSON.parse(dataObj.getAsJsonData())
+            ]);
         }
 
         // Prepare request

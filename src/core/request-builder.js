@@ -31,7 +31,7 @@ export class RequestBuilder
         this.assignAsData('flash', 'requestFlash', { emptyAsTrue: true });
         this.assignAsData('download', 'requestDownload', { emptyAsTrue: true });
         this.assignAsData('update', 'requestUpdate', { parseJson: true });
-        this.assignAsData('query', 'requestQuery', { parseJson: true });
+        this.assignAsData('query', 'requestQuery', { emptyAsTrue: true, parseJson: true });
 
         this.assignAsData('browserTarget', 'browserTarget');
         this.assignAsData('browserValidate', 'browserValidate', { emptyAsTrue: true });
@@ -122,15 +122,16 @@ export class RequestBuilder
             return;
         }
 
-        if (parseJson) {
-            this.options[optionName] = JsonParser.paramToObj(
+        attrVal = this.castAttrToOption(attrVal, emptyAsTrue);
+
+        if (parseJson && typeof attrVal === 'string') {
+            attrVal = JsonParser.paramToObj(
                 'data-' + normalizeDataKey(name),
                 attrVal
             );
         }
-        else {
-            this.options[optionName] = this.castAttrToOption(attrVal, emptyAsTrue);
-        }
+
+        this.options[optionName] = attrVal;
     }
 
     assignAsMetaData(optionName, name, { mergeValue = true, parseJson = false, emptyAsTrue = false } = {}) {
