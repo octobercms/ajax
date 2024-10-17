@@ -61,8 +61,8 @@ export class AttachLoader
 
     hide(el) {
         if (isElementInput(el)) {
-            if (el.nextSibling.classList.contains('oc-attach-loader')) {
-                el.nextSibling.remove();
+            if (el.nextElementSibling && el.nextElementSibling.classList.contains('oc-attach-loader')) {
+                el.nextElementSibling.remove();
             }
         }
         else {
