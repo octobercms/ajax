@@ -27,7 +27,7 @@ export class Visit
         this.historyChanged = false;
         this.progress = 0;
         this.scrolled = false;
-        this.snapshotCached = false;
+        this.snapshotCached = action === 'swap';
         this.state = VisitState.initialized;
 
         // Scrolling
