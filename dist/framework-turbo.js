@@ -503,6 +503,7 @@ var RequestBuilder = /*#__PURE__*/function () {
       parseJson: true
     });
     this.assignAsData('query', 'requestQuery', {
+      emptyAsTrue: true,
       parseJson: true
     });
     this.assignAsData('browserTarget', 'browserTarget');
@@ -601,11 +602,13 @@ var RequestBuilder = /*#__PURE__*/function () {
         return;
       }
 
-      if (parseJson) {
-        this.options[optionName] = _util_json_parser__WEBPACK_IMPORTED_MODULE_1__.JsonParser.paramToObj('data-' + normalizeDataKey(name), attrVal);
-      } else {
-        this.options[optionName] = this.castAttrToOption(attrVal, emptyAsTrue);
+      attrVal = this.castAttrToOption(attrVal, emptyAsTrue);
+
+      if (parseJson && typeof attrVal === 'string') {
+        attrVal = _util_json_parser__WEBPACK_IMPORTED_MODULE_1__.JsonParser.paramToObj('data-' + normalizeDataKey(name), attrVal);
       }
+
+      this.options[optionName] = attrVal;
     }
   }, {
     key: "assignAsMetaData",
@@ -2195,7 +2198,7 @@ var Request = /*#__PURE__*/function () {
 
 
       if (this.options.query) {
-        this.actions.invoke('applyQueryToUrl', [this.options.query]);
+        this.actions.invoke('applyQueryToUrl', [this.options.query !== true ? this.options.query : JSON.parse(dataObj.getAsJsonData())]);
       } // Prepare request
 
 
@@ -4938,7 +4941,7 @@ var Visit = /*#__PURE__*/function () {
     this.historyChanged = false;
     this.progress = 0;
     this.scrolled = false;
-    this.snapshotCached = false;
+    this.snapshotCached = action === 'swap';
     this.state = VisitState.initialized; // Scrolling
 
     this.performScroll = function () {
