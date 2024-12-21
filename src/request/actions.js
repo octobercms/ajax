@@ -1,5 +1,6 @@
 import { AssetManager } from "./asset-manager";
 import { Deferred } from "../util/deferred";
+import { getReferrerUrl } from "../util/referrer";
 
 export var ActionsUpdateMode = {
     replaceWith: 'replace',
@@ -282,6 +283,10 @@ export class Actions
             return;
         }
 
+        if (this.options.browserRedirectBack) {
+            href = getReferrerUrl() || href;
+        }
+
         if (oc.useTurbo && oc.useTurbo()) {
             oc.visit(href);
         }
@@ -453,7 +458,7 @@ export class Actions
             queryStr = searchParams.toString();
 
         if (queryStr) {
-            newUrl += '?' + searchParams.toString().replaceAll('%5B%5D=', '[]=')
+            newUrl += '?' + queryStr.replaceAll('%5B%5D=', '[]=')
         }
 
         if (oc.useTurbo && oc.useTurbo()) {

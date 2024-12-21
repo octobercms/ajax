@@ -35,6 +35,7 @@ export class RequestBuilder
 
         this.assignAsData('browserTarget', 'browserTarget');
         this.assignAsData('browserValidate', 'browserValidate', { emptyAsTrue: true });
+        this.assignAsData('browserRedirectBack', 'browserRedirectBack', { emptyAsTrue: true });
 
         this.assignAsMetaData('update', 'ajaxRequestUpdate', { parseJson: true, mergeValue: true });
 

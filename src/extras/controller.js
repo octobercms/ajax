@@ -2,6 +2,7 @@ import { Validator } from "./validator";
 import { AttachLoader } from "./attach-loader";
 import { FlashMessage } from "./flash-message";
 import { Events } from "../util/events";
+import { getReferrerUrl } from "../util/referrer";
 
 export class Controller
 {
@@ -93,19 +94,17 @@ export class Controller
                 return;
             }
 
+            const href = getReferrerUrl();
+            if (!href) {
+                return;
+            }
+
+            event.preventDefault();
             if (oc.useTurbo && oc.useTurbo()) {
-                const href = oc.AjaxTurbo.controller.getLastVisitUrl();
-                if (href) {
-                    event.preventDefault();
-                    oc.visit(href);
-                }
+                oc.visit(href);
             }
             else {
-                const href = getReferrerFromSameOrigin();
-                if (href) {
-                    event.preventDefault();
-                    location.assign(href);
-                }
+                location.assign(href);
             }
         };
     }
@@ -195,27 +194,4 @@ function shouldShowFlashMessage(value, type) {
     });
 
     return result;
-}
-
-function getReferrerFromSameOrigin() {
-    if (!document.referrer) {
-        return null;
-    }
-
-    // Fallback when turbo router is not activated
-    try {
-        const referrer = new URL(document.referrer);
-        if (referrer.origin !== location.origin) {
-            return null;
-        }
-
-        const pushReferrer = localStorage.getItem('ocPushStateReferrer');
-        if (pushReferrer && pushReferrer.indexOf(referrer.pathname) === 0) {
-            return pushReferrer;
-        }
-
-        return document.referrer;
-    }
-    catch (e) {
-    }
 }

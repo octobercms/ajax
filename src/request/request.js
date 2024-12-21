@@ -27,8 +27,9 @@ export class Request
             files: false,
             bulk: false,
             download: false,
-            browserValidate: false,
             browserTarget: null,
+            browserValidate: false,
+            browserRedirectBack: false,
             progressBarDelay: 500,
             progressBar: null
         }
