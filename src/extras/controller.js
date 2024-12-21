@@ -134,7 +134,6 @@ export class Controller
 
             // Browser redirect
             Events.on(document, 'click', '[data-browser-redirect-back]', this.handleBrowserRedirect);
-            Events.on(document, 'ajax:before-redirect', '[data-browser-redirect-back]', this.handleBrowserRedirect);
 
             this.started = true;
         }
@@ -165,7 +164,6 @@ export class Controller
 
             // Browser redirect
             Events.off(document, 'click', '[data-browser-redirect-back]', this.handleBrowserRedirect);
-            Events.off(document, 'ajax:before-redirect', '[data-browser-redirect-back]', this.handleBrowserRedirect);
 
             this.started = false;
         }
