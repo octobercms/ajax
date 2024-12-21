@@ -510,6 +510,9 @@ var RequestBuilder = /*#__PURE__*/function () {
     this.assignAsData('browserValidate', 'browserValidate', {
       emptyAsTrue: true
     });
+    this.assignAsData('browserRedirectBack', 'browserRedirectBack', {
+      emptyAsTrue: true
+    });
     this.assignAsMetaData('update', 'ajaxRequestUpdate', {
       parseJson: true,
       mergeValue: true
@@ -893,11 +896,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _attach_loader__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./attach-loader */ "./src/extras/attach-loader.js");
 /* harmony import */ var _flash_message__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./flash-message */ "./src/extras/flash-message.js");
 /* harmony import */ var _util_events__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../util/events */ "./src/util/events.js");
+/* harmony import */ var _util_referrer__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../util/referrer */ "./src/util/referrer.js");
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+
 
 
 
@@ -1000,20 +1005,18 @@ var Controller = /*#__PURE__*/function () {
         return;
       }
 
+      var href = (0,_util_referrer__WEBPACK_IMPORTED_MODULE_4__.getReferrerUrl)();
+
+      if (!href) {
+        return;
+      }
+
+      event.preventDefault();
+
       if (oc.useTurbo && oc.useTurbo()) {
-        var href = oc.AjaxTurbo.controller.getLastVisitUrl();
-
-        if (href) {
-          event.preventDefault();
-          oc.visit(href);
-        }
+        oc.visit(href);
       } else {
-        var _href = getReferrerFromSameOrigin();
-
-        if (_href) {
-          event.preventDefault();
-          location.assign(_href);
-        }
+        location.assign(href);
       }
     };
   }
@@ -1041,7 +1044,6 @@ var Controller = /*#__PURE__*/function () {
         addEventListener('page:before-cache', this.hideAllFlashMessages); // Browser redirect
 
         _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.on(document, 'click', '[data-browser-redirect-back]', this.handleBrowserRedirect);
-        _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.on(document, 'ajax:before-redirect', '[data-browser-redirect-back]', this.handleBrowserRedirect);
         this.started = true;
       }
     }
@@ -1068,7 +1070,6 @@ var Controller = /*#__PURE__*/function () {
         removeEventListener('page:before-cache', this.hideAllFlashMessages); // Browser redirect
 
         _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.off(document, 'click', '[data-browser-redirect-back]', this.handleBrowserRedirect);
-        _util_events__WEBPACK_IMPORTED_MODULE_3__.Events.off(document, 'ajax:before-redirect', '[data-browser-redirect-back]', this.handleBrowserRedirect);
         this.started = false;
       }
     }
@@ -1098,29 +1099,6 @@ function shouldShowFlashMessage(value, type) {
     }
   });
   return result;
-}
-
-function getReferrerFromSameOrigin() {
-  if (!document.referrer) {
-    return null;
-  } // Fallback when turbo router is not activated
-
-
-  try {
-    var referrer = new URL(document.referrer);
-
-    if (referrer.origin !== location.origin) {
-      return null;
-    }
-
-    var pushReferrer = localStorage.getItem('ocPushStateReferrer');
-
-    if (pushReferrer && pushReferrer.indexOf(referrer.pathname) === 0) {
-      return pushReferrer;
-    }
-
-    return document.referrer;
-  } catch (e) {}
 }
 
 /***/ }),
@@ -4178,6 +4156,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _asset_manager__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./asset-manager */ "./src/request/asset-manager.js");
 /* harmony import */ var _util_deferred__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../util/deferred */ "./src/util/deferred.js");
+/* harmony import */ var _util_referrer__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../util/referrer */ "./src/util/referrer.js");
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { _defineProperty(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
@@ -4201,6 +4180,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+
 
 
 
@@ -4505,6 +4485,10 @@ var Actions = /*#__PURE__*/function () {
         return;
       }
 
+      if (this.options.browserRedirectBack) {
+        href = (0,_util_referrer__WEBPACK_IMPORTED_MODULE_2__.getReferrerUrl)() || href;
+      }
+
       if (oc.useTurbo && oc.useTurbo()) {
         oc.visit(href);
       } else {
@@ -4682,7 +4666,7 @@ var Actions = /*#__PURE__*/function () {
           queryStr = searchParams.toString();
 
       if (queryStr) {
-        newUrl += '?' + searchParams.toString().replaceAll('%5B%5D=', '[]=');
+        newUrl += '?' + queryStr.replaceAll('%5B%5D=', '[]=');
       }
 
       if (oc.useTurbo && oc.useTurbo()) {
@@ -5916,8 +5900,9 @@ var Request = /*#__PURE__*/function () {
         files: false,
         bulk: false,
         download: false,
-        browserValidate: false,
         browserTarget: null,
+        browserValidate: false,
+        browserRedirectBack: false,
         progressBarDelay: 500,
         progressBar: null
       };
@@ -9872,6 +9857,52 @@ var JsonParser = /*#__PURE__*/function () {
 
   return JsonParser;
 }();
+
+/***/ }),
+
+/***/ "./src/util/referrer.js":
+/*!******************************!*\
+  !*** ./src/util/referrer.js ***!
+  \******************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "getReferrerUrl": () => (/* binding */ getReferrerUrl)
+/* harmony export */ });
+/**
+ * getReferrerUrl returns the last visited URL
+ */
+function getReferrerUrl() {
+  if (oc.useTurbo && oc.useTurbo()) {
+    return oc.AjaxTurbo.controller.getLastVisitUrl();
+  }
+
+  return getReferrerFromSameOrigin();
+}
+
+function getReferrerFromSameOrigin() {
+  if (!document.referrer) {
+    return null;
+  } // Fallback when turbo router is not activated
+
+
+  try {
+    var referrer = new URL(document.referrer);
+
+    if (referrer.origin !== location.origin) {
+      return null;
+    }
+
+    var pushReferrer = localStorage.getItem('ocPushStateReferrer');
+
+    if (pushReferrer && pushReferrer.indexOf(referrer.pathname) === 0) {
+      return pushReferrer;
+    }
+
+    return document.referrer;
+  } catch (e) {}
+}
 
 /***/ }),
 
