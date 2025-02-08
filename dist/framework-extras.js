@@ -7271,11 +7271,13 @@ __webpack_require__.r(__webpack_exports__);
  * getReferrerUrl returns the last visited URL
  */
 function getReferrerUrl() {
-  if (oc.useTurbo && oc.useTurbo()) {
-    return oc.AjaxTurbo.controller.getLastVisitUrl();
+  var url = oc.useTurbo && oc.useTurbo() ? oc.AjaxTurbo.controller.getLastVisitUrl() : getReferrerFromSameOrigin();
+
+  if (!url || isSameBaseUrl(url)) {
+    return null;
   }
 
-  return getReferrerFromSameOrigin();
+  return url;
 }
 
 function getReferrerFromSameOrigin() {
@@ -7299,6 +7301,12 @@ function getReferrerFromSameOrigin() {
 
     return document.referrer;
   } catch (e) {}
+}
+
+function isSameBaseUrl(url) {
+  var givenUrl = new URL(url, window.location.origin),
+      currentUrl = new URL(window.location.href);
+  return givenUrl.origin === currentUrl.origin && givenUrl.pathname === currentUrl.pathname;
 }
 
 /***/ }),

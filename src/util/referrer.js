@@ -2,11 +2,16 @@
  * getReferrerUrl returns the last visited URL
  */
 export function getReferrerUrl() {
-    if (oc.useTurbo && oc.useTurbo()) {
-        return oc.AjaxTurbo.controller.getLastVisitUrl();
+    const url = oc.useTurbo && oc.useTurbo()
+        ? oc.AjaxTurbo.controller.getLastVisitUrl()
+        : getReferrerFromSameOrigin();
+
+
+    if (!url || isSameBaseUrl(url)) {
+        return null;
     }
 
-    return getReferrerFromSameOrigin();
+    return url;
 }
 
 function getReferrerFromSameOrigin() {
@@ -30,4 +35,11 @@ function getReferrerFromSameOrigin() {
     }
     catch (e) {
     }
+}
+
+function isSameBaseUrl(url) {
+    const givenUrl = new URL(url, window.location.origin),
+        currentUrl = new URL(window.location.href);
+
+    return givenUrl.origin === currentUrl.origin && givenUrl.pathname === currentUrl.pathname;
 }
