@@ -373,6 +373,9 @@ export class Request
         }
     }
 
+
+    // @todo v2: this needs to pass more than just "data"
+    // perhaps { data, responseCode, headers }
     wrapInAsyncPromise(requestPromise) {
         return new Promise(function (resolve, reject, onCancel) {
             requestPromise
